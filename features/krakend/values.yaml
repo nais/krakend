@@ -1,0 +1,34 @@
+# -- (int) Number of replicas to deploy
+krakend:
+  replicaCount: 1
+
+  # -- (object) The securityContext to use for the krakend pod
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  # fsGroup: 2000
+
+  # -- (object) The securityContext to use for the krakend container
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    # -- (bool) Specifies whether an ingress should be created
+    enabled: true
+    # -- (string) The class to use for the ingress
+    className: "nais-ingress"
+    # -- (object) The annotations to use for the ingress
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # -- (list) The list of hosts to use for the ingress
+    hosts:
+      - host: krakend.dev.dev-nais.cloud.nais.io
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
