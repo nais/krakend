@@ -1,5 +1,21 @@
 # krakend
 
+## Testing in dev-nais-dev
+Install krakend in dev-nais-dev:
+```
+helm install krakend .
+```
+Apply test app and oauth2 server:
+
+```
+kubectl apply -f hack/
+```
+Test the echo endpoint:
+
+```
+TOKEN=$(curl -s -d "grant_type=client_credentials&client_id=yolo&client_secret=bolo&scope=yolo" https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/token  | jq -r '.access_token')
+curl -H "Authorization: Bearer $TOKEN"  https://krakend.dev.dev-nais.cloud.nais.io/echo -v
+```
 
 ## Notes
 
