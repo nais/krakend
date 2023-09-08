@@ -68,3 +68,17 @@ spec:
     app: echo
 ---
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gwapi-config
+  namespace: krakend
+  labels:
+    app: echo
+    team: plattformsikkerhet
+    apiGateway: krakend
+data:
+  audience: |
+    [
+      "aud1", "aud2"
+    ]
