@@ -6,6 +6,7 @@ import (
 	"fmt"
 	apimachineryv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
+	"krakend/internal/krakend"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-	"krakend/internal/endpointer"
 
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
@@ -25,13 +25,19 @@ import (
 )
 
 var (
-	logLevel    string
-	bindAddress string
+	logLevel        string
+	bindAddress     string
+	krakendNs       string
+	krakendPartials string
+	endpointsKey    string
 )
 
 func init() {
 	flag.StringVar(&bindAddress, "bind-address", ":8080", "Bind address")
 	flag.StringVar(&logLevel, "log-level", "debug", "Which log level to output")
+	flag.StringVar(&krakendNs, "krakend-ns", "nais-system", "Krakend namespace")
+	flag.StringVar(&krakendPartials, "krakend-partials", "cm-partials", "Krakend partials configmap")
+	flag.StringVar(&endpointsKey, "endpoints-key", "endpoints.tmpl", "Endpoints key")
 }
 
 func main() {
@@ -75,7 +81,7 @@ func main() {
 		log.WithError(err).Fatal("setting up cm informer")
 	}
 
-	ep := endpointer.New(log, k8sClient)
+	ep := krakend.New(log, k8sClient, krakendNs, krakendPartials, endpointsKey)
 	cmInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    ep.Add,
 		UpdateFunc: ep.Update,

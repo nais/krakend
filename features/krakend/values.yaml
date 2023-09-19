@@ -12,6 +12,7 @@ krakend:
               "auth/validator": {
                 "operation_debug": true,
                 "alg": "RS256",
+                "cache": true,
                 "jwk_url": "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks",
                 "issuer": "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger",
                 "audience": [
