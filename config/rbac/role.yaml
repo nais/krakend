@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - krakend.nais.io
+  resources:
+  - krakends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - krakend.nais.io
+  resources:
+  - krakends/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - krakend.nais.io
+  resources:
+  - krakends/status
+  verbs:
+  - get
+  - patch
+  - update
