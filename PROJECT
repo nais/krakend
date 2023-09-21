@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: krakend
 repo: github.com/nais/krakend
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: nais.io
+  group: krakend
+  kind: Krakend
+  path: github.com/nais/krakend/api/v1
+  version: v1
 version: "3"
