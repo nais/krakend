@@ -1,0 +1,27 @@
+# permissions for end users to view apiendpoints.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: apiendpoints-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: krakend
+    app.kubernetes.io/part-of: krakend
+    app.kubernetes.io/managed-by: kustomize
+  name: apiendpoints-viewer-role
+rules:
+- apiGroups:
+  - krakend.nais.io
+  resources:
+  - apiendpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - krakend.nais.io
+  resources:
+  - apiendpoints/status
+  verbs:
+  - get

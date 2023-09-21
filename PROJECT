@@ -17,4 +17,13 @@ resources:
   kind: Krakend
   path: github.com/nais/krakend/api/v1
   version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: nais.io
+  group: krakend
+  kind: ApiEndpoints
+  path: github.com/nais/krakend/api/v1
+  version: v1
 version: "3"

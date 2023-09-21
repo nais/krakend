@@ -1,0 +1,12 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  labels:
+    app.kubernetes.io/name: apiendpoints
+    app.kubernetes.io/instance: apiendpoints-sample
+    app.kubernetes.io/part-of: krakend
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: krakend
+  name: apiendpoints-sample
+spec:
+  # TODO(user): Add fields here
