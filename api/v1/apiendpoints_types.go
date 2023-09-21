@@ -20,22 +20,49 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type Endpoint struct {
+	Path           string    `json:"path,omitempty"`
+	Method         string    `json:"method,omitempty"`
+	BackendHost    string    `json:"backendHost,omitempty"`
+	BackendPath    string    `json:"backendPath,omitempty"`
+	ForwardHeaders []string  `json:"forwardHeaders,omitempty"`
+	QueryParams    []string  `json:"queryParams,omitempty"`
+	NoAuth         bool      `json:"noAuth,omitempty"`
+	RateLimit      RateLimit `json:"rateLimit,omitempty"`
+}
+
+type RateLimit struct {
+	MaxRate        int    `json:"maxRate"`
+	ClientMaxRate  int    `json:"clientMaxRate"`
+	Strategy       string `json:"strategy"`
+	Capacity       int    `json:"capacity"`
+	ClientCapacity int    `json:"clientCapacity"`
+}
+
+type Auth struct {
+	Alg      string   `json:"alg"`
+	Cache    bool     `json:"cache"`
+	Debug    bool     `json:"debug"`
+	JwkUrl   string   `json:"jwkUrl"`
+	Issuer   string   `json:"issuer"`
+	Audience []string `json:"audience"`
+	Scope    []string `json:"scope"`
+}
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ApiEndpointsSpec defines the desired state of ApiEndpoints
 type ApiEndpointsSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of ApiEndpoints. Edit apiendpoints_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// ApiName is the name of the API, e.g. name of the application or service
+	ApiName   string     `json:"apiName,omitempty"`
+	Auth      Auth       `json:"auth,omitempty"`
+	Endpoints []Endpoint `json:"endpoints,omitempty"`
 }
 
 // ApiEndpointsStatus defines the observed state of ApiEndpoints
 type ApiEndpointsStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// TODO: add status fields here
 }
 
 //+kubebuilder:object:root=true

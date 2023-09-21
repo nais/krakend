@@ -1,0 +1,38 @@
+apiVersion: nais.io.nais.io/v1
+kind: KrakendEndpoints
+metadata:
+  labels:
+    app.kubernetes.io/name: krakendendpoints
+    app.kubernetes.io/instance: krakendendpoints-sample
+    app.kubernetes.io/part-of: krakend-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: krakend-operator
+  name: krakendendpoints-sample
+spec:
+  ingress: example.nais.io
+  auth:
+    alg: "RS256"
+    cache: true
+    jwkUrl: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks"
+    issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
+    audience:
+      - "yolo"
+    scope:
+      - "scope1"
+  endpoints:
+    - path: /
+      method: GET
+      backendHost: example.com
+      backendPath: /
+      forwardHeaders:
+        - X-Forwarded-For
+      queryParams:
+        - foo
+        - bar
+      noAuth: false
+      rateLimit:
+        maxRate: 10
+        clientMaxRate: 0
+        strategy: ip
+        capacity: 0
+        clientCapacity: 0

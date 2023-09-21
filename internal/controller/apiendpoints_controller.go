@@ -18,13 +18,16 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/nais/krakend/internal/krakend"
+	"k8s.io/apimachinery/pkg/types"
 
+	krakendv1 "github.com/nais/krakend/api/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	krakendv1 "github.com/nais/krakend/api/v1"
 )
 
 // ApiEndpointsReconciler reconciles a ApiEndpoints object
@@ -37,19 +40,7 @@ type ApiEndpointsReconciler struct {
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the ApiEndpoints object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.0/pkg/reconcile
 func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
-
-	// TODO(user): your logic here
 
 	return ctrl.Result{}, nil
 }
@@ -59,4 +50,45 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&krakendv1.ApiEndpoints{}).
 		Complete(r)
+}
+
+func (r *ApiEndpointsReconciler) updateKrakend(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
+	name := types.NamespacedName{
+		Name:      "cm-partials",
+		Namespace: endpoints.Namespace,
+	}
+
+	cm := &corev1.ConfigMap{}
+
+	err := r.Get(ctx, name, cm)
+	if err != nil {
+		return err
+	}
+
+	ep := cm.Data["endpoints.tmpl"]
+	if ep == "" {
+		return fmt.Errorf("endpoints.tmpl not found in ConfigMap")
+	}
+
+	existing := &krakend.Partials{}
+	err = json.Unmarshal([]byte(ep), &existing.Endpoints)
+	if err != nil {
+		return err
+	}
+
+	n := krakend.ParseKrakendEndpointsSpec(endpoints.Spec)
+	merged, err := krakend.MergePartials(existing, n)
+	partials, err := json.Marshal(merged.Endpoints)
+	if err != nil {
+		return err
+	}
+
+	//TODO handle race conditions when updating configmap
+	cm.Data["endpoints.tmpl"] = string(partials)
+	err = r.Update(ctx, cm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
