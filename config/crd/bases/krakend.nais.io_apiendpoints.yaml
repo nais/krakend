@@ -60,12 +60,8 @@ spec:
                     type: array
                 required:
                 - alg
-                - audience
-                - cache
-                - debug
                 - issuer
                 - jwkUrl
-                - scope
                 type: object
               endpoints:
                 items:

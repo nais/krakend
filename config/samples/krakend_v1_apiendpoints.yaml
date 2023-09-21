@@ -9,4 +9,30 @@ metadata:
     app.kubernetes.io/created-by: krakend
   name: apiendpoints-sample
 spec:
-  # TODO(user): Add fields here
+  apiName: app1
+  auth:
+    alg: "RS256"
+    cache: true
+    debug: true
+    jwkUrl: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks"
+    issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
+    audience:
+      - "yolo"
+    scope:
+      - "scope1"
+  endpoints:
+    - path: /api1/somepath
+      method: GET
+      backendHost: example.com
+      backendPath: /api1/somepath
+      forwardHeaders:
+        - X-Forwarded-For
+      queryParams:
+        - foo
+        - bar
+      rateLimit:
+        maxRate: 10
+        clientMaxRate: 0
+        strategy: ip
+        capacity: 0
+        clientCapacity: 0

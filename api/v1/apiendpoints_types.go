@@ -41,12 +41,12 @@ type RateLimit struct {
 
 type Auth struct {
 	Alg      string   `json:"alg"`
-	Cache    bool     `json:"cache"`
-	Debug    bool     `json:"debug"`
+	Cache    bool     `json:"cache,omitempty"`
+	Debug    bool     `json:"debug,omitempty"`
 	JwkUrl   string   `json:"jwkUrl"`
 	Issuer   string   `json:"issuer"`
-	Audience []string `json:"audience"`
-	Scope    []string `json:"scope"`
+	Audience []string `json:"audience,omitempty"`
+	Scope    []string `json:"scope,omitempty"`
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!

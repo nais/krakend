@@ -53,7 +53,8 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	if err := r.updateKrakend(ctx, ae); err != nil {
-		return ctrl.Result{}, err
+		log.Errorf("Failed to update Krakend: %v", err)
+		return ctrl.Result{}, nil
 	}
 
 	return ctrl.Result{}, nil
