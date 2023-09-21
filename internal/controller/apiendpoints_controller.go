@@ -24,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	krakendv1 "github.com/nais/krakend/api/v1"
+	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -41,6 +42,19 @@ type ApiEndpointsReconciler struct {
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints/finalizers,verbs=update
 
 func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log.WithFields(log.Fields{
+		"apiendpoints_name":      req.Name,
+		"apiendpoints_namespace": req.Namespace,
+	}).Infof("Reconciling ApiEndpoints")
+
+	ae := &krakendv1.ApiEndpoints{}
+	if err := r.Get(ctx, req.NamespacedName, ae); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if err := r.updateKrakend(ctx, ae); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
