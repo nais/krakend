@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/created-by: krakend
   name: apiendpoints-sample
 spec:
+  krakendInstance: krakend-sample
   apiName: app1
   auth:
     alg: "RS256"
@@ -23,7 +24,7 @@ spec:
   endpoints:
     - path: /api1/somepath
       method: GET
-      backendHost: example.com
+      backendHost: example2.com
       backendPath: /api1/somepath
       forwardHeaders:
         - X-Forwarded-For

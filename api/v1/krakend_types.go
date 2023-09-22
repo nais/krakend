@@ -20,16 +20,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type PartialsConfigMap struct {
+	Name         string `json:"name"`
+	EndpointsKey string `json:"endpointsKey"`
+}
 
 // KrakendSpec defines the desired state of Krakend
 type KrakendSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Krakend. Edit krakend_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Ingress           string            `json:"ingress"`
+	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap"`
 }
 
 // KrakendStatus defines the observed state of Krakend

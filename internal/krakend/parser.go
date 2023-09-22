@@ -50,7 +50,15 @@ type QosRatelimitRouter struct {
 
 const DefaultOutputEncoding = "no-op"
 
-func ParseKrakendEndpointsSpec(spec v1.ApiEndpointsSpec) *Partials {
+func ToKrakendEndpoints(list *v1.ApiEndpointsList) []*Endpoint {
+	endpoints := make([]*Endpoint, 0)
+	for _, item := range list.Items {
+		endpoints = append(endpoints, parseKrakendEndpointsSpec(item.Spec)...)
+	}
+	return endpoints
+}
+
+func parseKrakendEndpointsSpec(spec v1.ApiEndpointsSpec) []*Endpoint {
 	endpoints := make([]*Endpoint, 0)
 	backend := make([]*Backend, 0)
 
@@ -98,9 +106,7 @@ func ParseKrakendEndpointsSpec(spec v1.ApiEndpointsSpec) *Partials {
 		}
 		endpoints = append(endpoints, endpoint)
 	}
-	return &Partials{
-		Endpoints: endpoints,
-	}
+	return endpoints
 }
 
 func ParsePartials(content []byte) (*Partials, error) {
@@ -112,12 +118,4 @@ func ParsePartials(content []byte) (*Partials, error) {
 	}
 	partials.Endpoints = endpoints
 	return partials, nil
-}
-
-func MergePartials(existing *Partials, n *Partials) (*Partials, error) {
-	endpoints := make([]*Endpoint, 0)
-	for _, e := range existing.Endpoints {
-		endpoints = append(endpoints, e)
-	}
-	return n, nil
 }

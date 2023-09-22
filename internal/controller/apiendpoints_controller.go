@@ -20,13 +20,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nais/krakend/internal/krakend"
-	"k8s.io/apimachinery/pkg/types"
-
 	krakendv1 "github.com/nais/krakend/api/v1"
+	"github.com/nais/krakend/internal/krakend"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -52,8 +51,8 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := r.updateKrakend(ctx, ae); err != nil {
-		log.Errorf("Failed to update Krakend: %v", err)
+	if err := r.updateKrakendConfigMap(ctx, ae); err != nil {
+		log.Errorf("updating Krakend configmap: %v", err)
 		return ctrl.Result{}, nil
 	}
 
@@ -67,42 +66,46 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ApiEndpointsReconciler) updateKrakend(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
-	name := types.NamespacedName{
-		Name:      "cm-partials",
+func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
+	k := &krakendv1.Krakend{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      endpoints.Spec.KrakendInstance,
 		Namespace: endpoints.Namespace,
+	}, k)
+	if err != nil {
+		return fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
 	}
 
 	cm := &corev1.ConfigMap{}
-
-	err := r.Get(ctx, name, cm)
+	err = r.Get(ctx, types.NamespacedName{
+		Name:      k.Spec.PartialsConfigMap.Name,
+		Namespace: endpoints.Namespace,
+	}, cm)
 	if err != nil {
-		return err
+		return fmt.Errorf("get ConfigMap '%s': %v", k.Spec.PartialsConfigMap.Name, err)
 	}
 
-	ep := cm.Data["endpoints.tmpl"]
+	ep := cm.Data[k.Spec.PartialsConfigMap.EndpointsKey]
 	if ep == "" {
-		return fmt.Errorf("endpoints.tmpl not found in ConfigMap")
+		return fmt.Errorf("%s not found in ConfigMap with name %s", k.Spec.PartialsConfigMap.EndpointsKey, k.Spec.PartialsConfigMap.Name)
 	}
 
-	existing := &krakend.Partials{}
-	err = json.Unmarshal([]byte(ep), &existing.Endpoints)
-	if err != nil {
-		return err
+	list := &krakendv1.ApiEndpointsList{}
+	if err = r.List(ctx, list, client.InNamespace(endpoints.Namespace)); err != nil {
+		return fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
-	n := krakend.ParseKrakendEndpointsSpec(endpoints.Spec)
-	merged, err := krakend.MergePartials(existing, n)
-	partials, err := json.Marshal(merged.Endpoints)
+	allEndpoints := krakend.ToKrakendEndpoints(list)
+	partials, err := json.Marshal(allEndpoints)
 	if err != nil {
 		return err
 	}
 
 	//TODO handle race conditions when updating configmap
-	cm.Data["endpoints.tmpl"] = string(partials)
+	cm.Data[k.Spec.PartialsConfigMap.EndpointsKey] = string(partials)
 	err = r.Update(ctx, cm)
 	if err != nil {
-		return err
+		return fmt.Errorf("update ConfigMap '%s': %v", k.Spec.PartialsConfigMap.Name, err)
 	}
 
 	return nil

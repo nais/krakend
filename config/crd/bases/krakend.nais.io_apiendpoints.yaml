@@ -105,6 +105,12 @@ spec:
                       type: object
                   type: object
                 type: array
+              krakendInstance:
+                description: KrakendInstance is the name of the Krakend instance in
+                  the cluster
+                type: string
+            required:
+            - krakendInstance
             type: object
           status:
             description: ApiEndpointsStatus defines the observed state of ApiEndpoints

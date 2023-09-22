@@ -34,10 +34,21 @@ spec:
           spec:
             description: KrakendSpec defines the desired state of Krakend
             properties:
-              foo:
-                description: Foo is an example field of Krakend. Edit krakend_types.go
-                  to remove/update
+              ingress:
                 type: string
+              partialsConfigMap:
+                properties:
+                  endpointsKey:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - endpointsKey
+                - name
+                type: object
+            required:
+            - ingress
+            - partialsConfigMap
             type: object
           status:
             description: KrakendStatus defines the observed state of Krakend
