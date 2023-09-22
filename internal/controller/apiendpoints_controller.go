@@ -66,6 +66,7 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+// TODO: validate unique paths - maybe webhook?
 func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
 	k := &krakendv1.Krakend{}
 	err := r.Get(ctx, types.NamespacedName{
