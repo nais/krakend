@@ -33,7 +33,7 @@ type ConfigConfigMap struct {
 // KrakendSpec defines the desired state of Krakend
 type KrakendSpec struct {
 	Name              string            `json:"name"`
-	Ingress           string            `json:"ingress"`
+	Ingress           Ingress           `json:"ingress"`
 	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap,omitempty"`
 	ConfigConfigMap   ConfigConfigMap   `json:"configConfigMap,omitempty"`
 	Deployment        KrakendDeployment `json:"deployment,omitempty"`
@@ -44,6 +44,25 @@ type KrakendDeployment struct {
 	ReplicaCount   int                         `json:"replicaCount,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
 	Image          Image                       `json:"image,omitempty"`
+}
+
+type Ingress struct {
+	Enabled     bool              `json:"enabled,omitempty"`
+	ClassName   string            `json:"className,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+	Hosts       []Host            `json:"hosts,omitempty"`
+	// Host specifying a host for the ingress will generate a ingress with a single host and sane defaults
+	Host string `json:"host,omitempty"`
+}
+
+type Host struct {
+	Host  string `json:"host,omitempty"`
+	Paths []Path `json:"paths,omitempty"`
+}
+
+type Path struct {
+	Path     string `json:"path,omitempty"`
+	PathType string `json:"pathType,omitempty"`
 }
 
 type Image struct {

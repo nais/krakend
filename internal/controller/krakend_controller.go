@@ -43,6 +43,8 @@ type KrakendReconciler struct {
 	KrakendChart *helm.Chart
 }
 
+const DefaultKrakendIngressClass = "nais-ingress-external"
+
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/finalizers,verbs=update
@@ -64,6 +66,15 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("marshalling krakend deployment: %w", err)
 	}
+
+	ingressValues, err := prepareIngressValues(k.Spec.Ingress)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("preparing ingress values: %w", err)
+	}
+	for k, v := range ingressValues {
+		fmt.Printf("ingress key: %s, value: %v", k, v)
+	}
+	values["ingress"] = ingressValues
 
 	//TODO: add ingress host
 	resources, err := r.KrakendChart.ToUnstructured(releaseName, chartutil.Values{
@@ -108,8 +119,8 @@ func (r *KrakendReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func toMap(deployment krakendv1.KrakendDeployment) (map[string]any, error) {
-	j, err := json.Marshal(deployment)
+func toMap(v any) (map[string]any, error) {
+	j, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +130,27 @@ func toMap(deployment krakendv1.KrakendDeployment) (map[string]any, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func prepareIngressValues(ingress krakendv1.Ingress) (map[string]any, error) {
+	if ingress.Host != "" {
+		ingress.Hosts = []krakendv1.Host{
+			{
+				Host: ingress.Host,
+				Paths: []krakendv1.Path{
+					{
+						Path:     "/",
+						PathType: "ImplementationSpecific",
+					},
+				},
+			},
+		}
+		ingress.Enabled = true
+	}
+	if ingress.ClassName == "" {
+		ingress.ClassName = DefaultKrakendIngressClass
+	}
+	return toMap(ingress)
 }
 
 func (r *KrakendReconciler) createOrUpdate(

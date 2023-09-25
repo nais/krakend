@@ -110,7 +110,36 @@ spec:
                     type: object
                 type: object
               ingress:
-                type: string
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  className:
+                    type: string
+                  enabled:
+                    type: boolean
+                  host:
+                    description: Host specifying a host for the ingress will generate
+                      a ingress with a single host and sane defaults
+                    type: string
+                  hosts:
+                    items:
+                      properties:
+                        host:
+                          type: string
+                        paths:
+                          items:
+                            properties:
+                              path:
+                                type: string
+                              pathType:
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                type: object
               name:
                 type: string
               partialsConfigMap:

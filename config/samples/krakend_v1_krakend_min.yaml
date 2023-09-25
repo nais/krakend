@@ -7,19 +7,11 @@ metadata:
     app.kubernetes.io/part-of: krakend
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: krakend
-  name: team1
+  name: team1-min
 spec:
-  name: team1
+  name: team1-min
   ingress:
-    # set defaults if not set
-    enabled: true
-    className: "nais-ingress"
-    annotations: {}
-    hosts:
-      - host: team1.nais.io
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
+    host: team1.nais.io
   partialsConfigMap:
     name: cm-partials
     endpointsKey: endpoints.tmpl

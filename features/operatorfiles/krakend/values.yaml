@@ -17,10 +17,3 @@ krakend:
     enabled: true
     className: "nais-ingress"
     annotations: {}
-    hosts:
-      # set from reconciler
-
-      - host: krakend.dev.dev-nais.cloud.nais.io
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
