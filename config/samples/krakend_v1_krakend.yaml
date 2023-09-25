@@ -7,11 +7,16 @@ metadata:
     app.kubernetes.io/part-of: krakend
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: krakend
-  name: krakend-sample
+  name: team1
 spec:
-  ingress: krakend.nais.io
+  name: team1
+  ingress: team1.nais.io
   partialsConfigMap:
     name: cm-partials
     endpointsKey: endpoints.tmpl
+  deployment:
+    replicaCount: 2
+    image:
+      tag: 2.4.3
 
 

@@ -1,6 +1,6 @@
 krakend:
   #krakend:
-  replicaCount: 1
+  replicaCount: 2
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault

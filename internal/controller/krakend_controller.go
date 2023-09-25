@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/helm"
@@ -57,13 +58,18 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// TODO: add logic for checking if update is neccessary....
 
-	// TODO: user releasename from krakend object
-	releaseName := "gateway"
+	releaseName := k.Spec.Name
+
+	values, err := toMap(k.Spec.Deployment)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("marshalling krakend deployment: %w", err)
+	}
+
+	//TODO: add ingress host
 	resources, err := r.KrakendChart.ToUnstructured(releaseName, chartutil.Values{
-		"krakend": map[string]interface{}{
-			"replicaCount": 2,
-		},
+		"krakend": values,
 	})
+
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("rendering helm chart: %w", err)
 	}
@@ -79,6 +85,8 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	for _, resource := range resources {
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
+
+		// TODO: check each resource if any changes are needed, maybe inside createOrUpdate
 
 		resource.SetNamespace(ns)
 		resource.SetOwnerReferences(ownerRef)
@@ -98,6 +106,19 @@ func (r *KrakendReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&krakendv1.Krakend{}).
 		Complete(r)
+}
+
+func toMap(deployment krakendv1.KrakendDeployment) (map[string]any, error) {
+	j, err := json.Marshal(deployment)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]any)
+	err = json.Unmarshal(j, &m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (r *KrakendReconciler) createOrUpdate(

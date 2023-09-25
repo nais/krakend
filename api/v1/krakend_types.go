@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,8 +34,23 @@ type ConfigConfigMap struct {
 type KrakendSpec struct {
 	Name              string            `json:"name"`
 	Ingress           string            `json:"ingress"`
-	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap"`
-	ConfigConfigMap   ConfigConfigMap   `json:"configConfigMap"`
+	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap,omitempty"`
+	ConfigConfigMap   ConfigConfigMap   `json:"configConfigMap,omitempty"`
+	Deployment        KrakendDeployment `json:"deployment,omitempty"`
+}
+
+type KrakendDeployment struct {
+	DeploymentType string                      `json:"deploymentType,omitempty"`
+	ReplicaCount   int                         `json:"replicaCount,omitempty"`
+	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
+	Image          Image                       `json:"image,omitempty"`
+}
+
+type Image struct {
+	Registry   string `json:"registry,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Tag        string `json:"tag,omitempty"`
+	PullPolicy string `json:"pullPolicy,omitempty"`
 }
 
 // KrakendStatus defines the observed state of Krakend
