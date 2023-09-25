@@ -25,10 +25,16 @@ type PartialsConfigMap struct {
 	EndpointsKey string `json:"endpointsKey"`
 }
 
+type ConfigConfigMap struct {
+	Name string `json:"name"`
+}
+
 // KrakendSpec defines the desired state of Krakend
 type KrakendSpec struct {
+	Name              string            `json:"name"`
 	Ingress           string            `json:"ingress"`
 	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap"`
+	ConfigConfigMap   ConfigConfigMap   `json:"configConfigMap"`
 }
 
 // KrakendStatus defines the observed state of Krakend

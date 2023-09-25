@@ -1,0 +1,26 @@
+krakend:
+  #krakend:
+  replicaCount: 1
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    enabled: true
+    className: "nais-ingress"
+    annotations: {}
+    hosts:
+      # set from reconciler
+
+      - host: krakend.dev.dev-nais.cloud.nais.io
+        paths:
+          - path: /
+            pathType: ImplementationSpecific

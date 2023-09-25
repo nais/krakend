@@ -34,7 +34,16 @@ spec:
           spec:
             description: KrakendSpec defines the desired state of Krakend
             properties:
+              configConfigMap:
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
               ingress:
+                type: string
+              name:
                 type: string
               partialsConfigMap:
                 properties:
@@ -47,7 +56,9 @@ spec:
                 - name
                 type: object
             required:
+            - configConfigMap
             - ingress
+            - name
             - partialsConfigMap
             type: object
           status:
