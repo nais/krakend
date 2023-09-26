@@ -11,12 +11,5 @@ metadata:
 spec:
   name: team1-min
   ingressHost: team1.nais.io
-  partialsConfigMap:
-    name: cm-partials
-    endpointsKey: endpoints.tmpl
-  deployment:
-    replicaCount: 2
-    image:
-      tag: 2.4.3
 
 

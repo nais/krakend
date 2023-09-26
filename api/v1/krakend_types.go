@@ -21,25 +21,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type PartialsConfigMap struct {
-	Name         string `json:"name"`
-	EndpointsKey string `json:"endpointsKey"`
-}
-
-type ConfigConfigMap struct {
-	Name string `json:"name"`
-}
-
 // KrakendSpec defines the desired state of Krakend
 type KrakendSpec struct {
 	Name string `json:"name"`
 	// Ingress lets you configure the ingress class, annotations and hosts or tls for an ingress
 	Ingress Ingress `json:"ingress,omitempty"`
 	// IngressHost is a shortcut for creating a single host ingress with sane defaults, if Ingress is specified this is ignored
-	IngressHost       string            `json:"ingressHost,omitempty"`
-	PartialsConfigMap PartialsConfigMap `json:"partialsConfigMap,omitempty"`
-	ConfigConfigMap   ConfigConfigMap   `json:"configConfigMap,omitempty"`
-	Deployment        KrakendDeployment `json:"deployment,omitempty"`
+	IngressHost string            `json:"ingressHost,omitempty"`
+	Deployment  KrakendDeployment `json:"deployment,omitempty"`
 }
 
 type KrakendDeployment struct {

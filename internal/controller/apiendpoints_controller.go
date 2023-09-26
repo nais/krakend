@@ -78,17 +78,19 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, end
 	}
 
 	cm := &corev1.ConfigMap{}
+	cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      k.Spec.PartialsConfigMap.Name,
+		Name:      cmName,
 		Namespace: endpoints.Namespace,
 	}, cm)
 	if err != nil {
-		return fmt.Errorf("get ConfigMap '%s': %v", k.Spec.PartialsConfigMap.Name, err)
+		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 	}
 
-	ep := cm.Data[k.Spec.PartialsConfigMap.EndpointsKey]
+	key := "endpoints.tmpl"
+	ep := cm.Data[key]
 	if ep == "" {
-		return fmt.Errorf("%s not found in ConfigMap with name %s", k.Spec.PartialsConfigMap.EndpointsKey, k.Spec.PartialsConfigMap.Name)
+		return fmt.Errorf("%s not found in ConfigMap with name %s", endpoints, cmName)
 	}
 
 	list := &krakendv1.ApiEndpointsList{}
@@ -103,10 +105,10 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, end
 	}
 
 	//TODO handle race conditions when updating configmap
-	cm.Data[k.Spec.PartialsConfigMap.EndpointsKey] = string(partials)
+	cm.Data[key] = string(partials)
 	err = r.Update(ctx, cm)
 	if err != nil {
-		return fmt.Errorf("update ConfigMap '%s': %v", k.Spec.PartialsConfigMap.Name, err)
+		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
 	}
 
 	return nil

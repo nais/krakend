@@ -34,13 +34,6 @@ spec:
           spec:
             description: KrakendSpec defines the desired state of Krakend
             properties:
-              configConfigMap:
-                properties:
-                  name:
-                    type: string
-                required:
-                - name
-                type: object
               deployment:
                 properties:
                   deploymentType:
@@ -144,16 +137,6 @@ spec:
                 type: string
               name:
                 type: string
-              partialsConfigMap:
-                properties:
-                  endpointsKey:
-                    type: string
-                  name:
-                    type: string
-                required:
-                - endpointsKey
-                - name
-                type: object
             required:
             - name
             type: object

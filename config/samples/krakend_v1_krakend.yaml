@@ -20,9 +20,6 @@ spec:
         paths:
           - path: /
             pathType: ImplementationSpecific
-  partialsConfigMap:
-    name: cm-partials
-    endpointsKey: endpoints.tmpl
   deployment:
     replicaCount: 2
     image:
