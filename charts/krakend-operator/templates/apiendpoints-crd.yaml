@@ -1,0 +1,129 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: apiendpoints.krakend.nais.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  labels:
+  {{- include "krakend-operator.labels" . | nindent 4 }}
+spec:
+  group: krakend.nais.io
+  names:
+    kind: ApiEndpoints
+    listKind: ApiEndpointsList
+    plural: apiendpoints
+    singular: apiendpoints
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ApiEndpoints is the Schema for the apiendpoints API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ApiEndpointsSpec defines the desired state of ApiEndpoints
+            properties:
+              apiName:
+                description: ApiName is the name of the API, e.g. name of the application
+                  or service
+                type: string
+              auth:
+                properties:
+                  alg:
+                    type: string
+                  audience:
+                    items:
+                      type: string
+                    type: array
+                  cache:
+                    type: boolean
+                  debug:
+                    type: boolean
+                  issuer:
+                    type: string
+                  jwkUrl:
+                    type: string
+                  scope:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - alg
+                - issuer
+                - jwkUrl
+                type: object
+              endpoints:
+                items:
+                  properties:
+                    backendHost:
+                      type: string
+                    backendPath:
+                      type: string
+                    forwardHeaders:
+                      items:
+                        type: string
+                      type: array
+                    method:
+                      type: string
+                    noAuth:
+                      type: boolean
+                    path:
+                      type: string
+                    queryParams:
+                      items:
+                        type: string
+                      type: array
+                    rateLimit:
+                      properties:
+                        capacity:
+                          type: integer
+                        clientCapacity:
+                          type: integer
+                        clientMaxRate:
+                          type: integer
+                        maxRate:
+                          type: integer
+                        strategy:
+                          type: string
+                      required:
+                      - capacity
+                      - clientCapacity
+                      - clientMaxRate
+                      - maxRate
+                      - strategy
+                      type: object
+                  type: object
+                type: array
+              krakendInstance:
+                description: KrakendInstance is the name of the Krakend instance in
+                  the cluster
+                type: string
+            required:
+            - krakendInstance
+            type: object
+          status:
+            description: ApiEndpointsStatus defines the observed state of ApiEndpoints
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
