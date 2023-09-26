@@ -62,21 +62,12 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	releaseName := k.Spec.Name
 
-	values, err := toMap(k.Spec.Deployment)
+	values, err := prepareValues(k)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("marshalling krakend deployment: %w", err)
+		return ctrl.Result{}, fmt.Errorf("preparing values: %w", err)
 	}
+	fmt.Printf("%+v\n", values)
 
-	ingressValues, err := prepareIngressValues(k.Spec.Ingress)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("preparing ingress values: %w", err)
-	}
-	for k, v := range ingressValues {
-		fmt.Printf("ingress key: %s, value: %v", k, v)
-	}
-	values["ingress"] = ingressValues
-
-	//TODO: add ingress host
 	resources, err := r.KrakendChart.ToUnstructured(releaseName, chartutil.Values{
 		"krakend": values,
 	})
@@ -112,6 +103,41 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
+func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
+	values, err := toMap(k.Spec.Deployment)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling krakend deployment: %w", err)
+	}
+
+	ingress := k.Spec.Ingress
+	ingressHost := k.Spec.IngressHost
+	if len(ingress.Hosts) == 0 && ingressHost == "" {
+		return nil, fmt.Errorf("either ingressHost or ingress.hosts must be specified")
+	}
+
+	if len(ingress.Hosts) == 0 && ingressHost != "" {
+		ingress.Hosts = []krakendv1.Host{
+			{
+				Host: ingressHost,
+				Paths: []krakendv1.Path{
+					{
+						Path:     "/",
+						PathType: "ImplementationSpecific",
+					},
+				},
+			},
+		}
+	}
+	ingressValues, err := toMap(ingress)
+	if err != nil {
+		return nil, fmt.Errorf("preparing ingress values: %w", err)
+	}
+
+	values["ingress"] = ingressValues
+
+	return values, nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *KrakendReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
@@ -130,27 +156,6 @@ func toMap(v any) (map[string]any, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-func prepareIngressValues(ingress krakendv1.Ingress) (map[string]any, error) {
-	if ingress.Host != "" {
-		ingress.Hosts = []krakendv1.Host{
-			{
-				Host: ingress.Host,
-				Paths: []krakendv1.Path{
-					{
-						Path:     "/",
-						PathType: "ImplementationSpecific",
-					},
-				},
-			},
-		}
-		ingress.Enabled = true
-	}
-	if ingress.ClassName == "" {
-		ingress.ClassName = DefaultKrakendIngressClass
-	}
-	return toMap(ingress)
 }
 
 func (r *KrakendReconciler) createOrUpdate(

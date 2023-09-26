@@ -110,6 +110,8 @@ spec:
                     type: object
                 type: object
               ingress:
+                description: Ingress lets you configure the ingress class, annotations
+                  and hosts or tls for an ingress
                 properties:
                   annotations:
                     additionalProperties:
@@ -119,10 +121,6 @@ spec:
                     type: string
                   enabled:
                     type: boolean
-                  host:
-                    description: Host specifying a host for the ingress will generate
-                      a ingress with a single host and sane defaults
-                    type: string
                   hosts:
                     items:
                       properties:
@@ -140,6 +138,10 @@ spec:
                       type: object
                     type: array
                 type: object
+              ingressHost:
+                description: IngressHost is a shortcut for creating a single host
+                  ingress with sane defaults, if Ingress is specified this is ignored
+                type: string
               name:
                 type: string
               partialsConfigMap:
@@ -153,7 +155,6 @@ spec:
                 - name
                 type: object
             required:
-            - ingress
             - name
             type: object
           status:

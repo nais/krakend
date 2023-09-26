@@ -1,0 +1,10 @@
+apiVersion: v2
+name: krakend
+description: helm chart for krakend installed by krakend operator
+type: application
+version: 0.1.21
+appVersion: "2.4.3"
+dependencies:
+  - name: krakend
+    version: v0.1.21
+    repository: https://helm.equinixmetal.com
