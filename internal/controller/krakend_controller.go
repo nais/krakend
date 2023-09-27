@@ -93,9 +93,17 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	for _, resource := range resources {
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
 
+		annotations := resource.GetAnnotations()
+		if resource.GetKind() == "Deployment" {
+			annotations["reloader.stakater.com/search"] = "true"
+		}
+
 		// TODO: check each resource if any changes are needed, maybe inside createOrUpdate
 		// TODO: remove temporary hack for not overwriting configmaps partials
 		if resource.GetKind() == "ConfigMap" {
+
+			annotations["reloader.stakater.com/match"] = "true"
+
 			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
 
 			cm := &v1.ConfigMap{}
@@ -113,6 +121,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			}
 		}
 
+		resource.SetAnnotations(annotations)
 		resource.SetNamespace(ns)
 		resource.SetOwnerReferences(ownerRef)
 		err := r.createOrUpdate(ctx, resource)
