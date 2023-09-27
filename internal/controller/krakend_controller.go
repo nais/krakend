@@ -24,10 +24,12 @@ import (
 	"github.com/nais/krakend/internal/helm"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/chartutil"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -87,10 +89,29 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		},
 	}
 
+	// TODO: IMPORTANT - current logic will overwrite configmap partials containing added api's with default from chart
 	for _, resource := range resources {
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
 
 		// TODO: check each resource if any changes are needed, maybe inside createOrUpdate
+		// TODO: remove temporary hack for not overwriting configmaps partials
+		if resource.GetKind() == "ConfigMap" {
+			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
+
+			cm := &v1.ConfigMap{}
+			err := r.Get(ctx, types.NamespacedName{
+				Name:      cmName,
+				Namespace: ns,
+			}, cm)
+
+			if err != nil && !errors.IsNotFound(err) {
+				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
+			}
+			if cm != nil {
+				log.Infof("found configmap %s, skipping createOrUpdate", cmName)
+				continue
+			}
+		}
 
 		resource.SetNamespace(ns)
 		resource.SetOwnerReferences(ownerRef)

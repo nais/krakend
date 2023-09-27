@@ -13,12 +13,15 @@ spec:
     issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
     audience:
       - "yolo"
-    scope:
-      - "scope1"
+  # scope:
+  #   - "scope1"
   # TODO: api doc and swagger?
   endpoints:
     - path: /echo
       method: GET
-      backendHost: http://echo
+      backendHost: http://echo:1027
       backendPath: /
-
+    - path: /echo2
+      method: GET
+      backendHost: http://echo:1027
+      backendPath: /
