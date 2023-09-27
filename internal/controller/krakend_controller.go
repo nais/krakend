@@ -106,7 +106,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
 
-			cm := &v1.ConfigMap{}
+			var cm *v1.ConfigMap
 			err := r.Get(ctx, types.NamespacedName{
 				Name:      cmName,
 				Namespace: ns,
