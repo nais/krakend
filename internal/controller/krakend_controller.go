@@ -95,14 +95,13 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		annotations := resource.GetAnnotations()
 		if resource.GetKind() == "Deployment" {
-			annotations["reloader.stakater.com/search"] = "true"
+			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
 		}
 
 		// TODO: check each resource if any changes are needed, maybe inside createOrUpdate
 		// TODO: remove temporary hack for not overwriting configmaps partials
 		if resource.GetKind() == "ConfigMap" {
-
-			annotations["reloader.stakater.com/match"] = "true"
+			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
 
 			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
 
@@ -133,6 +132,17 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func addAnnotations(resource *unstructured.Unstructured, annotations map[string]string) {
+	existing := resource.GetAnnotations()
+	if existing == nil {
+		existing = make(map[string]string)
+	}
+	for k, v := range annotations {
+		existing[k] = v
+	}
+	resource.SetAnnotations(existing)
 }
 
 func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
