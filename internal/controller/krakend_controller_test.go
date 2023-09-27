@@ -27,6 +27,7 @@ func TestRenderChart(t *testing.T) {
 	resources, err := c.ToUnstructured(k.Spec.Name, chartutil.Values{
 		"krakend": values,
 	})
+	assert.NoError(t, err)
 
 	for _, r := range resources {
 		fmt.Printf("%+v\n", r)

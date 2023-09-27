@@ -22,9 +22,8 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 
 	partials := parseKrakendEndpointsSpec(endpoints.Spec)
 
-	out, err := json.Marshal(partials)
+	_, err = json.Marshal(partials)
 	assert.NoError(t, err)
-	os.WriteFile("testdata/krakend-endpoints-parsed.json", out, 0644)
 }
 
 func TestParsePartials(t *testing.T) {

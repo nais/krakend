@@ -24,5 +24,4 @@ Dockerfile.cross
 *.swp
 *.swo
 *~
-/internal/deploy/
 /charts/testing/
