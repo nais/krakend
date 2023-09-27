@@ -69,7 +69,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("preparing values: %w", err)
 	}
-	fmt.Printf("%+v\n", values)
 
 	resources, err := r.KrakendChart.ToUnstructured(releaseName, chartutil.Values{
 		"krakend": values,
