@@ -87,7 +87,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-    name: Build and push
+    name: Build and push to GAR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.5.3
@@ -111,7 +111,7 @@ jobs:
   #     run: |-
   #       helm push ${{ env.NAME }}*.tgz ${{ env.IMAGE_REPOSITORY }}
   build_push_ghcr:
-    name: Build and Push Docker image
+    name: Build and push to GHCR
     runs-on: ubuntu-latest-16-cores
     needs: [meta, lint, build]
     steps:
