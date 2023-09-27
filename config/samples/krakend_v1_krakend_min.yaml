@@ -1,15 +1,9 @@
 apiVersion: krakend.nais.io/v1
 kind: Krakend
 metadata:
-  labels:
-    app.kubernetes.io/name: krakend
-    app.kubernetes.io/instance: krakend-sample
-    app.kubernetes.io/part-of: krakend
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: krakend
-  name: team1-min
+  name: apigw1
 spec:
-  name: team1-min
-  ingressHost: team1.nais.io
+  name: apigw1
+  ingressHost: apigw1.external.dev.dev-nais.cloud.nais.io
 
 
