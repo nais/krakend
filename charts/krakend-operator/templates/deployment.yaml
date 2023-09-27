@@ -42,6 +42,8 @@ spec:
         command:
         - /manager
         env:
+        - name: KRAKEND_CHART_PATH
+          value: {{ quote .Values.controllerManager.manager.env.krakendChartPath }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
@@ -63,7 +65,14 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/config
+          name: config
       securityContext:
         runAsNonRoot: true
       serviceAccountName: {{ include "krakend-operator.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
+      volumes:
+      - configMap:
+          name: {{ include "krakend-operator.fullname" . }}-config
+        name: config

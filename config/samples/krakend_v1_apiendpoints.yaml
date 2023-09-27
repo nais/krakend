@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: krakend
   name: apiendpoints-sample
 spec:
-  krakendInstance: krakend-sample
+  krakendInstance: team1-min
   apiName: app1
   auth:
     alg: "RS256"
@@ -23,7 +23,7 @@ spec:
       - "scope1"
   # TODO: api doc and swagger?
   endpoints:
-    - path: /api1/somepath
+    - path: /api1/somepath2
       method: GET
       backendHost: example2.com
       backendPath: /api1/somepath

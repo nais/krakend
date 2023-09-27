@@ -30,9 +30,11 @@ controllerManager:
       capabilities:
         drop:
         - ALL
+    env:
+      krakendChartPath: /var/config/krakend-chart.tgz
     image:
-      repository: controller
-      tag: latest
+      repository: ghcr.io/nais/krakend-operator
+      tag: main
     resources:
       limits:
         cpu: 500m

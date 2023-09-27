@@ -72,6 +72,9 @@ spec:
         - --leader-elect
         image: controller:latest
         name: manager
+        env:
+          - name: KRAKEND_CHART_PATH
+            value: "/var/config/krakend-chart.tgz"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -98,5 +101,12 @@ spec:
           requests:
             cpu: 10m
             memory: 64Mi
+        volumeMounts:
+          - mountPath: /var/config
+            name: config
+      volumes:
+        - name: config
+          configMap:
+            name: config
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

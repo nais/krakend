@@ -90,7 +90,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, end
 	key := "endpoints.tmpl"
 	ep := cm.Data[key]
 	if ep == "" {
-		return fmt.Errorf("%s not found in ConfigMap with name %s", endpoints, cmName)
+		return fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
 	}
 
 	list := &krakendv1.ApiEndpointsList{}

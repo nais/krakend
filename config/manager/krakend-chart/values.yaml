@@ -15,5 +15,5 @@ krakend:
         - ALL
   ingress:
     enabled: true
-    className: "nais-ingress"
+    className: "nais-ingress-external"
     annotations: {}

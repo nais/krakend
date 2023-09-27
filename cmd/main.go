@@ -59,7 +59,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&debug, "debug", os.Getenv("DEBUG") == "true", "Enable debug logging")
 	flag.DurationVar(&interval, "sync-interval", 1*time.Minute, "Synchronization interval for reconciliation")
-	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "charts/operatorfiles/krakend"), "Path to krakend helm chart")
+	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "config/manager/krakend-chart"), "Path to krakend helm chart")
 
 	opts := zap.Options{
 		Development: true,

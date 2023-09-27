@@ -1,0 +1,6 @@
+namespace: krakend-system
+resources:
+  - ../default
+
+patchesStrategicMerge:
+  - manager_config_patch.yaml

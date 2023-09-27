@@ -76,6 +76,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 
 .PHONY: helm
 helm: manifests kustomize helmify ## Generate Helm chart.
+	tar -czvf config/manager/krakend-chart.tgz  config/manager/krakend-chart
 	$(KUSTOMIZE) build config/default | $(HELMIFY) charts/krakend-operator
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
