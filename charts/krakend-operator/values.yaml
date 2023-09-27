@@ -38,7 +38,7 @@ controllerManager:
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
     image:
       repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
-      tag: 2023-09-27-143930-e4320b7
+      tag: 2023-09-27-145159-04e2d45
     resources:
       limits:
         cpu: 500m

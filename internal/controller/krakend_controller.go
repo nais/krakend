@@ -105,16 +105,16 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
 
-			var cm *v1.ConfigMap
+			var cm v1.ConfigMap
 			err := r.Get(ctx, types.NamespacedName{
 				Name:      cmName,
 				Namespace: ns,
-			}, cm)
+			}, &cm)
 
 			if err != nil && !errors.IsNotFound(err) {
 				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 			}
-			if cm != nil {
+			if err == nil {
 				log.Infof("found configmap %s, skipping createOrUpdate", cmName)
 				continue
 			}
