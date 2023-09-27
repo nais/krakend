@@ -30,6 +30,10 @@ controllerManager:
       capabilities:
         drop:
         - ALL
+      readOnlyRootFilesystem: true
+      runAsGroup: 65532
+      runAsNonRoot: true
+      runAsUser: 65532
     env:
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
     image:
