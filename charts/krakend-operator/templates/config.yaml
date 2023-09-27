@@ -6,7 +6,7 @@ metadata:
   {{- include "krakend-operator.labels" . | nindent 4 }}
 binaryData:
   krakend-chart.tgz: |
-    H4sIALjiE2UAA+y7Bzic3dY3LgRBEKLX0fvovQVRo/caBoNhjDJKECVB9N57b1FCRO+C6I
+    H4sIAL7xE2UAA+y7Bzic3dY3LgRBEKLX0fvovQVRo/caBoNhjDJKECVB9N57b1FCRO+C6I
     QgWpQgWqIkajD/kTzPKc8573POe53znff/fe+z5pr73ve+11577fJbe+21Z6ycYDYQW25H
     EAxkC3blBpo7uIIcwDBrLis7kKsbyr+FeHh4hAUFAT/uQj/vPHwCP+8/0/wAXgFBHgEkF7
     +wMICHj4ePVwgFwPPvqf73yR3uBnJFquLm5Ojo5ebqBIb9fT4km43N78j52RTAn+7/txA6
