@@ -6,6 +6,17 @@ metadata:
   {{- include "krakend-operator.labels" . | nindent 4 }}
 rules:
 - apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - krakend.nais.io
   resources:
   - apiendpoints

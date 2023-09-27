@@ -45,9 +45,12 @@ type KrakendReconciler struct {
 
 const DefaultKrakendIngressClass = "nais-ingress-external"
 
-//+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/finalizers,verbs=update
+//TODO: add more finegrained permissions
+
+// +kubebuilder:rbac:groups=krakend.nais.io,resources=krakends,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=krakend.nais.io,resources=krakends/finalizers,verbs=update
+// +kubebuilder:rbac:groups="*",resources=*,verbs=create;update;patch;get;list;watch
 
 func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log.Infof("reconciling krakend %s", req.NamespacedName)
