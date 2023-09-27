@@ -1,8 +1,8 @@
 apiVersion: v2
-name: krakend
+name: krakendinstaller
 description: helm chart for krakend used by krakend-operator to install krakend into a namespace
 type: application
-version: 0.1.21
+version: 1.0.0
 appVersion: "2.4.3"
 dependencies:
   - name: krakend

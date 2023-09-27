@@ -6,7 +6,7 @@ kind: Kustomization
 
 configMapGenerator:
 - files:
-  - krakend-chart.tgz
+  - krakendinstaller-1.0.0.tgz
   name: config
 generatorOptions:
   disableNameSuffixHash: true

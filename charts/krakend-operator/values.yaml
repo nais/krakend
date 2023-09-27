@@ -31,7 +31,7 @@ controllerManager:
         drop:
         - ALL
     env:
-      krakendChartPath: /var/config/krakend-chart.tgz
+      krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
     image:
       repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
       tag: latest
