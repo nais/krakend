@@ -89,7 +89,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		},
 	}
 
-	// TODO: IMPORTANT - current logic will overwrite configmap partials containing added api's with default from chart
 	for _, resource := range resources {
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
 
@@ -98,8 +97,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
 		}
 
-		// TODO: check each resource if any changes are needed, maybe inside createOrUpdate
-		// TODO: remove temporary hack for not overwriting configmaps partials
 		if resource.GetKind() == "ConfigMap" {
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
 
