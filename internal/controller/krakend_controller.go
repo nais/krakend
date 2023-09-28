@@ -103,19 +103,17 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if resource.GetKind() == "ConfigMap" {
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
 
-			cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
-
 			var cm v1.ConfigMap
 			err := r.Get(ctx, types.NamespacedName{
-				Name:      cmName,
+				Name:      resource.GetName(),
 				Namespace: ns,
 			}, &cm)
 
 			if err != nil && !errors.IsNotFound(err) {
-				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
+				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", resource.GetName(), err)
 			}
 			if err == nil {
-				log.Infof("found configmap %s, skipping createOrUpdate", cmName)
+				log.Infof("found configmap %s, skipping createOrUpdate", resource.GetName())
 				continue
 			}
 		}
