@@ -70,6 +70,8 @@ spec:
           name: config
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: {{ include "krakend-operator.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
       volumes:
