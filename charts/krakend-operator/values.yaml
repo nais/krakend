@@ -1,3 +1,5 @@
+apiserverIP: "" # mapping value from Fasit
+debug: false
 controllerManager:
   kubeRbacProxy:
     args:

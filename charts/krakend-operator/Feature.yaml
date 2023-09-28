@@ -1,0 +1,18 @@
+dependencies:
+  - allOf:
+    - cert-manager
+environmentKinds:
+  - tenant
+  - legacy
+  - onprem
+values:
+  apiserverIP:
+    displayName: API server IP
+    computed:
+      template: '"{{ .Env.apiserver_endpoint }}"'
+  debug:
+    description: Enable debug logging
+    displayName: Debug
+    config:
+      type: bool
+
