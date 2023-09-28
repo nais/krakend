@@ -92,7 +92,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	for _, resource := range resources {
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
 
-		annotations := resource.GetAnnotations()
 		if resource.GetKind() == "Deployment" {
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
 		}
@@ -115,7 +114,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			}
 		}
 
-		resource.SetAnnotations(annotations)
 		resource.SetNamespace(ns)
 		resource.SetOwnerReferences(ownerRef)
 		err := r.createOrUpdate(ctx, resource)
