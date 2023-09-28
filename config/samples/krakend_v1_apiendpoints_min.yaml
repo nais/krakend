@@ -4,13 +4,11 @@ metadata:
   name: app1-endpoints
 spec:
   krakendInstance: apigw1
-  apiName: app1
+  appName: app1
   auth:
-    alg: "RS256"
+    name: maskinporten
     cache: true
     debug: true
-    jwkUrl: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks"
-    issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
     audience:
       - "yolo"
   # scope:

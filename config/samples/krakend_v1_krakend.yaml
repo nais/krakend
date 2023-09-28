@@ -20,6 +20,11 @@ spec:
         paths:
           - path: /
             pathType: ImplementationSpecific
+  authProviders:
+    - name: maskinporten
+      alg: RS256
+      jwkUrl: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks"
+      issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
   deployment:
     replicaCount: 2
     image:

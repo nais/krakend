@@ -98,7 +98,10 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, end
 		return fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
-	allEndpoints := krakend.ToKrakendEndpoints(list)
+	allEndpoints, err := krakend.ToKrakendEndpoints(k, list)
+	if err != nil {
+		return fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
+	}
 	partials, err := json.Marshal(allEndpoints)
 	if err != nil {
 		return err

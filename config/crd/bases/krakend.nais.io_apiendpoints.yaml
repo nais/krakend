@@ -34,14 +34,12 @@ spec:
           spec:
             description: ApiEndpointsSpec defines the desired state of ApiEndpoints
             properties:
-              apiName:
-                description: ApiName is the name of the API, e.g. name of the application
+              appName:
+                description: AppName is the name of the API, e.g. name of the application
                   or service
                 type: string
               auth:
                 properties:
-                  alg:
-                    type: string
                   audience:
                     items:
                       type: string
@@ -50,18 +48,16 @@ spec:
                     type: boolean
                   debug:
                     type: boolean
-                  issuer:
-                    type: string
-                  jwkUrl:
+                  name:
+                    description: Name is the name of the auth provider defined in
+                      the Krakend resource, e.g. maskinporten
                     type: string
                   scope:
                     items:
                       type: string
                     type: array
                 required:
-                - alg
-                - issuer
-                - jwkUrl
+                - name
                 type: object
               endpoints:
                 items:

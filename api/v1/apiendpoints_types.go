@@ -40,11 +40,10 @@ type RateLimit struct {
 }
 
 type Auth struct {
-	Alg      string   `json:"alg"`
+	// Name is the name of the auth provider defined in the Krakend resource, e.g. maskinporten
+	Name     string   `json:"name"`
 	Cache    bool     `json:"cache,omitempty"`
 	Debug    bool     `json:"debug,omitempty"`
-	JwkUrl   string   `json:"jwkUrl"`
-	Issuer   string   `json:"issuer"`
 	Audience []string `json:"audience,omitempty"`
 	Scope    []string `json:"scope,omitempty"`
 }
@@ -56,8 +55,8 @@ type Auth struct {
 type ApiEndpointsSpec struct {
 	// KrakendInstance is the name of the Krakend instance in the cluster
 	KrakendInstance string `json:"krakendInstance"`
-	// ApiName is the name of the API, e.g. name of the application or service
-	ApiName   string     `json:"apiName,omitempty"`
+	// AppName is the name of the API, e.g. name of the application or service
+	AppName   string     `json:"appName,omitempty"`
 	Auth      Auth       `json:"auth,omitempty"`
 	Endpoints []Endpoint `json:"endpoints,omitempty"`
 }

@@ -2,6 +2,7 @@ package krakend
 
 import (
 	"encoding/json"
+	"fmt"
 	v1 "github.com/nais/krakend/api/v1"
 )
 
@@ -50,26 +51,25 @@ type QosRatelimitRouter struct {
 
 const DefaultOutputEncoding = "no-op"
 
-func ToKrakendEndpoints(list *v1.ApiEndpointsList) []*Endpoint {
+func ToKrakendEndpoints(k *v1.Krakend, list *v1.ApiEndpointsList) ([]*Endpoint, error) {
 	endpoints := make([]*Endpoint, 0)
 	for _, item := range list.Items {
-		endpoints = append(endpoints, parseKrakendEndpointsSpec(item.Spec)...)
+		parsed, err := parseKrakendEndpointsSpec(k, item.Spec)
+		if err != nil {
+			return nil, err
+		}
+		endpoints = append(endpoints, parsed...)
 	}
-	return endpoints
+	return endpoints, nil
 }
 
-func parseKrakendEndpointsSpec(spec v1.ApiEndpointsSpec) []*Endpoint {
+func parseKrakendEndpointsSpec(k *v1.Krakend, spec v1.ApiEndpointsSpec) ([]*Endpoint, error) {
 	endpoints := make([]*Endpoint, 0)
 	backend := make([]*Backend, 0)
 
-	auth := &AuthValidator{
-		OperationDebug: spec.Auth.Debug,
-		Alg:            spec.Auth.Alg,
-		Cache:          spec.Auth.Cache,
-		JwkUrl:         spec.Auth.JwkUrl,
-		Issuer:         spec.Auth.Issuer,
-		Audience:       spec.Auth.Audience,
-		Scope:          spec.Auth.Scope,
+	auth, err := findAuthProvider(k, &spec.Auth)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, e := range spec.Endpoints {
@@ -106,7 +106,24 @@ func parseKrakendEndpointsSpec(spec v1.ApiEndpointsSpec) []*Endpoint {
 		}
 		endpoints = append(endpoints, endpoint)
 	}
-	return endpoints
+	return endpoints, nil
+}
+
+func findAuthProvider(k *v1.Krakend, auth *v1.Auth) (*AuthValidator, error) {
+	for _, p := range k.Spec.AuthProviders {
+		if p.Name == auth.Name {
+			return &AuthValidator{
+				OperationDebug: auth.Debug,
+				Alg:            p.Alg,
+				Cache:          auth.Cache,
+				JwkUrl:         p.JwkUrl,
+				Issuer:         p.Issuer,
+				Audience:       auth.Audience,
+				Scope:          auth.Scope,
+			}, nil
+		}
+	}
+	return nil, fmt.Errorf("auth provider with name '%s' not found", auth.Name)
 }
 
 func ParsePartials(content []byte) (*Partials, error) {

@@ -27,8 +27,16 @@ type KrakendSpec struct {
 	// Ingress lets you configure the ingress class, annotations and hosts or tls for an ingress
 	Ingress Ingress `json:"ingress,omitempty"`
 	// IngressHost is a shortcut for creating a single host ingress with sane defaults, if Ingress is specified this is ignored
-	IngressHost string            `json:"ingressHost,omitempty"`
-	Deployment  KrakendDeployment `json:"deployment,omitempty"`
+	IngressHost   string            `json:"ingressHost,omitempty"`
+	AuthProviders []AuthProvider    `json:"authProviders,omitempty"`
+	Deployment    KrakendDeployment `json:"deployment,omitempty"`
+}
+
+type AuthProvider struct {
+	Name   string `json:"name"`
+	Alg    string `json:"alg"`
+	JwkUrl string `json:"jwkUrl"`
+	Issuer string `json:"issuer"`
 }
 
 type KrakendDeployment struct {

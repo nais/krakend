@@ -1,15 +1,9 @@
 apiVersion: krakend.nais.io/v1
 kind: ApiEndpoints
 metadata:
-  labels:
-    app.kubernetes.io/name: apiendpoints
-    app.kubernetes.io/instance: apiendpoints-sample
-    app.kubernetes.io/part-of: krakend
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: krakend
-  name: apiendpoints-sample
+  name: app1-endpoints
 spec:
-  krakendInstance: team1-min
+  krakendInstance: apigw1
   appName: app1
   auth:
     name: maskinporten
@@ -17,19 +11,20 @@ spec:
     debug: true
     audience:
       - "yolo"
-    scope:
-      - "scope1"
+  # scope:
+  #   - "scope1"
   # TODO: api doc and swagger?
   endpoints:
-    - path: /api1/somepath2
+    - path: /echo
       method: GET
-      backendHost: example2.com
-      backendPath: /api1/somepath
+      backendHost: http://echo:1027
+      backendPath: /
       forwardHeaders:
         - X-Forwarded-For
       queryParams:
         - foo
         - bar
+      noAuth: false
       rateLimit:
         maxRate: 10
         clientMaxRate: 0

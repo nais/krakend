@@ -35,6 +35,24 @@ spec:
           spec:
             description: KrakendSpec defines the desired state of Krakend
             properties:
+              authProviders:
+                items:
+                  properties:
+                    alg:
+                      type: string
+                    issuer:
+                      type: string
+                    jwkUrl:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - alg
+                  - issuer
+                  - jwkUrl
+                  - name
+                  type: object
+                type: array
               deployment:
                 properties:
                   deploymentType:
