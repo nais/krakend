@@ -92,11 +92,16 @@ func (r *ApiEndpointsReconciler) createOrUpdateNetpols(ctx context.Context, endp
 
 	npName := fmt.Sprintf("%s-%s-%s", "allow", endpoints.Spec.KrakendInstance, endpoints.Spec.AppName)
 
-	var np *v1.NetworkPolicy
+	np := &v1.NetworkPolicy{}
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      npName,
 		Namespace: endpoints.Namespace,
 	}, np)
+
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+
 	if errors.IsNotFound(err) {
 		np = netpol.AllowKrakendIngressNetpol(npName, endpoints.Namespace, map[string]string{
 			AppLabelName: endpoints.Spec.AppName,
