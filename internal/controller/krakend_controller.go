@@ -22,9 +22,12 @@ import (
 	"fmt"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/helm"
+	"github.com/nais/krakend/internal/netpol"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/chartutil"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -99,7 +102,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if resource.GetKind() == "ConfigMap" {
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
 
-			var cm v1.ConfigMap
+			var cm corev1.ConfigMap
 			err := r.Get(ctx, types.NamespacedName{
 				Name:      resource.GetName(),
 				Namespace: ns,
@@ -122,6 +125,10 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			continue
 		}
 		log.Debugf("created resource %v/%v for namespace %q", resource.GetKind(), resource.GetName(), ns)
+	}
+
+	if err := r.ensureKrakendEgressNetpol(ctx, k); err != nil {
+		return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
 	}
 
 	return ctrl.Result{}, nil
@@ -178,6 +185,51 @@ func (r *KrakendReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&krakendv1.Krakend{}).
 		Complete(r)
+}
+
+// TODO: this is temporary set to allow egress to all IPs and not per endpoint, consider creating fqdn policy for each endpoint. If we choose to do this, move this function to apiendpoints controller instead.
+func (r *KrakendReconciler) ensureKrakendEgressNetpol(ctx context.Context, k *krakendv1.Krakend) error {
+	ownerRef := []metav1.OwnerReference{
+		{
+			APIVersion: k.APIVersion,
+			Kind:       k.Kind,
+			Name:       k.Name,
+			UID:        k.UID,
+		},
+	}
+
+	npName := fmt.Sprintf("%s-%s-%s", "allow", k.Name, "egress")
+
+	np := &networkingv1.NetworkPolicy{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      npName,
+		Namespace: k.Namespace,
+	}, np)
+
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+
+	if errors.IsNotFound(err) {
+		np = netpol.AllowKrakendEgressNetpol(npName, k.Namespace, map[string]string{
+			// TODO: some logic to get the correct label?
+			"app.kubernetes.io/name": "krakend",
+		})
+		np.SetOwnerReferences(ownerRef)
+
+		err := r.Create(ctx, np)
+		if err != nil {
+			return fmt.Errorf("create netpol: %v", err)
+		}
+		return nil
+	}
+
+	//TODO: diff and update if needed
+	err = r.Update(ctx, np)
+	if err != nil {
+		return fmt.Errorf("update netpol: %v", err)
+	}
+	return nil
 }
 
 func toMap(v any) (map[string]any, error) {
