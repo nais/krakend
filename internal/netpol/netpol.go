@@ -45,6 +45,19 @@ func AllowKrakendEgressNetpol(name string, namespace string, labelSelector map[s
 						},
 					},
 				},
+				{
+					Ports: []v1.NetworkPolicyPort{
+						{
+							Protocol: &[]corev1.Protocol{corev1.ProtocolTCP}[0],
+							Port:     &intstr.IntOrString{IntVal: 80},
+						},
+					},
+					To: []v1.NetworkPolicyPeer{
+						{
+							NamespaceSelector: &metav1.LabelSelector{},
+						},
+					},
+				},
 			},
 		},
 	}
