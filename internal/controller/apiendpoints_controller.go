@@ -54,18 +54,27 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		"apiendpoints_namespace": req.Namespace,
 	}).Infof("Reconciling ApiEndpoints")
 
-	ae := &krakendv1.ApiEndpoints{}
-	if err := r.Get(ctx, req.NamespacedName, ae); err != nil {
+	endpoints := &krakendv1.ApiEndpoints{}
+	if err := r.Get(ctx, req.NamespacedName, endpoints); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := r.updateKrakendConfigMap(ctx, ae); err != nil {
+	k := &krakendv1.Krakend{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      endpoints.Spec.KrakendInstance,
+		Namespace: endpoints.Namespace,
+	}, k)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
+	}
+
+	if err := r.updateKrakendConfigMap(ctx, k, endpoints); err != nil {
 		log.Errorf("updating Krakend configmap: %v", err)
 		return ctrl.Result{}, nil
 	}
 
-	// TODO: check sync hash and skip if unchanged
-	if err := r.createOrUpdateNetpols(ctx, ae); err != nil {
+	//TODO: check sync hash and skip if unchanged
+	if err := r.ensureAppIngressNetpol(ctx, endpoints); err != nil {
 		log.Errorf("creating/updating netpol: %v", err)
 		return ctrl.Result{}, nil
 	}
@@ -80,7 +89,53 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ApiEndpointsReconciler) createOrUpdateNetpols(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
+// TODO: this is temporary set to allow egress to all IPs and not per endpoint, consider creating fqdn policy for each endpoint. If we choose to open wide like this, move this function to krakend controller instead.
+func (r *ApiEndpointsReconciler) ensureKrakendEgressNetpol(ctx context.Context, k krakendv1.Krakend, endpoints krakendv1.ApiEndpoints) error {
+	ownerRef := []metav1.OwnerReference{
+		{
+			APIVersion: k.APIVersion,
+			Kind:       k.Kind,
+			Name:       k.Name,
+			UID:        k.UID,
+		},
+	}
+
+	npName := fmt.Sprintf("%s-%s-%s-%s", "allow", k.Name, endpoints.Spec.AppName, "egress")
+
+	np := &v1.NetworkPolicy{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      npName,
+		Namespace: endpoints.Namespace,
+	}, np)
+
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+
+	if errors.IsNotFound(err) {
+		np = netpol.AllowKrakendEgressNetpol(npName, endpoints.Namespace, map[string]string{
+			// TODO: some logic to get the correct label?
+			"app.kubernetes.io/name": "krakend",
+		})
+		np.SetOwnerReferences(ownerRef)
+
+		err := r.Create(ctx, np)
+		if err != nil {
+			return fmt.Errorf("create netpol: %v", err)
+		}
+		return nil
+	}
+
+	//TODO: diff and update if needed
+	err = r.Update(ctx, np)
+	if err != nil {
+		return fmt.Errorf("update netpol: %v", err)
+	}
+	return nil
+}
+
+func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
+	// TODO: only create if app (in ApiEndpoints) is in same namespace, e.g. skip if host is outside cluster
 	ownerRef := []metav1.OwnerReference{
 		{
 			APIVersion: endpoints.APIVersion,
@@ -115,7 +170,7 @@ func (r *ApiEndpointsReconciler) createOrUpdateNetpols(ctx context.Context, endp
 		return nil
 	}
 
-	// TODO: diff and update if needed
+	//TODO: diff and update if needed
 	err = r.Update(ctx, np)
 	if err != nil {
 		return fmt.Errorf("update netpol: %v", err)
@@ -124,19 +179,10 @@ func (r *ApiEndpointsReconciler) createOrUpdateNetpols(ctx context.Context, endp
 }
 
 // TODO: validate unique paths - maybe webhook?
-func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
-	k := &krakendv1.Krakend{}
-	err := r.Get(ctx, types.NamespacedName{
-		Name:      endpoints.Spec.KrakendInstance,
-		Namespace: endpoints.Namespace,
-	}, k)
-	if err != nil {
-		return fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
-	}
-
+func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend, endpoints *krakendv1.ApiEndpoints) error {
 	cm := &corev1.ConfigMap{}
 	cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
-	err = r.Get(ctx, types.NamespacedName{
+	err := r.Get(ctx, types.NamespacedName{
 		Name:      cmName,
 		Namespace: endpoints.Namespace,
 	}, cm)
