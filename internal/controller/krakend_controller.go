@@ -193,6 +193,7 @@ func toMap(v any) (map[string]any, error) {
 	return m, nil
 }
 
+// TODO: diff and update - see nais/replicator for inspiration
 func (r *KrakendReconciler) createOrUpdate(
 	ctx context.Context,
 	resource *unstructured.Unstructured,
