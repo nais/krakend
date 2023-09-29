@@ -200,22 +200,23 @@ func (r *KrakendReconciler) ensureKrakendEgressNetpol(ctx context.Context, k *kr
 
 	npName := fmt.Sprintf("%s-%s-%s", "allow", k.Name, "egress")
 
-	np := &networkingv1.NetworkPolicy{}
+	existing := &networkingv1.NetworkPolicy{}
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      npName,
 		Namespace: k.Namespace,
-	}, np)
+	}, existing)
 
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	}
 
+	np := netpol.AllowKrakendEgressNetpol(npName, k.Namespace, map[string]string{
+		// TODO: some logic to get the correct label?
+		"app.kubernetes.io/name": "krakend",
+	})
+	np.SetOwnerReferences(ownerRef)
+
 	if errors.IsNotFound(err) {
-		np = netpol.AllowKrakendEgressNetpol(npName, k.Namespace, map[string]string{
-			// TODO: some logic to get the correct label?
-			"app.kubernetes.io/name": "krakend",
-		})
-		np.SetOwnerReferences(ownerRef)
 
 		err := r.Create(ctx, np)
 		if err != nil {
