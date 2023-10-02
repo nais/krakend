@@ -51,6 +51,7 @@ func main() {
 	var debug bool
 	var interval time.Duration
 	var krakendChartPath string
+	var netpolEnabled bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -60,6 +61,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", os.Getenv("DEBUG") == "true", "Enable debug logging")
 	flag.DurationVar(&interval, "sync-interval", 1*time.Minute, "Synchronization interval for reconciliation")
 	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "config/manager/krakend-chart"), "Path to krakend helm chart")
+	flag.BoolVar(&netpolEnabled, "netpol-enabled", os.Getenv("NETPOL_ENABLED") == "true", "Enable network policies")
 
 	opts := zap.Options{
 		Development: true,
@@ -103,19 +105,21 @@ func main() {
 	}
 
 	if err = (&controller.KrakendReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		Recorder:     mgr.GetEventRecorderFor("replicator"),
-		SyncInterval: interval,
-		KrakendChart: krakendChart,
+		Client:        mgr.GetClient(),
+		Scheme:        mgr.GetScheme(),
+		Recorder:      mgr.GetEventRecorderFor("replicator"),
+		SyncInterval:  interval,
+		KrakendChart:  krakendChart,
+		NetpolEnabled: netpolEnabled,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Krakend")
 		os.Exit(1)
 	}
 	if err = (&controller.ApiEndpointsReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		SyncInterval: interval,
+		Client:        mgr.GetClient(),
+		Scheme:        mgr.GetScheme(),
+		SyncInterval:  interval,
+		NetpolEnabled: netpolEnabled,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ApiEndpoints")
 		os.Exit(1)

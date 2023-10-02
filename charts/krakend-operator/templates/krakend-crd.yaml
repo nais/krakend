@@ -160,6 +160,12 @@ spec:
             type: object
           status:
             description: KrakendStatus defines the observed state of Krakend
+            properties:
+              synchronizationHash:
+                type: string
+              synchronizationTimestamp:
+                format: date-time
+                type: string
             type: object
         type: object
     served: true

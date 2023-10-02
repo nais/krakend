@@ -44,9 +44,14 @@ spec:
         env:
         - name: KRAKEND_CHART_PATH
           value: {{ quote .Values.controllerManager.manager.env.krakendChartPath }}
+        - name: NETPOL_ENABLED
+          value: {{ quote .Values.controllerManager.manager.env.netpolEnabled }}
+        - name: DEBUG
+          value: {{ quote .Values.controllerManager.manager.env.debug }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Chart.Version }}
+        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
+          | default .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /healthz

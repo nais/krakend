@@ -77,6 +77,10 @@ spec:
         env:
           - name: KRAKEND_CHART_PATH
             value: "/var/config/krakendinstaller-1.0.0.tgz"
+          - name: NETPOL_ENABLED
+            value: "true"
+          - name: DEBUG
+            value: "false"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

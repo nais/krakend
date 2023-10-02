@@ -39,8 +39,9 @@ import (
 // ApiEndpointsReconciler reconciles a ApiEndpoints object
 type ApiEndpointsReconciler struct {
 	client.Client
-	Scheme       *runtime.Scheme
-	SyncInterval time.Duration
+	Scheme        *runtime.Scheme
+	SyncInterval  time.Duration
+	NetpolEnabled bool
 }
 
 const (
@@ -100,10 +101,11 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	//TODO: check sync hash and skip if unchanged
-	if err := r.ensureAppIngressNetpol(ctx, endpoints); err != nil {
-		log.Errorf("creating/updating netpol: %v", err)
-		return ctrl.Result{}, nil
+	if r.NetpolEnabled {
+		if err := r.ensureAppIngressNetpol(ctx, endpoints); err != nil {
+			log.Errorf("creating/updating netpol: %v", err)
+			return ctrl.Result{}, nil
+		}
 	}
 
 	return ctrl.Result{}, nil

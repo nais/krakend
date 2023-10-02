@@ -35,7 +35,9 @@ controllerManager:
       runAsNonRoot: true
       runAsUser: 65532
     env:
+      debug: "false"
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
+      netpolEnabled: "true"
     image:
       repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
       tag: latest

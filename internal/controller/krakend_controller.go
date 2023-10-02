@@ -43,10 +43,11 @@ import (
 // KrakendReconciler reconciles a Krakend object
 type KrakendReconciler struct {
 	client.Client
-	Scheme       *runtime.Scheme
-	Recorder     record.EventRecorder
-	SyncInterval time.Duration
-	KrakendChart *helm.Chart
+	Scheme        *runtime.Scheme
+	Recorder      record.EventRecorder
+	SyncInterval  time.Duration
+	KrakendChart  *helm.Chart
+	NetpolEnabled bool
 }
 
 const DefaultKrakendIngressClass = "nais-ingress-external"
@@ -140,8 +141,10 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.Debugf("created resource %v/%v for namespace %q", resource.GetKind(), resource.GetName(), ns)
 	}
 
-	if err := r.ensureKrakendEgressNetpol(ctx, k); err != nil {
-		return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
+	if r.NetpolEnabled {
+		if err := r.ensureKrakendEgressNetpol(ctx, k); err != nil {
+			return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
+		}
 	}
 
 	k.Status.SynchronizationTimestamp = metav1.Now()
