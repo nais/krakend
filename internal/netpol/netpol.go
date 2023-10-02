@@ -55,6 +55,7 @@ func AllowKrakendEgressNetpol(name string, namespace string, labelSelector map[s
 					To: []v1.NetworkPolicyPeer{
 						{
 							NamespaceSelector: &metav1.LabelSelector{},
+							PodSelector:       &metav1.LabelSelector{},
 						},
 					},
 				},
