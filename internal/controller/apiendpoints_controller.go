@@ -108,6 +108,12 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
+	endpoints.Status.SynchronizationTimestamp = metav1.Now()
+	endpoints.Status.SynchronizationHash = hash
+	if err := r.Status().Update(ctx, endpoints); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
