@@ -113,8 +113,9 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.ApiEndpointsReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:       mgr.GetClient(),
+		Scheme:       mgr.GetScheme(),
+		SyncInterval: interval,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ApiEndpoints")
 		os.Exit(1)

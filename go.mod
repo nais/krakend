@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/arttor/helmify v0.4.5
 	github.com/golangci/golangci-lint v1.54.2
+	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
 	github.com/sirupsen/logrus v1.9.3

@@ -72,8 +72,8 @@ type Image struct {
 
 // KrakendStatus defines the observed state of Krakend
 type KrakendStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	SynchronizationTimestamp metav1.Time `json:"synchronizationTimestamp,omitempty"`
+	SynchronizationHash      string      `json:"synchronizationHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true

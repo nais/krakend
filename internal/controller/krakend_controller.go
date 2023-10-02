@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	hashstructure "github.com/mitchellh/hashstructure/v2"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/helm"
 	"github.com/nais/krakend/internal/netpol"
@@ -66,7 +67,19 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// TODO: add logic for checking if update is neccessary....
+	hash, err := hash(k.Spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// skip reconciliation if hash is unchanged and timestamp is within sync interval
+	// reconciliation is triggered when status subresource is updated, so we need this check to avoid infinite loop
+	if k.Status.SynchronizationHash == hash && !r.needsSync(k.Status.SynchronizationTimestamp.Time) {
+		log.Debugf("skipping reconciliation of %q, hash %q is unchanged and changed within syncInterval window", k.Name, hash)
+		return ctrl.Result{}, nil
+	} else {
+		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", k.Status.SynchronizationHash != hash, r.needsSync(k.Status.SynchronizationTimestamp.Time))
+	}
 
 	releaseName := k.Spec.Name
 
@@ -129,6 +142,13 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	if err := r.ensureKrakendEgressNetpol(ctx, k); err != nil {
 		return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
+	}
+
+	k.Status.SynchronizationTimestamp = metav1.Now()
+	k.Status.SynchronizationHash = hash
+	if err := r.Status().Update(ctx, k); err != nil {
+		r.Recorder.Eventf(k, "Warning", "UpdateStatus", "Unable to update status for %q: %v", k.Name, err)
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -270,4 +290,17 @@ func (r *KrakendReconciler) createOrUpdate(
 		}
 	}
 	return nil
+}
+
+func hash(k krakendv1.KrakendSpec) (string, error) {
+	hash, err := hashstructure.Hash(k, hashstructure.FormatV2, nil)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", hash), nil
+}
+
+func (r *KrakendReconciler) needsSync(timestamp time.Time) bool {
+	window := time.Now().Add(-r.SyncInterval)
+	return timestamp.Before(window)
 }

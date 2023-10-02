@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mitchellh/hashstructure/v2"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/krakend"
 	"github.com/nais/krakend/internal/netpol"
@@ -32,12 +33,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"time"
 )
 
 // ApiEndpointsReconciler reconciles a ApiEndpoints object
 type ApiEndpointsReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme       *runtime.Scheme
+	SyncInterval time.Duration
 }
 
 const (
@@ -59,8 +62,22 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	hash, err := hashEndpoints(endpoints.Spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// skip reconciliation if hash is unchanged and timestamp is within sync interval
+	// reconciliation is triggered when status subresource is updated, so we need this check to avoid infinite loop
+	if endpoints.Status.SynchronizationHash == hash && !r.needsSync(endpoints.Status.SynchronizationTimestamp.Time) {
+		log.Debugf("skipping reconciliation of %q, hash %q is unchanged and changed within syncInterval window", endpoints.Name, hash)
+		return ctrl.Result{}, nil
+	} else {
+		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", endpoints.Status.SynchronizationHash != hash, r.needsSync(endpoints.Status.SynchronizationTimestamp.Time))
+	}
+
 	k := &krakendv1.Krakend{}
-	err := r.Get(ctx, types.NamespacedName{
+	err = r.Get(ctx, types.NamespacedName{
 		Name:      endpoints.Spec.KrakendInstance,
 		Namespace: endpoints.Namespace,
 	}, k)
@@ -183,4 +200,17 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 	}
 
 	return nil
+}
+
+func hashEndpoints(a krakendv1.ApiEndpointsSpec) (string, error) {
+	hash, err := hashstructure.Hash(a, hashstructure.FormatV2, nil)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", hash), nil
+}
+
+func (r *ApiEndpointsReconciler) needsSync(timestamp time.Time) bool {
+	window := time.Now().Add(-r.SyncInterval)
+	return timestamp.Before(window)
 }

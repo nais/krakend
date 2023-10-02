@@ -63,7 +63,8 @@ type ApiEndpointsSpec struct {
 
 // ApiEndpointsStatus defines the observed state of ApiEndpoints
 type ApiEndpointsStatus struct {
-	// TODO: add status fields here
+	SynchronizationTimestamp metav1.Time `json:"synchronizationTimestamp,omitempty"`
+	SynchronizationHash      string      `json:"synchronizationHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
