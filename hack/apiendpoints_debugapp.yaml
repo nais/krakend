@@ -1,0 +1,23 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: debug-endpoints
+spec:
+  krakendInstance: apigw1
+  appName: debug
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    audience:
+      - "yolo"
+  # scope:
+  #   - "scope1"
+  # TODO: api doc and swagger?
+  endpoints:
+    - path: /ping
+      method: GET
+      queryParams:
+        - delay
+      backendHost: http://debug
+      backendPath: /ping
