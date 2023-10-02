@@ -86,16 +86,6 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
 	}
 
-	ownerRef := []metav1.OwnerReference{
-		{
-			APIVersion: k.APIVersion,
-			Kind:       k.Kind,
-			Name:       k.Name,
-			UID:        k.UID,
-		},
-	}
-	endpoints.SetOwnerReferences(ownerRef)
-
 	if err := r.updateKrakendConfigMap(ctx, k, endpoints); err != nil {
 		log.Errorf("updating Krakend configmap: %v", err)
 		return ctrl.Result{}, nil
@@ -105,6 +95,22 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := r.ensureAppIngressNetpol(ctx, endpoints); err != nil {
 			log.Errorf("creating/updating netpol: %v", err)
 			return ctrl.Result{}, nil
+		}
+	}
+
+	if endpoints.GetOwnerReferences() == nil {
+		ownerRef := []metav1.OwnerReference{
+			{
+				APIVersion: k.APIVersion,
+				Kind:       k.Kind,
+				Name:       k.Name,
+				UID:        k.UID,
+			},
+		}
+
+		endpoints.SetOwnerReferences(ownerRef)
+		if err := r.Update(ctx, endpoints); err != nil {
+			return ctrl.Result{}, err
 		}
 	}
 
