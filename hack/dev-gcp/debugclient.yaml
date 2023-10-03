@@ -8,5 +8,5 @@ metadata:
 spec:
   scopes:
     consumes:
-    - name: nav:krakend:demo
+    - name: nav:plattformsikkerhet:krakend.demo
   secretName: debugclient-maskinporten

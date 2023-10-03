@@ -1,0 +1,27 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: debug
+spec:
+  krakendInstance: gateway
+  appName: debug
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    scope:
+      - "nav:plattformsikkerhet:krakend.demo"
+  endpoints:
+    - path: /ping
+      method: GET
+      queryParams:
+        - delay
+      backendHost: http://debug
+      backendPath: /ping
+  openEndpoints:
+    - path: /doc
+      method: GET
+      queryParams:
+        - delay
+      backendHost: http://debug
+      backendPath: /ping

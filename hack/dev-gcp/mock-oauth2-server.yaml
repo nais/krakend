@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mock-oauth2-server
+  name: mock-oauth2-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-oauth2-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mock-oauth2-server
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - image: ghcr.io/navikt/mock-oauth2-server:0.5.8
+          name: mock-oauth2-server
+          ports:
+            - containerPort: 8080
+          resources: {}
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mock-oauth2-server
+  name: mock-oauth2-server
+spec:
+  ports:
+    - port: 8080
+      name: http
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: mock-oauth2-server
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mock-oauth2-server
+  labels:
+    app: mock-oauth2-server
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nais-ingress
+  rules:
+    - host: mock-oauth2-server.dev.dev-gcp.cloud.nais.io
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: mock-oauth2-server
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mock-oauth2-server
+spec:
+  ingress:
+    - from:
+        - namespaceSelector: {}
+  podSelector:
+    matchLabels:
+      app: mock-oauth2-server
+  policyTypes:
+    - Ingress

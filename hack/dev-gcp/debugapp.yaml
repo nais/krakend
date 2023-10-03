@@ -9,9 +9,9 @@ spec:
     enabled: true
     scopes:
       exposes:
-        - name: "nav:krakend:demo"
+        - name: "krakend.demo"
           enabled: true
-          product: "demo"
+          product: "plattformsikkerhet"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 120
