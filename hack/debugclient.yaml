@@ -1,0 +1,12 @@
+apiVersion: nais.io/v1
+kind: MaskinportenClient
+metadata:
+  labels:
+    app: debugclient
+    team: plattformsikkerhet
+  name: debugclient
+spec:
+  scopes:
+    consumes:
+    - name: nav:krakend:demo
+  secretName: debugclient-maskinporten

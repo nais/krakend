@@ -5,6 +5,19 @@ metadata:
     team: nais
   name: debug
 spec:
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: "nav:krakend:demo"
+          enabled: true
+          product: "demo"
+          allowedIntegrations:
+            - maskinporten
+          atMaxAge: 120
+          consumers:
+            - name: NAV
+              orgno: "889640782"
   image: europe-north1-docker.pkg.dev/nais-io/nais/images/testapp:latest
   port: 8080
   replicas:
@@ -14,3 +27,4 @@ spec:
     requests:
       cpu: 50m
       memory: 32Mi
+
