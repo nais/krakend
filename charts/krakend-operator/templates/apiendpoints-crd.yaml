@@ -73,8 +73,6 @@ spec:
                       type: array
                     method:
                       type: string
-                    noAuth:
-                      type: boolean
                     path:
                       type: string
                     queryParams:
@@ -106,6 +104,46 @@ spec:
                 description: KrakendInstance is the name of the Krakend instance in
                   the cluster
                 type: string
+              openEndpoints:
+                items:
+                  properties:
+                    backendHost:
+                      type: string
+                    backendPath:
+                      type: string
+                    forwardHeaders:
+                      items:
+                        type: string
+                      type: array
+                    method:
+                      type: string
+                    path:
+                      type: string
+                    queryParams:
+                      items:
+                        type: string
+                      type: array
+                    rateLimit:
+                      properties:
+                        capacity:
+                          type: integer
+                        clientCapacity:
+                          type: integer
+                        clientMaxRate:
+                          type: integer
+                        maxRate:
+                          type: integer
+                        strategy:
+                          type: string
+                      required:
+                      - capacity
+                      - clientCapacity
+                      - clientMaxRate
+                      - maxRate
+                      - strategy
+                      type: object
+                  type: object
+                type: array
             required:
             - krakendInstance
             type: object

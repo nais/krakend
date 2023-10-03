@@ -21,3 +21,10 @@ spec:
         - delay
       backendHost: http://debug
       backendPath: /ping
+  openEndpoints:
+    - path: /doc
+      method: GET
+      queryParams:
+        - delay
+      backendHost: http://debug
+      backendPath: /ping

@@ -24,7 +24,7 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 
 	_, err = json.Marshal(partials)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(partials))
+	assert.Equal(t, 2, len(partials))
 	p := partials[0]
 	assert.Equal(t, "/echo", p.Endpoint)
 	assert.Equal(t, "GET", p.Method)

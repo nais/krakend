@@ -29,7 +29,6 @@ spec:
       queryParams:
         - foo
         - bar
-      noAuth: false
       rateLimit:
         maxRate: 10
         clientMaxRate: 0

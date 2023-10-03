@@ -36,3 +36,8 @@ spec:
         strategy: ip
         capacity: 0
         clientCapacity: 0
+  openEndpoints:
+    - path: /api1/doc
+      method: GET
+      backendHost: example2.com
+      backendPath: /api1/doc

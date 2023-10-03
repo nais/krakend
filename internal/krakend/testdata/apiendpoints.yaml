@@ -24,10 +24,14 @@ spec:
       queryParams:
         - foo
         - bar
-      noAuth: false
       rateLimit:
         maxRate: 10
         clientMaxRate: 0
         strategy: ip
         capacity: 0
         clientCapacity: 0
+  openEndpoints:
+    - path: /doc
+      method: GET
+      backendHost: http://echo:1027
+      backendPath: /doc

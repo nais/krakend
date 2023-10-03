@@ -27,7 +27,6 @@ type Endpoint struct {
 	BackendPath    string    `json:"backendPath,omitempty"`
 	ForwardHeaders []string  `json:"forwardHeaders,omitempty"`
 	QueryParams    []string  `json:"queryParams,omitempty"`
-	NoAuth         bool      `json:"noAuth,omitempty"`
 	RateLimit      RateLimit `json:"rateLimit,omitempty"`
 }
 
@@ -56,9 +55,10 @@ type ApiEndpointsSpec struct {
 	// KrakendInstance is the name of the Krakend instance in the cluster
 	KrakendInstance string `json:"krakendInstance"`
 	// AppName is the name of the API, e.g. name of the application or service
-	AppName   string     `json:"appName,omitempty"`
-	Auth      Auth       `json:"auth,omitempty"`
-	Endpoints []Endpoint `json:"endpoints,omitempty"`
+	AppName       string     `json:"appName,omitempty"`
+	Auth          Auth       `json:"auth,omitempty"`
+	Endpoints     []Endpoint `json:"endpoints,omitempty"`
+	OpenEndpoints []Endpoint `json:"openEndpoints,omitempty"`
 }
 
 // ApiEndpointsStatus defines the observed state of ApiEndpoints

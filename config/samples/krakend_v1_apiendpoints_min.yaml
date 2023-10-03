@@ -23,3 +23,8 @@ spec:
       method: GET
       backendHost: http://echo:1027
       backendPath: /
+  openEndpoints:
+    - path: /doc
+      method: GET
+      backendHost: http://echo:1027
+      backendPath: /
