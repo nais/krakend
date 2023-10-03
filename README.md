@@ -4,7 +4,18 @@
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use
 
-## Getting Started
+## Status
+TODOs:
+* Add webhook for crd validation
+* Validate that the paths in apiendpoints are unique within one krakendinstance
+* Test cases
+* Setup test chain: internett -> dev-gcp -> dev-fss
+* Only update krakend (unstructured) resources if the spec has changed - see nais/replicator for inspiration
+  * https://github.com/nais/replicator/commit/f9197f779919924648d1c5586817db69ba399376
+  * https://github.com/nais/replicator/pull/11
+
+
+## Development
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 

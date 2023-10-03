@@ -111,9 +111,7 @@ func parseEndpoint(e v1.Endpoint) *Endpoint {
 			ClientCapacity: e.RateLimit.ClientCapacity,
 		}
 	}
-	if extraCfg.QosRatelimitRouter != nil {
-		endpoint.ExtraConfig = extraCfg
-	}
+	endpoint.ExtraConfig = extraCfg
 	return endpoint
 }
 
