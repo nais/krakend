@@ -33,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"time"
 )
 
@@ -45,7 +46,8 @@ type ApiEndpointsReconciler struct {
 }
 
 const (
-	AppLabelName = "app"
+	AppLabelName     = "app"
+	KrakendFinalizer = "finalizer.krakend.nais.io"
 )
 
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints,verbs=get;list;watch;create;update;patch;delete
@@ -63,6 +65,24 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if endpoints.GetDeletionTimestamp() != nil {
+		log.Debugf("Resource %s is marked for deletion", endpoints.Name)
+
+		_, err := r.updateKrakendConfigMap(ctx, endpoints.Spec.KrakendInstance, endpoints.Namespace)
+		if err != nil {
+			log.Errorf("updating Krakend configmap: %v", err)
+			return ctrl.Result{}, err
+		}
+
+		if controllerutil.RemoveFinalizer(endpoints, KrakendFinalizer) {
+			err := r.Update(ctx, endpoints)
+			if err != nil {
+				return ctrl.Result{}, fmt.Errorf("failed to remove finalizer: %w", err)
+			}
+		}
+		return ctrl.Result{}, nil
+	}
+
 	hash, err := hashEndpoints(endpoints.Spec)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -77,18 +97,10 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", endpoints.Status.SynchronizationHash != hash, r.needsSync(endpoints.Status.SynchronizationTimestamp.Time))
 	}
 
-	k := &krakendv1.Krakend{}
-	err = r.Get(ctx, types.NamespacedName{
-		Name:      endpoints.Spec.KrakendInstance,
-		Namespace: endpoints.Namespace,
-	}, k)
+	k, err := r.updateKrakendConfigMap(ctx, endpoints.Spec.KrakendInstance, endpoints.Namespace)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
-	}
-
-	if err := r.updateKrakendConfigMap(ctx, k, endpoints); err != nil {
 		log.Errorf("updating Krakend configmap: %v", err)
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	if r.NetpolEnabled {
@@ -98,6 +110,7 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
+	needsUpdate := controllerutil.AddFinalizer(endpoints, KrakendFinalizer)
 	if endpoints.GetOwnerReferences() == nil {
 		ownerRef := []metav1.OwnerReference{
 			{
@@ -109,6 +122,10 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 
 		endpoints.SetOwnerReferences(ownerRef)
+		needsUpdate = true
+	}
+
+	if needsUpdate {
 		if err := r.Update(ctx, endpoints); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -190,45 +207,61 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 }
 
 // TODO: validate unique paths - maybe webhook?
-func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend, endpoints *krakendv1.ApiEndpoints) error {
+func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, name, namespace string) (*krakendv1.Krakend, error) {
+	k := &krakendv1.Krakend{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}, k)
+	if err != nil {
+		return nil, fmt.Errorf("get Krakend instance '%s': %v", name, err)
+	}
+
 	cm := &corev1.ConfigMap{}
 	cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
-	err := r.Get(ctx, types.NamespacedName{
+	err = r.Get(ctx, types.NamespacedName{
 		Name:      cmName,
-		Namespace: endpoints.Namespace,
+		Namespace: k.Namespace,
 	}, cm)
 	if err != nil {
-		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
+		return nil, fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 	}
 
 	key := "endpoints.tmpl"
 	ep := cm.Data[key]
 	if ep == "" {
-		return fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
+		return nil, fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
 	}
 
 	list := &krakendv1.ApiEndpointsList{}
-	if err = r.List(ctx, list, client.InNamespace(endpoints.Namespace)); err != nil {
-		return fmt.Errorf("list all ApiEndpoints: %v", err)
+	if err = r.List(ctx, list, client.InNamespace(k.Namespace)); err != nil {
+		return nil, fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
-	allEndpoints, err := krakend.ToKrakendEndpoints(k, list)
+	filtered := make([]krakendv1.ApiEndpoints, 0)
+	for _, e := range list.Items {
+		if e.GetDeletionTimestamp() == nil {
+			filtered = append(filtered, e)
+		}
+	}
+
+	allEndpoints, err := krakend.ToKrakendEndpoints(k, filtered)
 	if err != nil {
-		return fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
+		return nil, fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
 	}
 	partials, err := json.Marshal(allEndpoints)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//TODO handle race conditions when updating configmap
 	cm.Data[key] = string(partials)
 	err = r.Update(ctx, cm)
 	if err != nil {
-		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
+		return nil, fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
 	}
 
-	return nil
+	return k, nil
 }
 
 func hashEndpoints(a krakendv1.ApiEndpointsSpec) (string, error) {

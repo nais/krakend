@@ -51,9 +51,9 @@ type QosRatelimitRouter struct {
 
 const DefaultOutputEncoding = "no-op"
 
-func ToKrakendEndpoints(k *v1.Krakend, list *v1.ApiEndpointsList) ([]*Endpoint, error) {
+func ToKrakendEndpoints(k *v1.Krakend, list []v1.ApiEndpoints) ([]*Endpoint, error) {
 	endpoints := make([]*Endpoint, 0)
-	for _, item := range list.Items {
+	for _, item := range list {
 		parsed, err := parseKrakendEndpointsSpec(k, item.Spec)
 		if err != nil {
 			return nil, err
@@ -102,7 +102,7 @@ func parseEndpoint(e v1.Endpoint) *Endpoint {
 	}
 
 	extraCfg := &ExtraConfig{}
-	if e.RateLimit != (v1.RateLimit{}) {
+	if e.RateLimit != nil { //(v1.RateLimit{}) {
 		extraCfg.QosRatelimitRouter = &QosRatelimitRouter{
 			MaxRate:        e.RateLimit.MaxRate,
 			ClientMaxRate:  e.RateLimit.ClientMaxRate,

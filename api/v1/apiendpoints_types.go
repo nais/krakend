@@ -21,13 +21,13 @@ import (
 )
 
 type Endpoint struct {
-	Path           string    `json:"path,omitempty"`
-	Method         string    `json:"method,omitempty"`
-	BackendHost    string    `json:"backendHost,omitempty"`
-	BackendPath    string    `json:"backendPath,omitempty"`
-	ForwardHeaders []string  `json:"forwardHeaders,omitempty"`
-	QueryParams    []string  `json:"queryParams,omitempty"`
-	RateLimit      RateLimit `json:"rateLimit,omitempty"`
+	Path           string     `json:"path,omitempty"`
+	Method         string     `json:"method,omitempty"`
+	BackendHost    string     `json:"backendHost,omitempty"`
+	BackendPath    string     `json:"backendPath,omitempty"`
+	ForwardHeaders []string   `json:"forwardHeaders,omitempty"`
+	QueryParams    []string   `json:"queryParams,omitempty"`
+	RateLimit      *RateLimit `json:"rateLimit,omitempty"`
 }
 
 type RateLimit struct {
