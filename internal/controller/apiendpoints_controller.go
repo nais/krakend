@@ -131,7 +131,22 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
-	// TODO: only create if app (in ApiEndpoints) is in same namespace, e.g. skip if host is outside cluster
+	// TODO: use label selector instead of app name
+	svc := &corev1.Service{}
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      endpoints.Spec.AppName,
+		Namespace: endpoints.Namespace,
+	}, svc)
+
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+
+	if errors.IsNotFound(err) {
+		log.Debugf("service for app %s not found, skipping ingress netpol", endpoints.Spec.AppName)
+		return nil
+	}
+
 	ownerRef := []metav1.OwnerReference{
 		{
 			APIVersion: endpoints.APIVersion,
@@ -144,7 +159,7 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 	npName := fmt.Sprintf("%s-%s-%s", "allow", endpoints.Spec.KrakendInstance, endpoints.Spec.AppName)
 
 	np := &v1.NetworkPolicy{}
-	err := r.Get(ctx, types.NamespacedName{
+	err = r.Get(ctx, types.NamespacedName{
 		Name:      npName,
 		Namespace: endpoints.Namespace,
 	}, np)
@@ -154,7 +169,7 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 	}
 
 	if errors.IsNotFound(err) {
-		np = netpol.AllowKrakendIngressNetpol(npName, endpoints.Namespace, map[string]string{
+		np = netpol.AppAllowKrakendIngressNetpol(npName, endpoints.Namespace, map[string]string{
 			AppLabelName: endpoints.Spec.AppName,
 		})
 		np.SetOwnerReferences(ownerRef)

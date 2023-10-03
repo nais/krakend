@@ -142,7 +142,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	if r.NetpolEnabled {
-		if err := r.ensureKrakendEgressNetpol(ctx, k); err != nil {
+		if err := r.ensureKrakendNetpol(ctx, k, releaseName); err != nil {
 			return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
 		}
 	}
@@ -211,7 +211,7 @@ func (r *KrakendReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 // TODO: this is temporary set to allow egress to all IPs and not per endpoint, consider creating fqdn policy for each endpoint. If we choose to do this, move this function to apiendpoints controller instead.
-func (r *KrakendReconciler) ensureKrakendEgressNetpol(ctx context.Context, k *krakendv1.Krakend) error {
+func (r *KrakendReconciler) ensureKrakendNetpol(ctx context.Context, k *krakendv1.Krakend, releaseName string) error {
 	ownerRef := []metav1.OwnerReference{
 		{
 			APIVersion: k.APIVersion,
@@ -221,7 +221,7 @@ func (r *KrakendReconciler) ensureKrakendEgressNetpol(ctx context.Context, k *kr
 		},
 	}
 
-	npName := fmt.Sprintf("%s-%s-%s", "allow", k.Name, "egress")
+	npName := fmt.Sprintf("%s-%s", releaseName, "krakend")
 
 	existing := &networkingv1.NetworkPolicy{}
 	err := r.Get(ctx, types.NamespacedName{
@@ -233,7 +233,7 @@ func (r *KrakendReconciler) ensureKrakendEgressNetpol(ctx context.Context, k *kr
 		return err
 	}
 
-	np := netpol.AllowKrakendEgressNetpol(npName, k.Namespace, map[string]string{
+	np := netpol.KrakendNetpol(npName, k.Namespace, map[string]string{
 		// TODO: some logic to get the correct label?
 		"app.kubernetes.io/name": "krakend",
 	})
