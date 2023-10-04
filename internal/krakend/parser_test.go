@@ -31,6 +31,15 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	assert.Equal(t, "/", p.Backend[0].UrlPattern)
 	assert.Equal(t, "GET", p.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p.Backend[0].Host[0])
+	assert.Equal(t, "org1:team1:krakend.app", p.ExtraConfig.AuthValidator.Scope[0])
+
+	p2 := partials[1]
+	assert.Equal(t, "/doc", p2.Endpoint)
+	assert.Equal(t, "GET", p2.Method)
+	assert.Equal(t, "/doc", p2.Backend[0].UrlPattern)
+	assert.Equal(t, "GET", p2.Backend[0].Method)
+	assert.Equal(t, "http://echo:1027", p2.Backend[0].Host[0])
+	assert.Empty(t, p2.ExtraConfig.AuthValidator)
 }
 
 func parseYaml(file string, v any) error {

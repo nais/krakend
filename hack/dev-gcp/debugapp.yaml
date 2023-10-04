@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   labels:
-    team: nais
+    team: plattformsikkerhet
   name: debug
 spec:
   maskinporten:
