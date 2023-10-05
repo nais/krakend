@@ -33,9 +33,4 @@ spec:
       method: GET
       backendHost: http://echo:1027
       backendPath: /doc
-      rateLimit:
-        maxRate: 10
-        clientMaxRate: 0
-        strategy: ip
-        capacity: 0
-        clientCapacity: 0
+

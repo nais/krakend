@@ -32,6 +32,16 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	assert.Equal(t, "GET", p.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p.Backend[0].Host[0])
 	assert.Equal(t, "org1:team1:krakend.app", p.ExtraConfig.AuthValidator.Scope[0])
+	assert.Equal(t, "https://test.maskinporten.no/jwk", p.ExtraConfig.AuthValidator.JwkUrl)
+	assert.Equal(t, "https://test.maskinporten.no/", p.ExtraConfig.AuthValidator.Issuer)
+	assert.Equal(t, "RS256", p.ExtraConfig.AuthValidator.Alg)
+	assert.Equal(t, 10, p.ExtraConfig.QosRatelimitRouter.MaxRate)
+	assert.Equal(t, 0, p.ExtraConfig.QosRatelimitRouter.ClientMaxRate)
+	assert.Equal(t, "ip", p.ExtraConfig.QosRatelimitRouter.Strategy)
+	assert.Equal(t, 0, p.ExtraConfig.QosRatelimitRouter.Capacity)
+	assert.Equal(t, 0, p.ExtraConfig.QosRatelimitRouter.ClientCapacity)
+	assert.Equal(t, "foo", p.InputQueryStrings[0])
+	assert.Equal(t, "bar", p.InputQueryStrings[1])
 
 	p2 := partials[1]
 	assert.Equal(t, "/doc", p2.Endpoint)
@@ -40,6 +50,7 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	assert.Equal(t, "GET", p2.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p2.Backend[0].Host[0])
 	assert.Empty(t, p2.ExtraConfig.AuthValidator)
+	assert.Empty(t, p2.ExtraConfig.QosRatelimitRouter)
 }
 
 func parseYaml(file string, v any) error {
