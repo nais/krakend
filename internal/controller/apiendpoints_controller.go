@@ -74,15 +74,15 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			Namespace: endpoints.Namespace,
 		}, k)
 		if err != nil {
-			return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
-		}
-
-		err = r.updateKrakendConfigMap(ctx, k)
-		if err != nil {
 			if !errors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
 			log.Debugf("krakend '%s' not found, nothing to do but remove finalizers", endpoints.Spec.KrakendInstance)
+		} else {
+			err = r.updateKrakendConfigMap(ctx, k)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 
 		if controllerutil.RemoveFinalizer(endpoints, KrakendFinalizer) {
