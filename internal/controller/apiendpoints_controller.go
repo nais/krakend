@@ -240,6 +240,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, nam
 
 	if !uniquePaths(list) {
 		//TODO: warn about duplicates
+		return nil, fmt.Errorf("Duplicate paths found in ApiEndpoints")
 	}
 
 	filtered := make([]krakendv1.ApiEndpoints, 0)
