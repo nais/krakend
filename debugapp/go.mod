@@ -3,7 +3,6 @@ module debugapp
 go 1.21.1
 
 require (
-	github.com/golangci/golangci-lint v1.54.2
 	github.com/lestrrat-go/jwx/v2 v2.0.13
 	github.com/sirupsen/logrus v1.9.3
 )
