@@ -1,0 +1,25 @@
+apiVersion: krakend.nais.io/v1
+kind: Krakend
+metadata:
+  name: gateway
+spec:
+  name: gateway
+  ingress:
+    enabled: true
+    className: "nais-ingress"
+    annotations: {}
+    hosts:
+      - host: gateway.intern.dev.nav.no
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+  ingressHost:
+  authProviders:
+    - name: mock-oauth2-server
+      alg: RS256
+      jwkUrl: "https://mock-oauth2-server.dev.dev-gcp.cloud.nais.io/debugger/jwks"
+      issuer: "https://mock-oauth2-server.dev.dev-gcp.cloud.nais.io/debugger"
+    - name: maskinporten
+      alg: RS256
+      jwkUrl: "https://test.maskinporten.no/jwk"
+      issuer: "https://test.maskinporten.no/"

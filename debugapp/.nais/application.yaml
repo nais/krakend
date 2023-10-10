@@ -1,0 +1,30 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    team: aura
+  name: debugapp-krakend
+spec:
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: "krakend.debugapp"
+          enabled: true
+          product: "aura"
+          allowedIntegrations:
+            - maskinporten
+          atMaxAge: 120
+          consumers:
+            - name: NAV
+              orgno: "889640782"
+  image: europe-north1-docker.pkg.dev/nais-io/nais/images/debugapp-krakend:2023-10-10-123943-3382e82
+  port: 8080
+  replicas:
+    max: 1
+    min: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+

@@ -1,0 +1,31 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: debugapp-krakend
+spec:
+  krakendInstance: gateway
+  appName: debugapp-krakend
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    scope:
+      - "nav:aura:krakend.debugapp"
+  endpoints:
+    - path: /fss/up
+      method: GET
+      forwardHeaders:
+        - Authorization
+      backendHost: https://up.dev-fss-pub.nais.io
+      backendPath: /
+    - path: /gcp/debugapp
+      method: GET
+      forwardHeaders:
+        - Authorization
+      backendHost: http://debugapp-krakend
+      backendPath: /
+  openEndpoints:
+    - path: /gcp/debugapp/doc
+      method: GET
+      backendHost: http://debugapp-krakend
+      backendPath: /doc

@@ -1,0 +1,12 @@
+apiVersion: nais.io/v1
+kind: MaskinportenClient
+metadata:
+  labels:
+    app: debugapp-krakend
+    team: aura
+  name: krakend-maskinporten-client
+spec:
+  scopes:
+    consumes:
+    - name: nav:aura:krakend.debugapp
+  secretName: krakend-maskinporten-client
