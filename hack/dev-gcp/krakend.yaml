@@ -9,7 +9,7 @@ spec:
     className: "nais-ingress"
     annotations: {}
     hosts:
-      - host: gateway.dev.dev-gcp.cloud.nais.io
+      - host: gateway.intern.dev.nav.no
         paths:
           - path: /
             pathType: ImplementationSpecific

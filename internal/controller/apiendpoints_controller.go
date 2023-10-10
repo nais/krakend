@@ -68,10 +68,19 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if endpoints.GetDeletionTimestamp() != nil {
 		log.Debugf("Resource %s is marked for deletion", endpoints.Name)
 
-		_, err := r.updateKrakendConfigMap(ctx, endpoints.Spec.KrakendInstance, endpoints.Namespace)
+		k := &krakendv1.Krakend{}
+		err := r.Get(ctx, types.NamespacedName{
+			Name:      endpoints.Spec.KrakendInstance,
+			Namespace: endpoints.Namespace,
+		}, k)
 		if err != nil {
-			log.Errorf("updating Krakend configmap: %v", err)
-			return ctrl.Result{}, err
+			return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
+		}
+
+		err = r.updateKrakendConfigMap(ctx, k)
+		if err != nil {
+			log.Debugf("updating Krakend configmap, nothing to do if not found: %v", err)
+			return ctrl.Result{}, client.IgnoreNotFound(err)
 		}
 
 		if controllerutil.RemoveFinalizer(endpoints, KrakendFinalizer) {
@@ -97,7 +106,15 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", endpoints.Status.SynchronizationHash != hash, r.needsSync(endpoints.Status.SynchronizationTimestamp.Time))
 	}
 
-	k, err := r.updateKrakendConfigMap(ctx, endpoints.Spec.KrakendInstance, endpoints.Namespace)
+	k := &krakendv1.Krakend{}
+	err = r.Get(ctx, types.NamespacedName{
+		Name:      endpoints.Spec.KrakendInstance,
+		Namespace: endpoints.Namespace,
+	}, k)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
+	}
+	err = r.updateKrakendConfigMap(ctx, k)
 	if err != nil {
 		log.Errorf("updating Krakend configmap: %v", err)
 		return ctrl.Result{}, err
@@ -207,40 +224,32 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 }
 
 // TODO: validate unique paths - maybe webhook?
-func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, name, namespace string) (*krakendv1.Krakend, error) {
-	k := &krakendv1.Krakend{}
-	err := r.Get(ctx, types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}, k)
-	if err != nil {
-		return nil, fmt.Errorf("get Krakend instance '%s': %v", name, err)
-	}
+func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend) error {
 
 	cm := &corev1.ConfigMap{}
 	cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
-	err = r.Get(ctx, types.NamespacedName{
+	err := r.Get(ctx, types.NamespacedName{
 		Name:      cmName,
 		Namespace: k.Namespace,
 	}, cm)
 	if err != nil {
-		return nil, fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
+		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 	}
 
 	key := "endpoints.tmpl"
 	ep := cm.Data[key]
 	if ep == "" {
-		return nil, fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
+		return fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
 	}
 
 	list := &krakendv1.ApiEndpointsList{}
 	if err = r.List(ctx, list, client.InNamespace(k.Namespace)); err != nil {
-		return nil, fmt.Errorf("list all ApiEndpoints: %v", err)
+		return fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
 	if !uniquePaths(list) {
 		//TODO: warn about duplicates
-		return nil, fmt.Errorf("Duplicate paths found in ApiEndpoints")
+		return fmt.Errorf("Duplicate paths found in ApiEndpoints")
 	}
 
 	filtered := make([]krakendv1.ApiEndpoints, 0)
@@ -252,21 +261,21 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, nam
 
 	allEndpoints, err := krakend.ToKrakendEndpoints(k, filtered)
 	if err != nil {
-		return nil, fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
+		return fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
 	}
 	partials, err := json.Marshal(allEndpoints)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	//TODO handle race conditions when updating configmap
 	cm.Data[key] = string(partials)
 	err = r.Update(ctx, cm)
 	if err != nil {
-		return nil, fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
+		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
 	}
 
-	return k, nil
+	return nil
 }
 
 func uniquePaths(list *krakendv1.ApiEndpointsList) bool {

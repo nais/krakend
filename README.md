@@ -14,7 +14,8 @@ TODOs:
   * https://github.com/nais/replicator/commit/f9197f779919924648d1c5586817db69ba399376
   * https://github.com/nais/replicator/pull/11
 * Investigate why RateLimit contains values when it's not defined - i.e. omitempty is not working
-
+* use podname as name of krakend instance container
+  * also for some reason linkerd (in dev-gcp) is added as the default container for logs  
 
 ## Development
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
