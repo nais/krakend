@@ -28,11 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.5.3
-        with:
-          sparse-checkout: debugapp
       - uses: nais/platform-build-push-sign@main
         id: build-push-sign
         with:
+          context: debugapp
+          dockerfile: debugapp/Dockerfile
           name: ${{ env.NAME }}
           google_service_account: ${{ env.SERVICE_ACCOUNT }}
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
