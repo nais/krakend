@@ -16,6 +16,7 @@ TODOs:
 * Investigate why RateLimit contains values when it's not defined - i.e. omitempty is not working
 * use podname as name of krakend instance container
   * also for some reason linkerd (in dev-gcp) is added as the default container for logs  
+* add metrics and alerts
 
 ## Development
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.

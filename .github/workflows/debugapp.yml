@@ -1,0 +1,37 @@
+name: Container Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - debugapp/**
+      - .github/workflows/debugapp.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_REPOSITORY: oci://europe-north1-docker.pkg.dev/nais-io/nais
+  SERVICE_ACCOUNT: gh-krakend
+  NAME: krakend-debugapp
+
+jobs:
+  build_push:
+    outputs:
+      version: ${{ steps.build-push-sign.outputs.version }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: Build and push to GAR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: nais/platform-build-push-sign@main
+        id: build-push-sign
+        with:
+          name: ${{ env.NAME }}
+          google_service_account: ${{ env.SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
+          push: true

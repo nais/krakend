@@ -12,10 +12,17 @@ spec:
     scope:
       - "nav:plattformsikkerhet:krakend.demo"
   endpoints:
-    - path: /ping
+    - path: /fss/up
+      method: GET
+      headers:
+        - Authorization
+      backendHost: https://up.dev-fss-pub.nais.io
+      backendPath: /
+    - path: /gcp/debugapp
       method: GET
       queryParams:
         - delay
+        - yolo
       backendHost: http://debug
       backendPath: /ping
   openEndpoints:
