@@ -32,7 +32,7 @@ jobs:
         id: build-push-sign
         with:
           name: ${{ env.NAME }}
-          dockerfile: debugapp
+          context: debugapp
           google_service_account: ${{ env.SERVICE_ACCOUNT }}
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
           push: true
