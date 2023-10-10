@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'debugapp/**'
+      - '.github/workflows/debugapp.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
