@@ -1,4 +1,4 @@
-name: Container Image
+name: Build and Push Debugapp Container Image
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - .github/workflows/debugapp.yml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-debugapp
   cancel-in-progress: true
 
 env:

@@ -66,6 +66,11 @@ func main() {
 		fmt.Fprintf(w, "ok for issuer %s and scope %v", token.Issuer(), scope)
 	})
 
+	http.HandleFunc("/doc", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "this is open documentation about this api")
+	})
+
 	fmt.Println("running @", bindAddr)
 	go func() {
 		log.Fatal((&http.Server{Addr: bindAddr}).ListenAndServe())
