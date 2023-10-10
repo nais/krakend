@@ -26,6 +26,7 @@ import (
 	"github.com/nais/krakend/internal/netpol"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/chartutil"
+	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 
@@ -111,6 +112,22 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		if resource.GetKind() == "Deployment" {
 			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
+			d := &v1.Deployment{}
+			err = runtime.DefaultUnstructuredConverter.FromUnstructured(resource.Object, d)
+			if err != nil {
+				return ctrl.Result{}, fmt.Errorf("converting unstructured to deployment: %w", err)
+			}
+
+			d.Spec.Template.Name = d.Name
+			if len(d.Spec.Template.Spec.Containers) == 1 {
+				d.Spec.Template.Spec.Containers[0].Name = d.Name
+			}
+
+			m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(d)
+			if err != nil {
+				return ctrl.Result{}, fmt.Errorf("converting deployment to unstructured: %w", err)
+			}
+			resource.Object = m
 		}
 
 		if resource.GetKind() == "ConfigMap" {
