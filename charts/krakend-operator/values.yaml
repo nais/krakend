@@ -42,12 +42,9 @@ controllerManager:
       repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
       tag: latest
     resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
       requests:
-        cpu: 10m
-        memory: 64Mi
+        cpu: 100m
+        memory: 256Mi
   replicas: 1
   serviceAccount:
     annotations: {}
