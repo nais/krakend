@@ -42,9 +42,12 @@ controllerManager:
       repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
       tag: latest
     resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 10m
+        memory: 64Mi
   replicas: 1
   serviceAccount:
     annotations: {}
@@ -55,4 +58,10 @@ metricsService:
     port: 8443
     protocol: TCP
     targetPort: https
+  type: ClusterIP
+webhookService:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
   type: ClusterIP

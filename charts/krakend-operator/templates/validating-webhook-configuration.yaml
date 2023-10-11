@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "krakend-operator.fullname" . }}-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "krakend-operator.fullname" . }}-serving-cert
+  labels:
+  {{- include "krakend-operator.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "krakend-operator.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
+      path: /validate-krakend-nais-io-v1-apiendpoints
+  failurePolicy: Fail
+  name: vapiendpoints.kb.io
+  rules:
+  - apiGroups:
+    - krakend.nais.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - apiendpoints
+  sideEffects: None

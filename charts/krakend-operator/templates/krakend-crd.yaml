@@ -3,6 +3,8 @@ kind: CustomResourceDefinition
 metadata:
   name: krakends.krakend.nais.io
   annotations:
+    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ include "krakend-operator.fullname"
+      . }}-serving-cert'
     controller-gen.kubebuilder.io/version: v0.13.0
   labels:
   {{- include "krakend-operator.labels" . | nindent 4 }}
