@@ -2,12 +2,10 @@ package main
 
 import (
 	"flag"
+	"github.com/nais/krakend/internal/helm"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
-
-	log "github.com/sirupsen/logrus"
-
-	"github.com/nais/krakend/internal/helm"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -125,12 +123,6 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ApiEndpoints")
 		os.Exit(1)
-	}
-	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err = (&krakendv1.ApiEndpoints{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "ApiEndpoints")
-			os.Exit(1)
-		}
 	}
 	//+kubebuilder:scaffold:builder
 

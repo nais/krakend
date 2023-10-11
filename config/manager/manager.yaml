@@ -81,8 +81,6 @@ spec:
             value: "true"
           - name: DEBUG
             value: "false"
-          - name: ENABLE_WEBHOOKS
-            value: "false"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -107,9 +105,12 @@ spec:
         # TODO(user): Configure the resources accordingly based on the project requirements.
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
         resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: 10m
+            memory: 64Mi
         volumeMounts:
           - mountPath: /var/config
             name: config
