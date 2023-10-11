@@ -1,0 +1,26 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: app3-endpoints
+spec:
+  krakendInstance: apigw1
+  appName: app3
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    audience:
+      - "yolo"
+  # scope:
+  #   - "scope1"
+  # TODO: api doc and swagger?
+  endpoints:
+    - path: /echo
+      method: GET
+      backendHost: http://echo:1027
+      backendPath: /
+    - path: /echo2
+      method: GET
+      backendHost: http://echo:1027
+      backendPath: /
+

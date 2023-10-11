@@ -36,6 +36,7 @@ controllerManager:
       runAsUser: 65532
     env:
       debug: "false"
+      enableWebhooks: "false"
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
       netpolEnabled: "true"
     image:
