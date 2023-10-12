@@ -9,12 +9,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
-
-// log is for logging in this package.
-var apiendpointslog = logf.Log.WithName("apiendpoints-resource")
 
 const (
 	MsgKrakendDoesNotExist = "the referenced KrakendInstance does not exist"

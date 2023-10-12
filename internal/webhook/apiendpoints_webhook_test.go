@@ -128,12 +128,6 @@ func krakend(krakend string) option {
 	}
 }
 
-func app(app string) option {
-	return func(o *options) {
-		o.App = app
-	}
-}
-
 func auth(auth string) option {
 	return func(o *options) {
 		o.Auth = auth
