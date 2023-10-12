@@ -10,9 +10,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-krakend-nais-io-v1-apiendpoints
+      path: /validate-apiendpoints
   failurePolicy: Fail
-  name: vapiendpoints.kb.io
+  name: apiendpoints.krakend.nais.io
   rules:
   - apiGroups:
     - krakend.nais.io

@@ -14,22 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package webhook
 
 import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/nais/krakend/api/v1"
 	"net"
 	"path/filepath"
 	"runtime"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	admissionv1 "k8s.io/api/admission/v1"
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 	//+kubebuilder:scaffold:imports
 	apimachineryruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
@@ -87,7 +88,7 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	scheme := apimachineryruntime.NewScheme()
-	err = AddToScheme(scheme)
+	err = v1.AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	err = admissionv1.AddToScheme(scheme)
@@ -113,8 +114,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&ApiEndpoints{}).SetupWebhookWithManager(mgr)
-	Expect(err).NotTo(HaveOccurred())
+	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: &ApiEndpointsValidator{Client: mgr.GetClient(), decoder: admission.NewDecoder(testEnv.Scheme)}})
 
 	//+kubebuilder:scaffold:webhook
 
