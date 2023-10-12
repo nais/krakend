@@ -13,16 +13,16 @@ func TestUniquePaths(t *testing.T) {
 	err := parseYaml("testdata/apiendpoints.yaml", endpointsList)
 	assert.NoError(t, err)
 
-	up := uniquePaths(endpointsList)
+	up := UniquePaths(endpointsList)
 	assert.NoError(t, up)
 
 	err = parseYaml("testdata/apiendpoints_dpaths_diff_app.yaml", endpointsList)
-	up = uniquePaths(endpointsList)
+	up = UniquePaths(endpointsList)
 	assert.NoError(t, err)
 	assert.Error(t, up)
 
 	err = parseYaml("testdata/apiendpoints_dpaths_same_app.yaml", endpointsList)
-	up = uniquePaths(endpointsList)
+	up = UniquePaths(endpointsList)
 	assert.NoError(t, err)
 	assert.Error(t, up)
 }

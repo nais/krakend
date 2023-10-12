@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func uniquePaths(list *krakendv1.ApiEndpointsList) error {
+func UniquePaths(list *krakendv1.ApiEndpointsList) error {
 
 	paths := make(map[string]string)
 	for _, e := range list.Items {
