@@ -249,9 +249,8 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
-	if !uniquePaths(list) {
-		//TODO: warn about duplicates
-		return fmt.Errorf("Duplicate paths found in ApiEndpoints")
+	if err := UniquePaths(list); err != nil {
+		return fmt.Errorf("validate unique paths: %v", err)
 	}
 
 	filtered := make([]krakendv1.ApiEndpoints, 0)
@@ -280,7 +279,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 	return nil
 }
 
-func uniquePaths(list *krakendv1.ApiEndpointsList) bool {
+func UniquePaths(list *krakendv1.ApiEndpointsList) error {
 
 	paths := make(map[string]string)
 	for _, e := range list.Items {
@@ -289,7 +288,7 @@ func uniquePaths(list *krakendv1.ApiEndpointsList) bool {
 				for _, p := range e.Spec.Endpoints {
 					if _, ok := paths[p.Path]; ok {
 						log.Warnf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return false
+						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
 					} else {
 						paths[p.Path] = e.Name
 					}
@@ -299,7 +298,7 @@ func uniquePaths(list *krakendv1.ApiEndpointsList) bool {
 				for _, p := range e.Spec.OpenEndpoints {
 					if _, ok := paths[p.Path]; ok {
 						log.Warnf("duplicate path %s in openEndpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return false
+						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
 					} else {
 						paths[p.Path] = e.Name
 					}
@@ -307,7 +306,7 @@ func uniquePaths(list *krakendv1.ApiEndpointsList) bool {
 			}
 		}
 	}
-	return true
+	return nil
 }
 
 func hashEndpoints(a krakendv1.ApiEndpointsSpec) (string, error) {

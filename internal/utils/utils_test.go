@@ -1,4 +1,4 @@
-package controller
+package utils
 
 import (
 	v1 "github.com/nais/krakend/api/v1"
@@ -13,16 +13,16 @@ func TestUniquePaths(t *testing.T) {
 	err := parseYaml("testdata/apiendpoints.yaml", endpointsList)
 	assert.NoError(t, err)
 
-	up := UniquePaths(endpointsList)
+	up := uniquePaths(endpointsList)
 	assert.NoError(t, up)
 
 	err = parseYaml("testdata/apiendpoints_dpaths_diff_app.yaml", endpointsList)
-	up = UniquePaths(endpointsList)
+	up = uniquePaths(endpointsList)
 	assert.NoError(t, err)
 	assert.Error(t, up)
 
 	err = parseYaml("testdata/apiendpoints_dpaths_same_app.yaml", endpointsList)
-	up = UniquePaths(endpointsList)
+	up = uniquePaths(endpointsList)
 	assert.NoError(t, err)
 	assert.Error(t, up)
 }
