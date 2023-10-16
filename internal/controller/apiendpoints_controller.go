@@ -24,6 +24,7 @@ import (
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/krakend"
 	"github.com/nais/krakend/internal/netpol"
+	"github.com/nais/krakend/internal/utils"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/networking/v1"
@@ -249,7 +250,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("list all ApiEndpoints: %v", err)
 	}
 
-	if err := UniquePaths(list); err != nil {
+	if err := utils.UniquePaths(list); err != nil {
 		return fmt.Errorf("validate unique paths: %v", err)
 	}
 
@@ -276,36 +277,6 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
 	}
 
-	return nil
-}
-
-func UniquePaths(list *krakendv1.ApiEndpointsList) error {
-
-	paths := make(map[string]string)
-	for _, e := range list.Items {
-		if e.GetDeletionTimestamp() == nil {
-			if len(e.Spec.Endpoints) > 0 {
-				for _, p := range e.Spec.Endpoints {
-					if _, ok := paths[p.Path]; ok {
-						log.Warnf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
-					} else {
-						paths[p.Path] = e.Name
-					}
-				}
-			}
-			if len(e.Spec.OpenEndpoints) > 0 {
-				for _, p := range e.Spec.OpenEndpoints {
-					if _, ok := paths[p.Path]; ok {
-						log.Warnf("duplicate path %s in openEndpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
-					} else {
-						paths[p.Path] = e.Name
-					}
-				}
-			}
-		}
-	}
 	return nil
 }
 
