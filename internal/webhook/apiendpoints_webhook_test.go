@@ -10,8 +10,8 @@ import (
 
 var _ = Describe("ApiEndpoints Validating Webhook", func() {
 	var (
-		created, fetched *v1.ApiEndpoints
-		k                *v1.Krakend
+		created, fetched, a *v1.ApiEndpoints
+		k                   *v1.Krakend
 	)
 
 	name := "valid"
@@ -33,6 +33,14 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			},
 			Status: v1.KrakendStatus{},
 		}
+		a = &v1.ApiEndpoints{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "existing",
+				Namespace: "default",
+			},
+			Spec: newApiEndpointSpec(paths("/preunique1", "/preunique2")),
+		}
+
 		// Add any setup steps that needs to be executed before each test
 		Expect(k8sClient.Create(ctx, k)).Should(Succeed())
 	})
@@ -82,8 +90,28 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgKrakendDoesNotExist)))
 		})
 
+		It("should create an object with unique paths within all apiendpoints objects successfully", func() {
+
+			Expect(k8sClient.Create(ctx, a)).Should(Succeed())
+
+			validMinSpec := newApiEndpointSpec(paths("/unique1", "/unique2"))
+			created = apiEndpoints(name, ns, validMinSpec)
+
+			Expect(k8sClient.Create(ctx, created)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, a)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, created)).Should(Succeed())
+		})
+
 		It("should fail to create an object with duplicate paths within all apiendpoints objects", func() {
-			// TODO
+			existingEndpoints := newApiEndpointSpec(paths("/duplicate", "/unique2"))
+			existing := apiEndpoints("app2", ns, existingEndpoints)
+			Expect(k8sClient.Create(ctx, existing)).Should(Succeed())
+
+			validMinSpec := newApiEndpointSpec(paths("/unique1", "/duplicate"))
+			created = apiEndpoints(name, ns, validMinSpec)
+
+			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
+			Expect(k8sClient.Delete(ctx, existing)).Should(Succeed())
 		})
 
 		It("should fail to create object if auth provider does not exist", func() {
@@ -110,7 +138,6 @@ func apiEndpoints(name, namespace string, spec v1.ApiEndpointsSpec) *v1.ApiEndpo
 type options struct {
 	Paths   []string
 	Krakend string
-	App     string
 	Auth    string
 }
 
@@ -150,9 +177,7 @@ func newApiEndpointSpec(opts ...option) v1.ApiEndpointsSpec {
 	if o.Krakend != "" {
 		a.KrakendInstance = o.Krakend
 	}
-	if o.App != "" {
-		a.AppName = o.App
-	}
+
 	if o.Auth != "" {
 		a.Auth = v1.Auth{
 			Name: o.Auth,

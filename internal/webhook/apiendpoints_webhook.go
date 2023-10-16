@@ -3,7 +3,8 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"github.com/nais/krakend/api/v1"
+	krakendv1 "github.com/nais/krakend/api/v1"
+	"github.com/nais/krakend/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,7 +35,7 @@ func (v *ApiEndpointsValidator) InjectDecoder(d *admission.Decoder) error {
 }
 
 func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	a := &v1.ApiEndpoints{}
+	a := &krakendv1.ApiEndpoints{}
 	err := v.decoder.Decode(req, a)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
@@ -45,8 +46,8 @@ func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Reques
 	return admission.Allowed("")
 }
 
-func (v *ApiEndpointsValidator) validate(ctx context.Context, a *v1.ApiEndpoints) error {
-	k := &v1.Krakend{}
+func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEndpoints) error {
+	k := &krakendv1.Krakend{}
 	err := v.Client.Get(ctx, types.NamespacedName{
 		Name:      a.Spec.KrakendInstance,
 		Namespace: a.Namespace,
@@ -64,10 +65,15 @@ func (v *ApiEndpointsValidator) validate(ctx context.Context, a *v1.ApiEndpoints
 		return err
 	}
 
-	return validateEndpoints(a.Spec.Endpoints)
+	el := &krakendv1.ApiEndpointsList{}
+	err = v.Client.List(ctx, el, client.InNamespace(k.Namespace))
+	if err != nil {
+		return fmt.Errorf("getting list of apiendpoints: %w", err)
+	}
+	return validateEndpointsList(el, a)
 }
 
-func validateAuth(k *v1.Krakend, auth v1.Auth) error {
+func validateAuth(k *krakendv1.Krakend, auth krakendv1.Auth) error {
 	found := false
 	for _, p := range k.Spec.AuthProviders {
 		if p.Name == auth.Name {
@@ -81,8 +87,24 @@ func validateAuth(k *v1.Krakend, auth v1.Auth) error {
 	return nil
 }
 
-func validateEndpoints(e []v1.Endpoint) error {
-	if len(e) > 0 && e[0].Path == "/duplicate" {
+func validateEndpointsList(el *krakendv1.ApiEndpointsList, e *krakendv1.ApiEndpoints) error {
+	endpointUpdated := false
+	for i := len(el.Items) - 1; i >= 0; i-- {
+		endpoint := el.Items[i]
+		// Delete updated apiEndpoints from existing list
+		if endpoint.Name == e.Name {
+			el.Items = append(el.Items[:i], el.Items[i+1:]...)
+			//add new apiEndpoints to list
+			el.Items = append(el.Items, *e)
+			endpointUpdated = true
+		}
+	}
+	if !endpointUpdated {
+		el.Items = append(el.Items, *e)
+	}
+
+	err := utils.UniquePaths(el)
+	if err != nil {
 		return fmt.Errorf(MsgPathDuplicate)
 	}
 	return nil
