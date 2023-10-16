@@ -91,7 +91,7 @@ func validateEndpointsList(el *krakendv1.ApiEndpointsList, e *krakendv1.ApiEndpo
 	endpointUpdated := false
 	for i := len(el.Items) - 1; i >= 0; i-- {
 		endpoint := el.Items[i]
-		// Delete updated apiEndpoints from existing list
+		// Delete the apiEndpoints that is about to be updated from existing list
 		if endpoint.Name == e.Name {
 			el.Items = append(el.Items[:i], el.Items[i+1:]...)
 			//add new apiEndpoints to list

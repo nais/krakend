@@ -38,7 +38,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 				Name:      "existing",
 				Namespace: "default",
 			},
-			Spec: newApiEndpointSpec(paths("/preunique1", "/preunique2")),
+			Spec: newApiEndpointSpec(paths("/before_each_unique1", "/before_each_unique2")),
 		}
 
 		// Add any setup steps that needs to be executed before each test
@@ -98,13 +98,19 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			created = apiEndpoints(name, ns, validMinSpec)
 
 			Expect(k8sClient.Create(ctx, created)).Should(Succeed())
+
+			fetched = &v1.ApiEndpoints{}
+			Eventually(func() error {
+				return k8sClient.Get(ctx, nname(created), fetched)
+			}).Should(Succeed())
+
 			Expect(k8sClient.Delete(ctx, a)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, created)).Should(Succeed())
 		})
 
 		It("should fail to create an object with duplicate paths within all apiendpoints objects", func() {
 			existingEndpoints := newApiEndpointSpec(paths("/duplicate", "/unique2"))
-			existing := apiEndpoints("app2", ns, existingEndpoints)
+			existing := apiEndpoints("existingapp-endpoints", ns, existingEndpoints)
 			Expect(k8sClient.Create(ctx, existing)).Should(Succeed())
 
 			validMinSpec := newApiEndpointSpec(paths("/unique1", "/duplicate"))
@@ -112,6 +118,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 
 			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
 			Expect(k8sClient.Delete(ctx, existing)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, created)).Should(Not(Succeed()))
 		})
 
 		It("should fail to create object if auth provider does not exist", func() {
