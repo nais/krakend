@@ -10,9 +10,32 @@ values:
     displayName: API server IP
     computed:
       template: '"{{ .Env.apiserver_endpoint }}"'
-  debug:
+  env.debug:
     description: Enable debug logging
     displayName: Debug
     config:
       type: bool
-
+  env.netpolEnabled:
+    displayName: Network policy enabled
+    computed:
+      template: '{{ ne .Kind "onprem" }}'
+  krakend.ingressDomain:
+    displayName: Krakend ingress domain
+    description: The domain to use for the ingress
+    config:
+      type: string
+  krakend.ingressClassName:
+    displayName: Krakend ingress class name
+    description: The class to use for the ingress
+    config:
+      type: string
+  krakend.maskinporten.jwkUrl:
+    displayName: Krakend Maskinporten JWK URL
+    description: The JWK URL to use for Maskinporten
+    config:
+      type: string
+  krakend.maskinporten.issuer:
+    displayName: Krakend Maskinporten issuer
+    description: The issuer to use for Maskinporten
+    config:
+      type: string

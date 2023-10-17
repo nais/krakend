@@ -1,3 +1,4 @@
+apiserverIP:
 krakend:
   ingressDomain: external.dev.dev-nais.cloud.nais.io
   ingressClassName: nais-ingress-external
