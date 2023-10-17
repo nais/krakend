@@ -1,3 +1,10 @@
+krakend:
+  ingressDomain: external.dev.dev-nais.cloud.nais.io
+  ingressClassName: nais-ingress-external
+  maskinporten:
+    jwkUrl: "https://test.maskinporten.no/jwk"
+    issuer: "https://test.maskinporten.no/"
+
 controllerManager:
   kubeRbacProxy:
     args:

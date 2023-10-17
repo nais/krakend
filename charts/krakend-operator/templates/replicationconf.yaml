@@ -1,0 +1,44 @@
+---
+apiVersion: nais.io/v1
+kind: ReplicationConfig
+metadata:
+  name: {{ include "krakend-operator.fullname" . }}
+  labels:
+    {{- include "krakend-operator.labels" . | nindent 4 }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # replicationconfig is considered part of the release.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  namespaceSelector:
+    matchExpressions:
+      - key: nais.io/krakend
+        operator: Exists
+  templateValues:
+    namespace:
+      labels:
+        - team
+  resources:
+    - template: |
+        apiVersion: krakend.nais.io/v1
+        kind: Krakend
+        metadata:
+          name: [[ .Values.team ]]
+        spec:
+          name: [[ .Values.team ]]
+          ingress:
+            enabled: true
+            className: "{{ .Values.krakend.ingressClassName }}"
+            annotations: {}
+            hosts:
+              - host: "[[ .Values.team ]]-gw.{{ .Values.krakend.ingressDomain }}"
+                paths:
+                  - path: /
+                    pathType: ImplementationSpecific
+          authProviders:
+            - name: maskinporten
+              alg: RS256
+              jwkUrl: "{{ .Values.krakend.maskinporten.jwkUrl }}"
+              issuer: "{{ .Values.krakend.maskinporten.issuer }}"

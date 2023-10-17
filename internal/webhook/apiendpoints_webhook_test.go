@@ -56,11 +56,13 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 	// test Kubernetes API server, which isn't the goal here.
 	Context("Create ApiEndpoints ", func() {
 
-		It("should create an object successfully", func() {
+		It("should create an object with unique paths within all apiendpoints objects successfully", func() {
+
+			Expect(k8sClient.Create(ctx, a)).Should(Succeed())
+
 			validMinSpec := newApiEndpointSpec(paths("/unique1", "/unique2"))
 			created = apiEndpoints(name, ns, validMinSpec)
 
-			By("creating a valid apiendpoints resource with unique paths")
 			Expect(k8sClient.Create(ctx, created)).Should(Succeed())
 
 			fetched = &v1.ApiEndpoints{}
@@ -68,9 +70,8 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 				return k8sClient.Get(ctx, nname(created), fetched)
 			}).Should(Succeed())
 
-			err := k8sClient.Delete(ctx, fetched)
-			Expect(err).Should(Succeed())
-
+			Expect(k8sClient.Delete(ctx, a)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, created)).Should(Succeed())
 		})
 
 		It("should fail to create an object with duplicate paths in same object", func() {
@@ -88,24 +89,6 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 
 			By("creating a valid apiendpoints resource where krakendinstance does not exist")
 			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgKrakendDoesNotExist)))
-		})
-
-		It("should create an object with unique paths within all apiendpoints objects successfully", func() {
-
-			Expect(k8sClient.Create(ctx, a)).Should(Succeed())
-
-			validMinSpec := newApiEndpointSpec(paths("/unique1", "/unique2"))
-			created = apiEndpoints(name, ns, validMinSpec)
-
-			Expect(k8sClient.Create(ctx, created)).Should(Succeed())
-
-			fetched = &v1.ApiEndpoints{}
-			Eventually(func() error {
-				return k8sClient.Get(ctx, nname(created), fetched)
-			}).Should(Succeed())
-
-			Expect(k8sClient.Delete(ctx, a)).Should(Succeed())
-			Expect(k8sClient.Delete(ctx, created)).Should(Succeed())
 		})
 
 		It("should fail to create an object with duplicate paths within all apiendpoints objects", func() {

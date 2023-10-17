@@ -1,17 +1,10 @@
 apiVersion: krakend.nais.io/v1
 kind: Krakend
 metadata:
-  labels:
-    app.kubernetes.io/name: krakend
-    app.kubernetes.io/instance: krakend-sample
-    app.kubernetes.io/part-of: krakend
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: krakend
   name: team1
 spec:
   name: team1
   ingress:
-    # set defaults if not set
     enabled: true
     className: "nais-ingress"
     annotations: {}
