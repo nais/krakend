@@ -9,7 +9,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"net/http"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -25,12 +27,10 @@ type ApiEndpointsValidator struct {
 	decoder *admission.Decoder
 }
 
-// implements admission.DecoderInjector.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (v *ApiEndpointsValidator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
+func (v *ApiEndpointsValidator) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	log.Infof("registering webhook server at /validate-apiendpoints")
+	v.decoder = admission.NewDecoder(mgr.GetScheme())
+	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: v})
 	return nil
 }
 

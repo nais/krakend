@@ -2,9 +2,8 @@ package main
 
 import (
 	"flag"
-	webhook2 "github.com/nais/krakend/internal/webhook"
+	"github.com/nais/krakend/internal/webhook"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -129,8 +128,10 @@ func main() {
 		os.Exit(1)
 	}
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		log.Infof("webhooks enabled, registering webhook server at /validate-apiendpoints")
-		mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: &webhook2.ApiEndpointsValidator{Client: mgr.GetClient()}})
+		if err = (&webhook.ApiEndpointsValidator{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ApiEndpoints")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 
