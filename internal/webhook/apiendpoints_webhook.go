@@ -23,13 +23,14 @@ const (
 //+kubebuilder:webhook:path=/validate-apiendpoints,mutating=false,failurePolicy=fail,sideEffects=None,groups=krakend.nais.io,resources=apiendpoints,verbs=create;update,versions=v1,name=apiendpoints.krakend.nais.io,admissionReviewVersions=v1
 
 type ApiEndpointsValidator struct {
-	Client  client.Client
+	client  client.Client
 	decoder *admission.Decoder
 }
 
 func (v *ApiEndpointsValidator) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	log.Infof("registering webhook server at /validate-apiendpoints")
 	v.decoder = admission.NewDecoder(mgr.GetScheme())
+	v.client = mgr.GetClient()
 	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: v})
 	return nil
 }
@@ -48,7 +49,7 @@ func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Reques
 
 func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEndpoints) error {
 	k := &krakendv1.Krakend{}
-	err := v.Client.Get(ctx, types.NamespacedName{
+	err := v.client.Get(ctx, types.NamespacedName{
 		Name:      a.Spec.KrakendInstance,
 		Namespace: a.Namespace,
 	}, k)
@@ -66,7 +67,7 @@ func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEn
 	}
 
 	el := &krakendv1.ApiEndpointsList{}
-	err = v.Client.List(ctx, el, client.InNamespace(k.Namespace))
+	err = v.client.List(ctx, el, client.InNamespace(k.Namespace))
 	if err != nil {
 		return fmt.Errorf("getting list of apiendpoints: %w", err)
 	}

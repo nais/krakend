@@ -114,7 +114,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: &ApiEndpointsValidator{Client: mgr.GetClient(), decoder: admission.NewDecoder(testEnv.Scheme)}})
+	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: &ApiEndpointsValidator{client: mgr.GetClient(), decoder: admission.NewDecoder(testEnv.Scheme)}})
 
 	//+kubebuilder:scaffold:webhook
 
