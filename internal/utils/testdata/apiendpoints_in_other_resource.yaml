@@ -1,0 +1,22 @@
+---
+metadata: {}
+items:
+  - kind: ApiEndpoints
+    apiVersion: krakend.nais.io/v1
+    metadata:
+      name: app3-endpoints
+      namespace: krakendtest
+    spec:
+      krakendInstance: apigw1
+      appName: app3
+      auth:
+        name: maskinporten
+        cache: true
+        debug: true
+        audience:
+          - yolo
+      endpoints:
+        - path: "/echo"
+          method: GET
+          backendHost: http://echo:1027
+          backendPath: "/"
