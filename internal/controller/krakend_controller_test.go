@@ -104,15 +104,11 @@ var _ = Describe("Krakend Controller", func() {
 
 			d := &v1.Deployment{}
 			Eventually(func() bool {
-
 				err := k8sClient.Get(ctx, types.NamespacedName{
 					Namespace: "default",
 					Name:      "team1-krakend",
 				}, d)
-				if err != nil {
-					return false
-				}
-				return true
+				return err == nil
 			}, timeout, interval).Should(BeTrue())
 		})
 	})

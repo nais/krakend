@@ -100,6 +100,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 
 	chart, err := helm.LoadChart(krakendChartPath)
+	Expect(err).ToNot(HaveOccurred())
 	err = (&KrakendReconciler{
 		Client:        k8sManager.GetClient(),
 		Scheme:        k8sManager.GetScheme(),
