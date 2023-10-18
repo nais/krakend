@@ -121,6 +121,9 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			d.Spec.Template.Name = d.Name
 			if len(d.Spec.Template.Spec.Containers) == 1 {
 				d.Spec.Template.Spec.Containers[0].Name = d.Name
+				existing := d.Spec.Template.Spec.Containers[0].Env
+				existing = append(existing, k.Spec.Deployment.ExtraEnvVars...)
+				d.Spec.Template.Spec.Containers[0].Env = existing
 			}
 			d.Spec.Template.Annotations["kubectl.kubernetes.io/default-container"] = d.Name
 

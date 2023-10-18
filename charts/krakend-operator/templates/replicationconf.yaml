@@ -41,3 +41,19 @@ spec:
               alg: RS256
               jwkUrl: "{{ .Values.krakend.maskinporten.jwkUrl }}"
               issuer: "{{ .Values.krakend.maskinporten.issuer }}"
+          {{- if .Values.krakend.webproxy }}
+          deployment:
+            extraEnvVars:
+              - name: HTTP_PROXY
+                value: http://webproxy.nais:8088
+              - name: http_proxy
+                value: http://webproxy.nais:8088
+              - name: HTTPS_PROXY
+                value: http://webproxy.nais:8088
+              - name: https_proxy
+                value: http://webproxy.nais:8088
+              - name: NO_PROXY
+                value: localhost,127.0.0.1,10.254.0.1,.local,.adeo.no,.nav.no,.aetat.no,.devillo.no,.oera.no,.nais.io,.aivencloud.com,.intern.dev.nav.no
+              - name: no_proxy
+                value: localhost,127.0.0.1,10.254.0.1,.local,.adeo.no,.nav.no,.aetat.no,.devillo.no,.oera.no,.nais.io,.aivencloud.com,.intern.dev.nav.no
+          {{- end }}

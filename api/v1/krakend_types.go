@@ -19,6 +19,7 @@ package v1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // KrakendSpec defines the desired state of Krakend
@@ -44,6 +45,9 @@ type KrakendDeployment struct {
 	ReplicaCount   int                         `json:"replicaCount,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
 	Image          Image                       `json:"image,omitempty"`
+	// ExtraEnv is a list of extra environment variables to add to the deployment
+	// +kubebuilder:validation:Optional
+	ExtraEnvVars []corev1.EnvVar `json:"extraEnvVars,omitempty"`
 }
 
 type Ingress struct {
@@ -99,4 +103,11 @@ type KrakendList struct {
 
 func init() {
 	SchemeBuilder.Register(&Krakend{}, &KrakendList{})
+}
+
+func (k *Krakend) NamespacedName() types.NamespacedName {
+	return types.NamespacedName{
+		Namespace: k.Namespace,
+		Name:      k.Name,
+	}
 }
