@@ -1,5 +1,8 @@
 krakend:
-  #krakend:
+  krakend:
+    env:
+      - name: USAGE_DISABLE
+        value: "1"
   replicaCount: 2
   podSecurityContext:
     seccompProfile:

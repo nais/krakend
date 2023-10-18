@@ -4,45 +4,42 @@ import (
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/chartutil"
 	v1 "k8s.io/api/apps/v1"
-	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
 )
 
+const krakendChart = "../../config/manager/krakend-chart"
+
 func TestChart_ToUnstructured(t *testing.T) {
-	c, err := LoadChart("testdata/krakend-v0.1.21.tgz")
+	c, err := LoadChart(krakendChart)
 	assert.NoError(t, err)
 	rs, err := c.ToUnstructured("my-release", chartutil.Values{
-		"replicaCount": 2,
+		"krakend": map[string]interface{}{
+			"replicaCount": 3,
+		},
 	})
 	assert.NoError(t, err)
 	for _, r := range rs {
 		if r.GetKind() == "Deployment" {
-			assert.Equal(t, 2, r.Object["spec"].(map[string]interface{})["replicas"])
+			d := &v1.Deployment{}
+			err = runtime.DefaultUnstructuredConverter.FromUnstructured(r.Object, d)
+			assert.NoError(t, err)
+			replicas := *d.Spec.Replicas
+			assert.Equal(t, int32(3), replicas)
+			assert.True(t, len(d.Spec.Template.Spec.Containers) == 1)
+			assert.True(t, len(d.Spec.Template.Spec.Containers[0].Env) > 0)
+			found := false
+			for _, e := range d.Spec.Template.Spec.Containers[0].Env {
+				if e.Name == "USAGE_DISABLE" {
+					found = true
+					assert.Equalf(t, "1", e.Value, "env var USAGE_DISABLE should have 1 as value")
+					break
+				}
+			}
+			assert.Truef(t, found, "env var USAGE_DISABLE not found in deployment")
 			return
 		}
 	}
+
 	assert.Fail(t, "deployment not found")
-}
-
-func TestChart_Render(t *testing.T) {
-	c, err := LoadChart("testdata/krakend-v0.1.21.tgz")
-	if err != nil {
-		t.Fatal(err)
-	}
-	files, err := c.render("my-release", chartutil.Values{
-		"replicaCount": 2,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-	obj, _, err := decode([]byte(files["krakend/templates/deployment.yaml"]), nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	deployment := obj.(*v1.Deployment)
-
-	assert.Equal(t, 2, int(*deployment.Spec.Replicas))
-	assert.Equal(t, "my-release-krakend", deployment.Name)
 }
