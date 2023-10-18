@@ -4,13 +4,6 @@ resources:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-configMapGenerator:
-- files:
-  - krakendinstaller-1.0.0.tgz
-  name: config
-generatorOptions:
-  disableNameSuffixHash: true
-
 images:
 - name: controller
   newName: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator

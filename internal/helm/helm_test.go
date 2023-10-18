@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const krakendChart = "../../config/manager/krakend-chart"
+const krakendChart = "../../charts/krakend"
 
 func TestChart_ToUnstructured(t *testing.T) {
 	c, err := LoadChart(krakendChart)

@@ -57,7 +57,7 @@ func TestControllers(t *testing.T) {
 	RunSpecs(t, "Controller Suite")
 }
 
-const krakendChartPath = "../../config/manager/krakend-chart"
+const krakendChartPath = "../../charts/krakend"
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))

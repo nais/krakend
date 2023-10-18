@@ -27,3 +27,4 @@ Dockerfile.cross
 /charts/testing/
 ignore/
 maskinporten
+/charts/testchart/
