@@ -3,7 +3,7 @@ kind: ApiEndpoints
 metadata:
   name: debug
 spec:
-  krakendInstance: gateway
+  krakendInstance: aura
   appName: debug
   auth:
     name: maskinporten
@@ -14,9 +14,9 @@ spec:
   endpoints:
     - path: /fss/up
       method: GET
-      headers:
+      forwardHeaders:
         - Authorization
-      backendHost: https://up.dev-fss-pub.nais.io
+      backendHost: https://aura-gw.dev-fss-pub.nais.io
       backendPath: /
     - path: /gcp/debugapp
       method: GET

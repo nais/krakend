@@ -17,6 +17,8 @@ TODOs:
 * use podname as name of krakend instance container
   * also for some reason linkerd (in dev-gcp) is added as the default container for logs  
 * add metrics and alerts
+* block calls to krakend.io for telemetry: ref fss which is blocked by fw: Unable to create the usage report client: Post "https://usage.krakend.io/session": dial tcp 142.250.74.179:443: connect: connection refused
+
 
 ## Development
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.

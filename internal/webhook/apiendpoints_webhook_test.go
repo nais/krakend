@@ -2,11 +2,14 @@ package webhook
 
 import (
 	"github.com/nais/krakend/api/v1"
-	"github.com/nais/krakend/internal/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/yaml"
+	"os"
+	"testing"
 )
 
 var _ = Describe("ApiEndpoints Validating Webhook", func() {
@@ -80,7 +83,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			created = apiEndpoints(name, ns, duplicatePaths)
 
 			By("creating an valid apiendpoints resource with duplicate paths")
-			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(utils.MsgPathDuplicate)))
+			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
 
 		})
 
@@ -100,7 +103,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			validMinSpec := newApiEndpointSpec(paths("/unique1", "/duplicate"))
 			created = apiEndpoints(name, ns, validMinSpec)
 
-			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(utils.MsgPathDuplicate)))
+			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
 			Expect(k8sClient.Delete(ctx, existing)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, created)).Should(Not(Succeed()))
 		})
@@ -115,6 +118,64 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 
 	})
 })
+
+func TestUniquePaths(t *testing.T) {
+	endpointsList := &v1.ApiEndpointsList{}
+	err := parseYaml("testdata/apiendpoints.yaml", endpointsList)
+	assert.NoError(t, err)
+
+	up := uniquePaths(endpointsList)
+	assert.NoError(t, up)
+
+	err = parseYaml("testdata/apiendpoints_dpaths_diff_app.yaml", endpointsList)
+	up = uniquePaths(endpointsList)
+	assert.NoError(t, err)
+	assert.Error(t, up)
+
+	err = parseYaml("testdata/apiendpoints_dpaths_same_app.yaml", endpointsList)
+	up = uniquePaths(endpointsList)
+	assert.NoError(t, err)
+	assert.Error(t, up)
+}
+
+func TestValidateEndpointsList(t *testing.T) {
+	apiendpoint := &v1.ApiEndpoints{}
+	err := parseYaml("testdata/apiendpoint.yaml", apiendpoint)
+	assert.NoError(t, err)
+
+	apiendpointsList := &v1.ApiEndpointsList{}
+	err = parseYaml("testdata/apiendpoints.yaml", apiendpointsList)
+	assert.NoError(t, err)
+
+	//Validate update of apiendpoint in same apiendpoints resource
+	err = validateEndpointsList(apiendpointsList, apiendpoint)
+	assert.NoError(t, err)
+
+	//Validate update/create of apiendpoint with duplicate path in a different apiendpoints resource
+	err = parseYaml("testdata/apiendpoints_in_other_resource.yaml", apiendpointsList)
+	assert.NoError(t, err)
+	err = validateEndpointsList(apiendpointsList, apiendpoint)
+	assert.Error(t, err)
+
+	//Validate update/create of apiendpoint with unique paths in different apiendpoints resources
+	apiendpoint.Spec.Endpoints[0].Path = "/unique"
+	err = validateEndpointsList(apiendpointsList, apiendpoint)
+	assert.NoError(t, err)
+
+}
+
+func parseYaml(file string, v any) error {
+	reader, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	decoder := yaml.NewYAMLOrJSONDecoder(reader, 4096)
+	err = decoder.Decode(v)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func apiEndpoints(name, namespace string, spec v1.ApiEndpointsSpec) *v1.ApiEndpoints {
 	return &v1.ApiEndpoints{

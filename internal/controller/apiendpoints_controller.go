@@ -24,7 +24,6 @@ import (
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/krakend"
 	"github.com/nais/krakend/internal/netpol"
-	"github.com/nais/krakend/internal/utils"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/networking/v1"
@@ -226,7 +225,6 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 	return nil
 }
 
-// TODO: validate unique paths - maybe webhook?
 func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend) error {
 
 	cm := &corev1.ConfigMap{}
@@ -248,10 +246,6 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 	list := &krakendv1.ApiEndpointsList{}
 	if err = r.List(ctx, list, client.InNamespace(k.Namespace)); err != nil {
 		return fmt.Errorf("list all ApiEndpoints: %v", err)
-	}
-
-	if err := utils.UniquePaths(list); err != nil {
-		return fmt.Errorf("validate unique paths: %v", err)
 	}
 
 	filtered := make([]krakendv1.ApiEndpoints, 0)
