@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"github.com/nais/krakend/api/v1"
+	"github.com/nais/krakend/internal/utils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,7 +80,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			created = apiEndpoints(name, ns, duplicatePaths)
 
 			By("creating an valid apiendpoints resource with duplicate paths")
-			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
+			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(utils.MsgPathDuplicate)))
 
 		})
 
@@ -99,7 +100,7 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 			validMinSpec := newApiEndpointSpec(paths("/unique1", "/duplicate"))
 			created = apiEndpoints(name, ns, validMinSpec)
 
-			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(MsgPathDuplicate)))
+			Expect(k8sClient.Create(ctx, created)).Should(MatchError(ContainSubstring(utils.MsgPathDuplicate)))
 			Expect(k8sClient.Delete(ctx, existing)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, created)).Should(Not(Succeed()))
 		})
