@@ -268,10 +268,6 @@ spec:
                 description: IngressHost is a shortcut for creating a single host
                   ingress with sane defaults, if Ingress is specified this is ignored
                 type: string
-              name:
-                type: string
-            required:
-            - name
             type: object
           status:
             description: KrakendStatus defines the observed state of Krakend

@@ -26,7 +26,6 @@ spec:
         metadata:
           name: [[ .Values.team ]]
         spec:
-          name: [[ .Values.team ]]
           ingress:
             enabled: true
             className: "{{ .Values.krakend.ingressClassName }}"

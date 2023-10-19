@@ -86,7 +86,7 @@ helm-generate: manifests kustomize helmify ## Generate Helm chart.
 	$(KUSTOMIZE) build config/default | $(HELMIFY) charts/krakend-operator
 
 .PHONY: helm-crds
-helm-crds: manifests kustomize helmify ## Generate Helm chart.
+helm-crds: generate manifests kustomize helmify ## Generate Helm chart.
 	$(KUSTOMIZE) build config/crd | $(HELMIFY) charts/krakend-operator-crds
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.

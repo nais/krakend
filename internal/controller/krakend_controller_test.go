@@ -41,9 +41,8 @@ func krakendResource(ns, name string, spec krakendv1.KrakendSpec) *krakendv1.Kra
 	}
 }
 
-func fullKrakendSpec(name string) krakendv1.KrakendSpec {
+func fullKrakendSpec() krakendv1.KrakendSpec {
 	return krakendv1.KrakendSpec{
-		Name:          name,
 		IngressHost:   "krakend.nais.io",
 		AuthProviders: []krakendv1.AuthProvider{},
 		Deployment: krakendv1.KrakendDeployment{
@@ -96,7 +95,7 @@ var _ = Describe("Krakend Controller", func() {
 		It("should create an Krakend installation successfully", func() {
 
 			ctx := context.Background()
-			created = krakendResource("default", "team1", fullKrakendSpec("team1"))
+			created = krakendResource("default", "team1", fullKrakendSpec())
 
 			actual := &krakendv1.Krakend{ObjectMeta: created.ObjectMeta}
 			Expect(k8sClient.Create(ctx, created)).Should(Succeed())
@@ -124,7 +123,7 @@ func TestRenderChart(t *testing.T) {
 	c, err := helm.LoadChart("testdata/krakend")
 	assert.NoError(t, err)
 
-	resources, err := c.ToUnstructured(k.Spec.Name, chartutil.Values{
+	resources, err := c.ToUnstructured(k.Name, chartutil.Values{
 		"krakend": values,
 	})
 	assert.NoError(t, err)

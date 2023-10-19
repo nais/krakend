@@ -234,7 +234,7 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend) error {
 
 	cm := &corev1.ConfigMap{}
-	cmName := fmt.Sprintf("%s-%s-%s", k.Spec.Name, "krakend", "partials")
+	cmName := fmt.Sprintf("%s-%s-%s", k.Name, "krakend", "partials")
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      cmName,
 		Namespace: k.Namespace,

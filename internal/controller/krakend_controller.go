@@ -83,7 +83,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", k.Status.SynchronizationHash != hash, r.needsSync(k.Status.SynchronizationTimestamp.Time))
 	}
 
-	releaseName := k.Spec.Name
+	releaseName := k.Name
 
 	values, err := prepareValues(k)
 	if err != nil {

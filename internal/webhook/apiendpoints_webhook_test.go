@@ -28,7 +28,6 @@ var _ = Describe("ApiEndpoints Validating Webhook", func() {
 				Namespace: "default",
 			},
 			Spec: v1.KrakendSpec{
-				Name: "default",
 				AuthProviders: []v1.AuthProvider{
 					{
 						Name: "maskinporten",
