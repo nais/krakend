@@ -53,7 +53,7 @@ type Auth struct {
 // ApiEndpointsSpec defines the desired state of ApiEndpoints
 type ApiEndpointsSpec struct {
 	// Krakend is the name of the Krakend instance in the cluster
-	Krakend string `json:"krakend" fake:"skip"`
+	Krakend string `json:"krakend,omitempty" fake:"skip"`
 	// AppName is the name of the API, e.g. name of the application or service
 	AppName       string     `json:"appName,omitempty" fake:"{appname}"`
 	Auth          Auth       `json:"auth,omitempty"`

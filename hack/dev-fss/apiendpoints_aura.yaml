@@ -3,7 +3,6 @@ kind: ApiEndpoints
 metadata:
   name: up
 spec:
-  krakend: aura
   appName: up
   auth:
     name: maskinporten

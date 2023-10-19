@@ -3,7 +3,6 @@ kind: ApiEndpoints
 metadata:
   name: fss-up
 spec:
-  krakend: aura
   appName: fss-up
   auth:
     name: maskinporten
@@ -16,7 +15,5 @@ spec:
       method: GET
       forwardHeaders:
         - Authorization
-      queryParams:
-        - yolo
       backendHost: https://aura-gw.dev-fss-pub.nais.io
       backendPath: /up

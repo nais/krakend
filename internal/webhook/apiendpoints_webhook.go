@@ -48,8 +48,14 @@ func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Reques
 
 func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEndpoints) error {
 	k := &krakendv1.Krakend{}
+
+	krakendName := a.Spec.Krakend
+	if krakendName == "" {
+		krakendName = a.Namespace
+	}
+
 	err := v.client.Get(ctx, types.NamespacedName{
-		Name:      a.Spec.Krakend,
+		Name:      krakendName,
 		Namespace: a.Namespace,
 	}, k)
 	if client.IgnoreNotFound(err) != nil {

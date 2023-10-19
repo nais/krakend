@@ -65,19 +65,24 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	krakendName := endpoints.Spec.Krakend
+	if krakendName == "" {
+		krakendName = endpoints.Namespace
+	}
+
 	if endpoints.GetDeletionTimestamp() != nil {
 		log.Debugf("Resource %s is marked for deletion", endpoints.Name)
 
 		k := &krakendv1.Krakend{}
 		err := r.Get(ctx, types.NamespacedName{
-			Name:      endpoints.Spec.Krakend,
+			Name:      krakendName,
 			Namespace: endpoints.Namespace,
 		}, k)
 		if err != nil {
 			if !errors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
-			log.Debugf("krakend '%s' not found, nothing to do but remove finalizers", endpoints.Spec.Krakend)
+			log.Debugf("krakend '%s' not found, nothing to do but remove finalizers", krakendName)
 		} else {
 			err = r.updateKrakendConfigMap(ctx, k)
 			if err != nil {
@@ -110,11 +115,11 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	k := &krakendv1.Krakend{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      endpoints.Spec.Krakend,
+		Name:      krakendName,
 		Namespace: endpoints.Namespace,
 	}, k)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.Krakend, err)
+		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", krakendName, err)
 	}
 	err = r.updateKrakendConfigMap(ctx, k)
 	if err != nil {
@@ -198,7 +203,11 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 		},
 	}
 
-	npName := fmt.Sprintf("%s-%s-%s", "allow", endpoints.Spec.Krakend, endpoints.Spec.AppName)
+	krakendName := endpoints.Spec.Krakend
+	if krakendName == "" {
+		krakendName = endpoints.Namespace
+	}
+	npName := fmt.Sprintf("%s-%s-%s", "allow", krakendName, endpoints.Spec.AppName)
 
 	np := &v1.NetworkPolicy{}
 	err = r.Get(ctx, types.NamespacedName{
