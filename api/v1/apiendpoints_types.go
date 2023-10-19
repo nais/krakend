@@ -21,30 +21,30 @@ import (
 )
 
 type Endpoint struct {
-	Path           string     `json:"path,omitempty"`
-	Method         string     `json:"method,omitempty"`
-	BackendHost    string     `json:"backendHost,omitempty"`
-	BackendPath    string     `json:"backendPath,omitempty"`
-	ForwardHeaders []string   `json:"forwardHeaders,omitempty"`
-	QueryParams    []string   `json:"queryParams,omitempty"`
+	Path           string     `json:"path,omitempty" fake:"{inputname}"`
+	Method         string     `json:"method,omitempty" fake:"GET"`
+	BackendHost    string     `json:"backendHost,omitempty" fake:"http://appname.namespace.svc.cluster.local"`
+	BackendPath    string     `json:"backendPath,omitempty" fake:"{inputname}"`
+	ForwardHeaders []string   `json:"forwardHeaders,omitempty" fake:"{word}" fakesize:"1"`
+	QueryParams    []string   `json:"queryParams,omitempty" fake:"{word}" fakesize:"1"`
 	RateLimit      *RateLimit `json:"rateLimit,omitempty"`
 }
 
 type RateLimit struct {
-	MaxRate        int    `json:"maxRate"`
-	ClientMaxRate  int    `json:"clientMaxRate"`
-	Strategy       string `json:"strategy"`
-	Capacity       int    `json:"capacity"`
-	ClientCapacity int    `json:"clientCapacity"`
+	MaxRate        int    `json:"maxRate" fake:"5"`
+	ClientMaxRate  int    `json:"clientMaxRate" fake:"{number:10,100}"`
+	Strategy       string `json:"strategy" fake:"ip"`
+	Capacity       int    `json:"capacity" fake:"1000"`
+	ClientCapacity int    `json:"clientCapacity" fake:"{number:10,100}"`
 }
 
 type Auth struct {
 	// Name is the name of the auth provider defined in the Krakend resource, e.g. maskinporten
-	Name     string   `json:"name"`
-	Cache    bool     `json:"cache,omitempty"`
-	Debug    bool     `json:"debug,omitempty"`
-	Audience []string `json:"audience,omitempty"`
-	Scope    []string `json:"scope,omitempty"`
+	Name     string   `json:"name" fake:"maskinporten"`
+	Cache    bool     `json:"cache,omitempty" fake:"true"`
+	Debug    bool     `json:"debug,omitempty" fake:"false"`
+	Audience []string `json:"audience,omitempty" fake:"{uuid}" fakesize:"1"`
+	Scope    []string `json:"scope,omitempty" fake:"{word}" fakesize:"1"`
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -52,13 +52,13 @@ type Auth struct {
 
 // ApiEndpointsSpec defines the desired state of ApiEndpoints
 type ApiEndpointsSpec struct {
-	// KrakendInstance is the name of the Krakend instance in the cluster
-	KrakendInstance string `json:"krakendInstance"`
+	// Krakend is the name of the Krakend instance in the cluster
+	Krakend string `json:"krakend" fake:"skip"`
 	// AppName is the name of the API, e.g. name of the application or service
-	AppName       string     `json:"appName,omitempty"`
+	AppName       string     `json:"appName,omitempty" fake:"{appname}"`
 	Auth          Auth       `json:"auth,omitempty"`
-	Endpoints     []Endpoint `json:"endpoints,omitempty"`
-	OpenEndpoints []Endpoint `json:"openEndpoints,omitempty"`
+	Endpoints     []Endpoint `json:"endpoints,omitempty" fakesize:"1"`
+	OpenEndpoints []Endpoint `json:"openEndpoints,omitempty" fakesize:"1"`
 }
 
 // ApiEndpointsStatus defines the observed state of ApiEndpoints

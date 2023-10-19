@@ -29,7 +29,7 @@ type KrakendSpec struct {
 	Ingress Ingress `json:"ingress,omitempty"`
 	// IngressHost is a shortcut for creating a single host ingress with sane defaults, if Ingress is specified this is ignored
 	IngressHost   string            `json:"ingressHost,omitempty"`
-	AuthProviders []AuthProvider    `json:"authProviders,omitempty"`
+	AuthProviders []AuthProvider    `json:"authProviders,omitempty" fakesize:"1"`
 	Deployment    KrakendDeployment `json:"deployment,omitempty"`
 }
 

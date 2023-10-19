@@ -219,15 +219,15 @@ func newApiEndpointSpec(opts ...option) v1.ApiEndpointsSpec {
 		opt(o)
 	}
 	a := v1.ApiEndpointsSpec{
-		KrakendInstance: "default",
-		AppName:         "default",
+		Krakend: "default",
+		AppName: "default",
 		Auth: v1.Auth{
 			Name: "maskinporten",
 		},
 	}
 
 	if o.Krakend != "" {
-		a.KrakendInstance = o.Krakend
+		a.Krakend = o.Krakend
 	}
 
 	if o.Auth != "" {

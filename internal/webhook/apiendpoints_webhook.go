@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	MsgKrakendDoesNotExist = "the referenced KrakendInstance does not exist"
+	MsgKrakendDoesNotExist = "the referenced Krakend does not exist"
 	MsgPathDuplicate       = "duplicate paths in apiendpoints resource"
 )
 
@@ -49,7 +49,7 @@ func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Reques
 func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEndpoints) error {
 	k := &krakendv1.Krakend{}
 	err := v.client.Get(ctx, types.NamespacedName{
-		Name:      a.Spec.KrakendInstance,
+		Name:      a.Spec.Krakend,
 		Namespace: a.Namespace,
 	}, k)
 	if client.IgnoreNotFound(err) != nil {

@@ -9,7 +9,7 @@ Bump the version of the krakend dependency in `Chart.yaml` and run `helm depende
 Run the following command to make sure the operator is using the new version:
 
 ```bash
-make krakend-package
+make helm
 ```
 
 ## Changing the krakend chart configuration
@@ -17,5 +17,5 @@ make krakend-package
 Do your updates in the values.yaml/templates and run the following command from the root of this repo:
 
 ```bash
-make krakend-package
+make helm
 ```

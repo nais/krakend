@@ -70,14 +70,14 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 		k := &krakendv1.Krakend{}
 		err := r.Get(ctx, types.NamespacedName{
-			Name:      endpoints.Spec.KrakendInstance,
+			Name:      endpoints.Spec.Krakend,
 			Namespace: endpoints.Namespace,
 		}, k)
 		if err != nil {
 			if !errors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
-			log.Debugf("krakend '%s' not found, nothing to do but remove finalizers", endpoints.Spec.KrakendInstance)
+			log.Debugf("krakend '%s' not found, nothing to do but remove finalizers", endpoints.Spec.Krakend)
 		} else {
 			err = r.updateKrakendConfigMap(ctx, k)
 			if err != nil {
@@ -110,11 +110,11 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	k := &krakendv1.Krakend{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      endpoints.Spec.KrakendInstance,
+		Name:      endpoints.Spec.Krakend,
 		Namespace: endpoints.Namespace,
 	}, k)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.KrakendInstance, err)
+		return ctrl.Result{}, fmt.Errorf("get Krakend instance '%s': %v", endpoints.Spec.Krakend, err)
 	}
 	err = r.updateKrakendConfigMap(ctx, k)
 	if err != nil {
@@ -192,7 +192,7 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 		},
 	}
 
-	npName := fmt.Sprintf("%s-%s-%s", "allow", endpoints.Spec.KrakendInstance, endpoints.Spec.AppName)
+	npName := fmt.Sprintf("%s-%s-%s", "allow", endpoints.Spec.Krakend, endpoints.Spec.AppName)
 
 	np := &v1.NetworkPolicy{}
 	err = r.Get(ctx, types.NamespacedName{
