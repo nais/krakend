@@ -1,6 +1,7 @@
 dependencies:
   - allOf:
     - cert-manager
+    - krakend-operator-crds
 environmentKinds:
   - tenant
   - legacy

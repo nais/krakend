@@ -44,8 +44,7 @@ help: ## Display this help.
 
 ##@ Development
 .PHONY: helm
-helm: manifests generate
-	cp ./config/crd/bases/* ./charts/krakend-operator/templates/
+helm:
 	helm package charts/krakend -d charts/krakend-operator
 
 .PHONY: manifests
@@ -85,6 +84,10 @@ run: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: helm-generate
 helm-generate: manifests kustomize helmify ## Generate Helm chart.
 	$(KUSTOMIZE) build config/default | $(HELMIFY) charts/krakend-operator
+
+.PHONY: helm-crds
+helm-crds: manifests kustomize helmify ## Generate Helm chart.
+	$(KUSTOMIZE) build config/crd | $(HELMIFY) charts/krakend-operator-crds
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64). However, you must enable docker buildKit for it.

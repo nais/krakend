@@ -1,0 +1,21 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: up
+spec:
+  krakend: aura
+  appName: up
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    # TODO: create scope for aura and add it here
+    scope:
+      - "nav:plattformsikkerhet:krakend.demo"
+  endpoints:
+    - path: /up
+      method: GET
+      forwardHeaders:
+        - Authorization
+      backendHost: http://up.aura.svc.nais.local
+      backendPath: /

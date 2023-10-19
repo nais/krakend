@@ -1,0 +1,22 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: fss-up
+spec:
+  krakend: aura
+  appName: fss-up
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    scope:
+      - "nav:plattformsikkerhet:krakend.demo"
+  endpoints:
+    - path: /fss/up
+      method: GET
+      forwardHeaders:
+        - Authorization
+      queryParams:
+        - yolo
+      backendHost: https://aura-gw.dev-fss-pub.nais.io
+      backendPath: /up

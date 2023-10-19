@@ -1,10 +1,11 @@
----
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  name: krakends.krakend.nais.io
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  name: krakends.krakend.nais.io
+  labels:
+  {{- include "krakend-operator-crds.labels" . | nindent 4 }}
 spec:
   group: krakend.nais.io
   names:
@@ -57,26 +58,25 @@ spec:
                   deploymentType:
                     type: string
                   extraEnvVars:
-                    description: ExtraEnv is a list of extra environment variables
-                      to add to the deployment
+                    description: ExtraEnv is a list of extra environment variables to
+                      add to the deployment
                     items:
                       description: EnvVar represents an environment variable present
                         in a Container.
                       properties:
                         name:
-                          description: Name of the environment variable. Must be a
-                            C_IDENTIFIER.
+                          description: Name of the environment variable. Must be a C_IDENTIFIER.
                           type: string
                         value:
                           description: 'Variable references $(VAR_NAME) are expanded
-                            using the previously defined environment variables in
-                            the container and any service environment variables. If
-                            a variable cannot be resolved, the reference in the input
-                            string will be unchanged. Double $$ are reduced to a single
-                            $, which allows for escaping the $(VAR_NAME) syntax: i.e.
-                            "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
-                            Escaped references will never be expanded, regardless
-                            of whether the variable exists or not. Defaults to "".'
+                            using the previously defined environment variables in the
+                            container and any service environment variables. If a variable
+                            cannot be resolved, the reference in the input string will
+                            be unchanged. Double $$ are reduced to a single $, which
+                            allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                            will produce the string literal "$(VAR_NAME)". Escaped references
+                            will never be expanded, regardless of whether the variable
+                            exists or not. Defaults to "".'
                           type: string
                         valueFrom:
                           description: Source for the environment variable's value.
@@ -103,18 +103,17 @@ spec:
                               x-kubernetes-map-type: atomic
                             fieldRef:
                               description: 'Selects a field of the pod: supports metadata.name,
-                                metadata.namespace, `metadata.labels[''<KEY>'']`,
-                                `metadata.annotations[''<KEY>'']`, spec.nodeName,
-                                spec.serviceAccountName, status.hostIP, status.podIP,
-                                status.podIPs.'
+                                metadata.namespace, `metadata.labels[''<KEY>'']`, `metadata.annotations[''<KEY>'']`,
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP, status.podIPs.'
                               properties:
                                 apiVersion:
-                                  description: Version of the schema the FieldPath
-                                    is written in terms of, defaults to "v1".
+                                  description: Version of the schema the FieldPath is
+                                    written in terms of, defaults to "v1".
                                   type: string
                                 fieldPath:
-                                  description: Path of the field to select in the
-                                    specified API version.
+                                  description: Path of the field to select in the specified
+                                    API version.
                                   type: string
                               required:
                               - fieldPath
@@ -134,8 +133,8 @@ spec:
                                   anyOf:
                                   - type: integer
                                   - type: string
-                                  description: Specifies the output format of the
-                                    exposed resources, defaults to "1"
+                                  description: Specifies the output format of the exposed
+                                    resources, defaults to "1"
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 resource:
@@ -146,8 +145,7 @@ spec:
                               type: object
                               x-kubernetes-map-type: atomic
                             secretKeyRef:
-                              description: Selects a key of a secret in the pod's
-                                namespace
+                              description: Selects a key of a secret in the pod's namespace
                               properties:
                                 key:
                                   description: The key of the secret to select from.  Must
@@ -189,19 +187,18 @@ spec:
                       requirements.
                     properties:
                       claims:
-                        description: "Claims lists the names of resources, defined
-                          in spec.resourceClaims, that are used by this container.
-                          \n This is an alpha field and requires enabling the DynamicResourceAllocation
-                          feature gate. \n This field is immutable. It can only be
-                          set for containers."
+                        description: "Claims lists the names of resources, defined in
+                          spec.resourceClaims, that are used by this container. \n This
+                          is an alpha field and requires enabling the DynamicResourceAllocation
+                          feature gate. \n This field is immutable. It can only be set
+                          for containers."
                         items:
                           description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                           properties:
                             name:
                               description: Name must match the name of one entry in
                                 pod.spec.resourceClaims of the Pod where this field
-                                is used. It makes that resource available inside a
-                                container.
+                                is used. It makes that resource available inside a container.
                               type: string
                           required:
                           - name
@@ -265,8 +262,8 @@ spec:
                     type: array
                 type: object
               ingressHost:
-                description: IngressHost is a shortcut for creating a single host
-                  ingress with sane defaults, if Ingress is specified this is ignored
+                description: IngressHost is a shortcut for creating a single host ingress
+                  with sane defaults, if Ingress is specified this is ignored
                 type: string
               name:
                 type: string
@@ -287,3 +284,9 @@ spec:
     storage: true
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

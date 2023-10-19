@@ -1,0 +1,8 @@
+apiVersion: v2
+name: krakend-operator-crds
+description: A Helm chart for Krakend Operator CRDs
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+sources:
+  - https://github.com/nais/krakend/tree/main/charts/krakend-operator-crds

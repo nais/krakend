@@ -90,14 +90,17 @@ jobs:
           version: "3.12.0"
       - name: Build Chart
         run: |-
-          sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/${{ env.NAME }}/Chart.yaml
-          cat charts/${{ env.NAME }}/Chart.yaml
-          helm package charts/${{ env.NAME }}
+          sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/krakend-operator/Chart.yaml
+          sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/krakend-operator-crds/Chart.yaml
+          
+          helm package charts/krakend-operator
+          helm package charts/krakend-operator-crds
       - name: Push Chart
         run: |-
-          helm push ${{ env.NAME }}*.tgz ${{ env.IMAGE_REPOSITORY }}
-          
-  rollout:
+          helm push krakend-operator-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
+          helm push krakend-operator-crds-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
+
+  rollout-controller:
     needs:
       - build_push
     runs-on: fasit-deploy
@@ -106,6 +109,17 @@ jobs:
     steps:
       - uses: nais/fasit-deploy@v2
         with:
-          chart: ${{ env.IMAGE_REPOSITORY }}/${{ env.NAME }}
+          chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator
           version: ${{ needs.build_push.outputs.version }}
-          feature_name: ${{ env.NAME }}
+
+  rollout-crds:
+    needs:
+      - build_push
+    runs-on: fasit-deploy
+    permissions:
+      id-token: write
+    steps:
+      - uses: nais/fasit-deploy@v2
+        with:
+          chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator-crds
+          version: ${{ needs.build_push.outputs.version }}
