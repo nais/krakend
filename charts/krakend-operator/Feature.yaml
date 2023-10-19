@@ -10,15 +10,19 @@ values:
     displayName: API server IP
     computed:
       template: '"{{ .Env.apiserver_endpoint }}"'
-  env.debug:
+  controllerManager.manager.env.debug:
     description: Enable debug logging
     displayName: Debug
     config:
       type: bool
-  env.netpolEnabled:
+  controllerManager.manager.env.netpolEnabled:
     displayName: Network policy enabled
     computed:
       template: '{{ ne .Kind "onprem" }}'
+  krakend.webproxy:
+    displayName: Use webproxy for krakend
+    computed:
+      template: '{{ eq .Kind "onprem" }}'
   krakend.ingressDomain:
     displayName: Krakend ingress domain
     description: The domain to use for the ingress

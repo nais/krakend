@@ -1,5 +1,6 @@
 apiserverIP:
 krakend:
+  webproxy: false
   ingressDomain: external.dev.dev-nais.cloud.nais.io
   ingressClassName: nais-ingress-external
   maskinporten:
