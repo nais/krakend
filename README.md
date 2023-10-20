@@ -13,6 +13,37 @@ Currently, the operator supports the following custom resources:
 
 The operator is built using the [Kubebuilder](https://book.kubebuilder.io/) framework.
 
+```mermaid
+graph LR
+    subgraph Kubernetes
+        subgraph krakend-system
+            krakend-operator[krakend-operator]
+        end
+
+        subgraph my-namespace
+            krakend[Krakend]
+            a1[ApiEndpoints]
+            a2[ApiEndpoints]
+            a3[ApiEndpoints...]
+
+            deployment[Deployment]
+            config[ConfigMap]
+        end
+    end
+
+    krakend-operator -- manages --> krakend
+    krakend-operator -- manages --> a1
+    krakend-operator -- manages --> a2
+    krakend-operator -- manages --> a3
+    krakend -..-> deployment
+    krakend -..-> config
+    a1 -..-> config
+    a2 -..-> config
+    a3 -..-> config
+    deployment -- uses --> config
+
+```
+
 ### Krakend Kind
 
 The purpose of the `Krakend` kind is to install and manage the KrakenD API Gateway in a namespace. 
