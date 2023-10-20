@@ -1,36 +1,36 @@
 apiVersion: krakend.nais.io/v1
 kind: ApiEndpoints
 metadata:
-  name: app1-endpoints
+  name: app1
 spec:
-  krakendInstance: apigw1
+  krakend: namespace1
   appName: app1
   auth:
     name: maskinporten
     cache: true
     debug: true
+    audience:
+      - "audience1"
     scope:
-      - "org1:team1:krakend.app"
+      - "scope1"
   rateLimit:
     maxRate: 10
     clientMaxRate: 0
     strategy: ip
     capacity: 0
     clientCapacity: 0
-  # TODO: api doc and swagger?
   endpoints:
-    - path: /echo
+    - path: /app1/somepath
       method: GET
-      backendHost: http://echo:1027
-      backendPath: /
       forwardHeaders:
-        - X-Forwarded-For
+        - Authorization
       queryParams:
         - foo
         - bar
+      backendHost: http://app1
+      backendPath: /api/somepath
   openEndpoints:
-    - path: /doc
+    - path: /app1/doc
       method: GET
-      backendHost: http://echo:1027
+      backendHost: http://app1
       backendPath: /doc
-

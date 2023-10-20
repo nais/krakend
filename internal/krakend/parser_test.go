@@ -50,7 +50,6 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	assert.Equal(t, "GET", p2.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p2.Backend[0].Host[0])
 	assert.Empty(t, p2.ExtraConfig.AuthValidator)
-	assert.Empty(t, p2.ExtraConfig.QosRatelimitRouter)
 }
 
 func parseYaml(file string, v any) error {

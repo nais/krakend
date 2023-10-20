@@ -35,15 +35,24 @@ spec:
             description: KrakendSpec defines the desired state of Krakend
             properties:
               authProviders:
+                description: AuthProviders is a list of supported auth providers to
+                  be used in ApiEndpoints
                 items:
+                  description: AuthProvider defines the configuration for an JWT auth
+                    provider
                   properties:
                     alg:
+                      description: Alg is the algorithm used for signing the JWT token,
+                        e.g. RS256
                       type: string
                     issuer:
+                      description: Issuer is the issuer of the JWT token
                       type: string
                     jwkUrl:
+                      description: JwkUrl is the URL to the JWKs for the auth provider
                       type: string
                     name:
+                      description: Name is the name of the auth provider, e.g. maskinporten
                       type: string
                   required:
                   - alg
@@ -53,11 +62,14 @@ spec:
                   type: object
                 type: array
               deployment:
+                description: Deployment defines configuration for the KrakenD deployment
                 properties:
                   deploymentType:
+                    description: DeploymentType is the type of deployment to use,
+                      either deployment or rollout
                     type: string
                   extraEnvVars:
-                    description: ExtraEnv is a list of extra environment variables
+                    description: ExtraEnvVars is a list of extra environment variables
                       to add to the deployment
                     items:
                       description: EnvVar represents an environment variable present
@@ -172,21 +184,29 @@ spec:
                       type: object
                     type: array
                   image:
+                    description: Image is the image configuration to use for the deployment
                     properties:
                       pullPolicy:
+                        description: PullPolicy is the pull policy to use for the
+                          image
                         type: string
                       registry:
+                        description: Registry is the registry to use for the image
                         type: string
                       repository:
+                        description: Repository is the repository to use for the image
                         type: string
                       tag:
+                        description: Tag is the tag to use for the image
                         type: string
                     type: object
                   replicaCount:
+                    description: ReplicaCount is the number of replicas to use for
+                      the deployment
                     type: integer
                   resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
+                    description: Resources is the resource requirements for the deployment,
+                      as in corev1.ResourceRequirements
                     properties:
                       claims:
                         description: "Claims lists the names of resources, defined
@@ -242,22 +262,37 @@ spec:
                   annotations:
                     additionalProperties:
                       type: string
+                    description: Annotations is a list of annotations to add to the
+                      ingress
                     type: object
                   className:
+                    description: Class is the ingress class to use for the Krakend
+                      instance
                     type: string
                   enabled:
+                    description: Enabled is whether to enable ingress for the Krakend
+                      instance
                     type: boolean
                   hosts:
+                    description: Hosts is a list of hosts to add to the ingress
                     items:
+                      description: Host defines the host configuration for an ingress
                       properties:
                         host:
+                          description: Host is the host name to add to the ingress
                           type: string
                         paths:
+                          description: Paths is a list of paths to add to the ingress
                           items:
+                            description: Path defines the path configuration for an
+                              ingress
                             properties:
                               path:
+                                description: Path is the path to add to the ingress
                                 type: string
                               pathType:
+                                description: PathType is the path type to add to the
+                                  ingress
                                 type: string
                             type: object
                           type: array

@@ -1,0 +1,15 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: app1
+spec:
+  appName: app1
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+  endpoints:
+    - path: /app1/somepath
+      method: GET
+      backendHost: http://app1
+      backendPath: /api/somepath

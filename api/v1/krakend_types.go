@@ -1,19 +1,3 @@
-/*
-Copyright 2023.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package v1
 
 import (
@@ -27,49 +11,76 @@ type KrakendSpec struct {
 	// Ingress lets you configure the ingress class, annotations and hosts or tls for an ingress
 	Ingress Ingress `json:"ingress,omitempty"`
 	// IngressHost is a shortcut for creating a single host ingress with sane defaults, if Ingress is specified this is ignored
-	IngressHost   string            `json:"ingressHost,omitempty"`
-	AuthProviders []AuthProvider    `json:"authProviders,omitempty" fakesize:"1"`
-	Deployment    KrakendDeployment `json:"deployment,omitempty"`
+	IngressHost string `json:"ingressHost,omitempty"`
+	// AuthProviders is a list of supported auth providers to be used in ApiEndpoints
+	AuthProviders []AuthProvider `json:"authProviders,omitempty" fakesize:"1"`
+	// Deployment defines configuration for the KrakenD deployment
+	Deployment KrakendDeployment `json:"deployment,omitempty"`
 }
 
+// AuthProvider defines the configuration for an JWT auth provider
 type AuthProvider struct {
-	Name   string `json:"name"`
-	Alg    string `json:"alg"`
+	// Name is the name of the auth provider, e.g. maskinporten
+	Name string `json:"name"`
+	// Alg is the algorithm used for signing the JWT token, e.g. RS256
+	Alg string `json:"alg"`
+	// JwkUrl is the URL to the JWKs for the auth provider
 	JwkUrl string `json:"jwkUrl"`
+	// Issuer is the issuer of the JWT token
 	Issuer string `json:"issuer"`
 }
 
+// KrakendDeployment defines the configuration for the KrakenD deployment
 type KrakendDeployment struct {
-	DeploymentType string                      `json:"deploymentType,omitempty"`
-	ReplicaCount   int                         `json:"replicaCount,omitempty"`
-	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
-	Image          Image                       `json:"image,omitempty"`
-	// ExtraEnv is a list of extra environment variables to add to the deployment
-	// +kubebuilder:validation:Optional
+	// DeploymentType is the type of deployment to use, either deployment or rollout
+	DeploymentType string `json:"deploymentType,omitempty"`
+	// ReplicaCount is the number of replicas to use for the deployment
+	ReplicaCount int `json:"replicaCount,omitempty"`
+	// Resources is the resource requirements for the deployment, as in corev1.ResourceRequirements
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+	// Image is the image configuration to use for the deployment
+	Image Image `json:"image,omitempty"`
+	// ExtraEnvVars is a list of extra environment variables to add to the deployment
 	ExtraEnvVars []corev1.EnvVar `json:"extraEnvVars,omitempty"`
 }
 
+// Ingress defines the ingress configuration
 type Ingress struct {
-	Enabled     bool              `json:"enabled,omitempty"`
-	ClassName   string            `json:"className,omitempty"`
+	// Enabled is whether to enable ingress for the Krakend instance
+	Enabled bool `json:"enabled,omitempty"`
+	// Class is the ingress class to use for the Krakend instance
+	ClassName string `json:"className,omitempty"`
+	// Annotations is a list of annotations to add to the ingress
 	Annotations map[string]string `json:"annotations,omitempty"`
-	Hosts       []Host            `json:"hosts,omitempty"`
+	// Hosts is a list of hosts to add to the ingress
+	Hosts []Host `json:"hosts,omitempty"`
 }
 
+// Host defines the host configuration for an ingress
 type Host struct {
-	Host  string `json:"host,omitempty"`
+	// Host is the host name to add to the ingress
+	Host string `json:"host,omitempty"`
+	// Paths is a list of paths to add to the ingress
 	Paths []Path `json:"paths,omitempty"`
 }
 
+// Path defines the path configuration for an ingress
 type Path struct {
-	Path     string `json:"path,omitempty"`
+	// Path is the path to add to the ingress
+	Path string `json:"path,omitempty"`
+	// PathType is the path type to add to the ingress
 	PathType string `json:"pathType,omitempty"`
 }
 
+// Image defines the image configuration for the Krakend deployment
 type Image struct {
-	Registry   string `json:"registry,omitempty"`
+	// Registry is the registry to use for the image
+	Registry string `json:"registry,omitempty"`
+	// Repository is the repository to use for the image
 	Repository string `json:"repository,omitempty"`
-	Tag        string `json:"tag,omitempty"`
+	// Tag is the tag to use for the image
+	Tag string `json:"tag,omitempty"`
+	// PullPolicy is the pull policy to use for the image
 	PullPolicy string `json:"pullPolicy,omitempty"`
 }
 

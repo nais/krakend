@@ -1,5 +1,0 @@
-## Append samples of your project ##
-resources:
-- krakend_v1_krakend.yaml
-- krakend_v1_apiendpoints.yaml
-#+kubebuilder:scaffold:manifestskustomizesamples

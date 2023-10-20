@@ -21,7 +21,10 @@ spec:
   deployment:
     replicaCount: 2
     image:
-      tag: 2.4.3
+      registry: docker.io
+      repository: devopsfaith/krakend
+      tag: "2.4.3"
+      pullPolicy: IfNotPresent
     resources:
       limits:
         cpu: 100m
@@ -29,5 +32,6 @@ spec:
       requests:
         cpu: 100m
         memory: 128Mi
-
-
+    extraEnvVars:
+      - name: MY_ENV_VAR
+        value: "my-value"

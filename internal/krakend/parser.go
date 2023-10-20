@@ -67,6 +67,7 @@ func parseKrakendEndpointsSpec(k *v1.Krakend, spec v1.ApiEndpointsSpec) ([]*Endp
 	endpoints := make([]*Endpoint, 0)
 
 	auth, err := findAuthProvider(k, &spec.Auth)
+	rateLimit := spec.RateLimit
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +75,13 @@ func parseKrakendEndpointsSpec(k *v1.Krakend, spec v1.ApiEndpointsSpec) ([]*Endp
 	for _, e := range spec.Endpoints {
 		endpoint := parseEndpoint(e)
 		endpoint.ExtraConfig.AuthValidator = auth
+		endpoint.ExtraConfig.QosRatelimitRouter = parseRateLimit(rateLimit)
 		endpoints = append(endpoints, endpoint)
 	}
 	for _, e := range spec.OpenEndpoints {
 		endpoint := parseEndpoint(e)
+		endpoint.ExtraConfig = &ExtraConfig{}
+		endpoint.ExtraConfig.QosRatelimitRouter = parseRateLimit(rateLimit)
 		endpoints = append(endpoints, endpoint)
 	}
 	return endpoints, nil
@@ -102,17 +106,21 @@ func parseEndpoint(e v1.Endpoint) *Endpoint {
 	}
 
 	extraCfg := &ExtraConfig{}
-	if e.RateLimit != nil { //(v1.RateLimit{}) {
-		extraCfg.QosRatelimitRouter = &QosRatelimitRouter{
-			MaxRate:        e.RateLimit.MaxRate,
-			ClientMaxRate:  e.RateLimit.ClientMaxRate,
-			Strategy:       e.RateLimit.Strategy,
-			Capacity:       e.RateLimit.Capacity,
-			ClientCapacity: e.RateLimit.ClientCapacity,
-		}
-	}
 	endpoint.ExtraConfig = extraCfg
 	return endpoint
+}
+
+func parseRateLimit(r *v1.RateLimit) *QosRatelimitRouter {
+	if r == nil {
+		return nil
+	}
+	return &QosRatelimitRouter{
+		MaxRate:        r.MaxRate,
+		ClientMaxRate:  r.ClientMaxRate,
+		Strategy:       r.Strategy,
+		Capacity:       r.Capacity,
+		ClientCapacity: r.ClientCapacity,
+	}
 }
 
 func findAuthProvider(k *v1.Krakend, auth *v1.Auth) (*AuthValidator, error) {

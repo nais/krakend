@@ -1,30 +1,135 @@
-# krakend
-// TODO(user): Add simple overview of use/purpose
+# krakend-operator
+
+Kubernetes operator for installing and managing [KrakenD](https://www.krakend.io/) - an open-source API Gateway - in kubernetes namespaces.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+The operator's main purpose is two-fold:
+* installing and managing the KrakenD API Gateway in kubernetes namespaces
+* managing the configuration of the KrakenD API Gateway, i.e. the APIs that will be exposed through the gateway
 
-## Status
-TODOs:
-* Add webhook for crd validation
-* Validate that the paths in apiendpoints are unique within one krakendinstance
-* Test cases
-* Setup test chain: internett -> dev-gcp -> dev-fss
-* Only update krakend (unstructured) resources if the spec has changed - see nais/replicator for inspiration
-  * https://github.com/nais/replicator/commit/f9197f779919924648d1c5586817db69ba399376
-  * https://github.com/nais/replicator/pull/11
-* Investigate why RateLimit contains values when it's not defined - i.e. omitempty is not working
-* use podname as name of krakend instance container
-  * also for some reason linkerd (in dev-gcp) is added as the default container for logs  
-* add metrics and alerts
-* block calls to krakend.io for telemetry: ref fss which is blocked by fw: Unable to create the usage report client: Post "https://usage.krakend.io/session": dial tcp 142.250.74.179:443: connect: connection refused
+Currently, the operator supports the following custom resources:
+* `Krakend` for installing and updating the KrakenD API Gateway in the namespace by utilizing the [KrakenD Helm chart](https://www.krakend.io/docs/deploying/kubernetes/#helm-chart)
+* `ApiEndpoints` for adding APIs to KrakenD configuration providing sane defaults such as authentication and rate limiting
 
+The operator is built using the [Kubebuilder](https://book.kubebuilder.io/) framework.
+
+### Krakend Kind
+
+The purpose of the `Krakend` kind is to install and manage the KrakenD API Gateway in a namespace. 
+
+Currently the operator support the following features:
+
+* common authentication provider config which can be used across multiple API endpoints
+* configuration of ingress settings such as ingress class and annotations
+* control aspects of the deployment, such as number of replicas, resource requirements, krakend image, or extra environment variables
+
+The following example will create a deployment with 2 replicas for krakend in the namespace `my-namespace` with an ingress of `https://my-namespace.nais.io`:
+
+```yaml
+
+apiVersion: krakend.nais.io/v1
+kind: Krakend
+metadata:
+  name: my-namespace
+  namespace: my-namespace
+spec:
+  ingress:
+    enabled: true
+    className: your-ingress-class
+    annotations: {}
+    hosts:
+      - host: my-namespace.nais.io
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+  authProviders:
+    - name: some-jwt-auth-provider # this name will be used in the api endpoint config
+      alg: RS256
+      jwkUrl: https://the-jwk-url
+      issuer: https://the-jwt-issuer
+  deployment:
+    replicaCount: 2
+    image:
+      tag: 2.4.3
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+```
+
+For more details take a look at the [samples](./config/samples/) directory or the CRD definition [here](./config/crd/bases/krakend.nais.io_krakends.yaml).
+
+### ApiEndpoints Kind
+
+The purpose of the `ApiEndpoints` kind is to add APIs to the KrakenD configuration. 
+The [configuration](https://www.krakend.io/docs/endpoints/) of API endpoints in KrakenD is quite flexible and complex, so the `ApiEndpoints` kind is created as an abstraction to simplify 
+and provide sane defaults for common use cases. 
+
+In KrakenD you can specify features such as authentication and rate limiting on a per-endpoint basis, we have chosen to specify these features on a per-app basis.
+
+The `ApiEndpoints` resource splits the configuration of an app's API endpoints into two parts:
+
+* `endpoints` - secure API endpoints requiring authentication
+* `openEndpoints` - open API endpoints not requiring authentication, .e.g. documentation or OpenAPI specs
+
+Currently we support the following KrakenD features:
+* [JWT validation](https://www.krakend.io/docs/authorization/jwt-validation/): authentication for a secured endpoint is defined by specifying the name of an authentication provider defined in the `Krakend` resource.
+* [Rate-limiting](https://www.krakend.io/docs/endpoints/rate-limit/): if rate-limiting is defined it is applied to all `endpoints` and `openEndpoints` defined in the `ApiEndpoints` resource.
+
+Note: There are some strict requirements on specifying paths, query params and headers in KrakenD, see [here](https://www.krakend.io/docs/endpoints/) and the [ApiEndpoints CRD](./config/crd/bases/krakend.nais.io_apiendpoints.yaml) for details.
+
+The following example will expose two API endpoints requiring authentication and one open endpoint for the app `app1` in the namespace `my-namespace` using a common rate-limiting configuration:
+
+```yaml
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: app1
+  namespace: my-namespace
+spec:
+  appName: app1
+  auth:
+    name: some-jwt-auth-provider
+    cache: true
+    debug: true
+    audience:
+      - "audience1"
+    scope:
+      - "scope1"
+      
+  rateLimit:
+    maxRate: 10
+    clientMaxRate: 0
+    strategy: ip
+    capacity: 0
+    clientCapacity: 0
+    
+  endpoints:
+    - path: /echo-service
+      method: GET
+      backendHost: http://app1
+      backendPath: /somesecurestuff
+    - path: /echo-ingress
+      method: GET
+      backendHost: https://anotherapp.nais.io
+      backendPath: /
+  openEndpoints:
+    - path: /doc
+      method: GET
+      backendHost: http://app1 
+      backendPath: /doc
+```
+
+For more details take a look at the [samples](./config/samples/) directory or the CRD definition [here](./config/crd/bases/krakend.nais.io_apiendpoints.yaml).
 
 ## Development
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
-### Running on the cluster
+### Running on local cluster
 1. Install Instances of Custom Resources:
 
 ```sh
@@ -93,18 +198,4 @@ make manifests
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
-
-Copyright 2023.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 

@@ -88,6 +88,11 @@ func (in *ApiEndpointsList) DeepCopyObject() runtime.Object {
 func (in *ApiEndpointsSpec) DeepCopyInto(out *ApiEndpointsSpec) {
 	*out = *in
 	in.Auth.DeepCopyInto(&out.Auth)
+	if in.RateLimit != nil {
+		in, out := &in.RateLimit, &out.RateLimit
+		*out = new(RateLimit)
+		**out = **in
+	}
 	if in.Endpoints != nil {
 		in, out := &in.Endpoints, &out.Endpoints
 		*out = make([]Endpoint, len(*in))
@@ -182,11 +187,6 @@ func (in *Endpoint) DeepCopyInto(out *Endpoint) {
 		in, out := &in.QueryParams, &out.QueryParams
 		*out = make([]string, len(*in))
 		copy(*out, *in)
-	}
-	if in.RateLimit != nil {
-		in, out := &in.RateLimit, &out.RateLimit
-		*out = new(RateLimit)
-		**out = **in
 	}
 }
 

@@ -1,16 +1,12 @@
 apiVersion: krakend.nais.io/v1
 kind: Krakend
 metadata:
-  name: apigw1
+  name: team1
 spec:
-  name: apigw1
-  ingressHost: apigw1.external.dev.dev-nais.cloud.nais.io
+  name: team1
+  ingressHost: team1.nais.io
   authProviders:
-    - name: mock-oauth2-server
+    - name: maskinporten
       alg: RS256
       jwkUrl: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger/jwks"
       issuer: "https://mock-oauth2-server.dev.dev-nais.cloud.nais.io/debugger"
-    - name: maskinporten
-      alg: RS256
-      jwkUrl: "https://test.maskinporten.no/jwk"
-      issuer: "https://test.maskinporten.no/"

@@ -1,63 +1,66 @@
-/*
-Copyright 2023.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Endpoint defines the endpoint configuration
 type Endpoint struct {
-	Path           string     `json:"path,omitempty" fake:"{inputname}"`
-	Method         string     `json:"method,omitempty" fake:"GET"`
-	BackendHost    string     `json:"backendHost,omitempty" fake:"http://appname.namespace.svc.cluster.local"`
-	BackendPath    string     `json:"backendPath,omitempty" fake:"{inputname}"`
-	ForwardHeaders []string   `json:"forwardHeaders,omitempty" fake:"{word}" fakesize:"1"`
-	QueryParams    []string   `json:"queryParams,omitempty" fake:"{word}" fakesize:"1"`
-	RateLimit      *RateLimit `json:"rateLimit,omitempty"`
+	// Path is exact path of an endpoint in a KrakenD instance and must be unique, see https://www.krakend.io/docs/endpoints/#endpoint
+	Path string `json:"path,omitempty" fake:"{inputname}"`
+	// Method is the HTTP method of the endpoint, see https://www.krakend.io/docs/endpoints/#method
+	Method string `json:"method,omitempty" fake:"GET"`
+	// BackendHost is the base URL of the backend service and must start with the protocol, i.e. http:// or https://
+	BackendHost string `json:"backendHost,omitempty" fake:"http://appname.namespace.svc.cluster.local"`
+	// BackendPath is the path of the backend service and follows the conventions of url_pattern in https://www.krakend.io/docs/backends/#backendupstream-configuration
+	BackendPath string `json:"backendPath,omitempty" fake:"{inputname}"`
+	// ForwardHeaders is a list of header names to be forwarded to the backend service, see https://www.krakend.io/docs/endpoints/#input_headers
+	ForwardHeaders []string `json:"forwardHeaders,omitempty" fake:"{word}" fakesize:"1"`
+	// QueryParams is an exact list of query parameter names that are allowed to reach the backend. By default, KrakenD won’t pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
+	QueryParams []string `json:"queryParams,omitempty" fake:"{word}" fakesize:"1"`
 }
 
+// RateLimit defines the rate limit configuration
 type RateLimit struct {
-	MaxRate        int    `json:"maxRate" fake:"5"`
-	ClientMaxRate  int    `json:"clientMaxRate" fake:"{number:10,100}"`
-	Strategy       string `json:"strategy" fake:"ip"`
-	Capacity       int    `json:"capacity" fake:"1000"`
-	ClientCapacity int    `json:"clientCapacity" fake:"{number:10,100}"`
+	// MaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	MaxRate int `json:"maxRate" fake:"5"`
+	// ClientMaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	ClientMaxRate int `json:"clientMaxRate" fake:"{number:10,100}"`
+	// Strategy is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	Strategy string `json:"strategy" fake:"ip"`
+	// Capacity is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	Capacity int `json:"capacity" fake:"1000"`
+	// ClientCapacity is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	ClientCapacity int `json:"clientCapacity" fake:"{number:10,100}"`
 }
 
+// Auth defines the JWT authentication config
 type Auth struct {
 	// Name is the name of the auth provider defined in the Krakend resource, e.g. maskinporten
-	Name     string   `json:"name" fake:"maskinporten"`
-	Cache    bool     `json:"cache,omitempty" fake:"true"`
-	Debug    bool     `json:"debug,omitempty" fake:"false"`
+	Name string `json:"name" fake:"maskinporten"`
+	// Cache is whether to cache the JWKs from the auth provider
+	Cache bool `json:"cache,omitempty" fake:"true"`
+	// Debug is whether to enable debug logging for the auth provider
+	Debug bool `json:"debug,omitempty" fake:"false"`
+	// Audience is the list of audiences to validate the JWT against
 	Audience []string `json:"audience,omitempty" fake:"{uuid}" fakesize:"1"`
-	Scope    []string `json:"scope,omitempty" fake:"{word}" fakesize:"1"`
+	// Scope is the list of scopes to validate the JWT against
+	Scope []string `json:"scope,omitempty" fake:"{word}" fakesize:"1"`
 }
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ApiEndpointsSpec defines the desired state of ApiEndpoints
 type ApiEndpointsSpec struct {
 	// Krakend is the name of the Krakend instance in the cluster
 	Krakend string `json:"krakend,omitempty" fake:"skip"`
 	// AppName is the name of the API, e.g. name of the application or service
-	AppName       string     `json:"appName,omitempty" fake:"{appname}"`
-	Auth          Auth       `json:"auth,omitempty"`
-	Endpoints     []Endpoint `json:"endpoints,omitempty" fakesize:"1"`
+	AppName string `json:"appName,omitempty" fake:"{appname}"`
+	// Auth is the common JWT authentication provider used for the endpoints specified in Endpoints
+	Auth Auth `json:"auth,omitempty"`
+	// RateLimit is the common rate limit configuration used for the endpoints specified in Endpoints and OpenEndpoints
+	RateLimit *RateLimit `json:"rateLimit,omitempty"`
+	// Endpoints is a list of endpoints that require authentication
+	Endpoints []Endpoint `json:"endpoints,omitempty" fakesize:"1"`
+	// OpenEndpoints is a list of endpoints that do not require authentication
 	OpenEndpoints []Endpoint `json:"openEndpoints,omitempty" fakesize:"1"`
 }
 
