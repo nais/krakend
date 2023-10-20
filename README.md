@@ -139,11 +139,11 @@ spec:
     clientCapacity: 0
     
   endpoints:
-    - path: /echo-service
+    - path: /app1/somesecurestuff
       method: GET
       backendHost: http://app1
       backendPath: /somesecurestuff
-    - path: /echo-ingress
+    - path: /anotherapp
       method: GET
       backendHost: https://anotherapp.nais.io
       backendPath: /
