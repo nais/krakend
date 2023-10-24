@@ -3,7 +3,7 @@ module github.com/nais/krakend
 go 1.21
 
 require (
-	github.com/arttor/helmify v0.4.5
+	github.com/arttor/helmify v0.4.7
 	github.com/brianvoe/gofakeit/v6 v6.23.2
 	github.com/golangci/golangci-lint v1.55.0
 	github.com/lestrrat-go/jwx/v2 v2.0.15
@@ -26,6 +26,7 @@ require (
 require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect
 	4d63.com/gochecknoglobals v0.2.1 // indirect
+	dario.cat/mergo v1.0.0 // indirect
 	github.com/4meepo/tagalign v1.3.3 // indirect
 	github.com/Abirdcfly/dupword v0.0.13 // indirect
 	github.com/Antonboom/errname v0.1.12 // indirect
@@ -122,7 +123,7 @@ require (
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
-	github.com/imdario/mergo v0.3.14 // indirect
+	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jgautheron/goconst v1.6.0 // indirect
 	github.com/jingyugao/rowserrcheck v1.1.1 // indirect
