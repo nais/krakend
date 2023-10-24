@@ -8,6 +8,7 @@ on:
       - 'debugapp/**'
       - '.github/workflows/debugapp.yml'
       - '.github/workflows/test.yml'
+      - '.github/workflows/updatechart.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
