@@ -14,4 +14,4 @@ targets:
       Name: "charts/krakend"
       file: "Chart.yaml"
       key: "dependencies[0].version"
-      versionIncrement: "patch"
+      versionIncrement: "none"
