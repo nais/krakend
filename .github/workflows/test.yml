@@ -1,0 +1,52 @@
+name: testpullrequest
+
+pull_request:
+  branches:
+    - main
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Go environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+  build:
+    name: Build and Test code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Restore cached binaries
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ github.workspace }}/bin
+          key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
+      - name: Set up Go environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+      - name: Install make
+        run: sudo apt-get update && sudo apt-get install make
+      - name: Vet code
+        run: make vet
+      - name: Test code
+        run: make test
+      - name: Build binary
+        run: make build
+      - name: Cache installed binaries
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/bin
+          key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
