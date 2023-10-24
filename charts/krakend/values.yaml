@@ -7,11 +7,10 @@ krakend:
   image:
     registry: docker.io
     repository: devopsfaith/krakend
-    tag: "2.4.3"
+    tag: 2.4.6
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
-
   securityContext:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
