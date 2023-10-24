@@ -1,0 +1,17 @@
+sources:
+  latestMinorRelease:
+    kind: helmChart
+    spec:
+      url: "https://helm.equinixmetal.com"
+      name: "krakend"
+      version: "v0.*.*"
+conditions: {}
+targets:
+  chart:
+    name: Bump Chart dependencies
+    kind: helmChart
+    spec:
+      Name: "charts/krakend"
+      file: "Chart.yaml"
+      key: "dependencies[0].version"
+      versionIncrement: "patch"

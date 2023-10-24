@@ -1,0 +1,24 @@
+sources:
+  latestMinorRelease:
+    name: "krakend image"
+    kind: dockerimage
+    spec:
+      image: "devopsfaith/krakend"
+      tagfilter: "2.4.*"
+      versionfilter:
+        kind: semver
+conditions:
+  docker:
+    name: "Docker Image Published on Registry"
+    kind: dockerimage
+    spec:
+      image: "devopsfaith/krakend"
+targets:
+  chart:
+    name: Bump image tag
+    kind: helmChart
+    spec:
+      name: "charts/krakend"
+      file: "values.yaml"
+      key: "$.krakend.image.tag"
+      versionIncrement: "none"
