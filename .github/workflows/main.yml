@@ -7,6 +7,7 @@ on:
     paths-ignore:
       - 'debugapp/**'
       - '.github/workflows/debugapp.yml'
+      - '.github/workflows/test.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
