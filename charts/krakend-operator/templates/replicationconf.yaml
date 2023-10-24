@@ -13,7 +13,7 @@ metadata:
 spec:
   namespaceSelector:
     matchExpressions:
-      - key: nais.io/krakend
+      - key: krakend.nais.io/enabled
         operator: Exists
   templateValues:
     namespace:
