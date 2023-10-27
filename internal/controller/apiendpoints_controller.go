@@ -31,9 +31,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"net/url"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"strings"
 	"time"
 )
 
@@ -43,11 +45,13 @@ type ApiEndpointsReconciler struct {
 	Scheme        *runtime.Scheme
 	SyncInterval  time.Duration
 	NetpolEnabled bool
+	ClusterDomain string
 }
 
 const (
-	AppLabelName     = "app"
-	KrakendFinalizer = "finalizer.krakend.nais.io"
+	AppLabelName        = "app"
+	KrakendFinalizer    = "finalizer.krakend.nais.io"
+	KrakendConfigMapKey = "endpoints.tmpl"
 )
 
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints,verbs=get;list;watch;create;update;patch;delete
@@ -150,17 +154,23 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	if needsUpdate {
-		if err := r.Update(ctx, endpoints); err != nil {
-			return ctrl.Result{}, err
-		}
 		// refetch to avoid the issue "the object has been modified, please apply
 		// your changes to the latest version and try again" which would re-trigger the reconciliation
 		if err := r.Get(ctx, req.NamespacedName, endpoints); err != nil {
 			log.Error(err, "refetching resource after update")
 			return ctrl.Result{}, err
 		}
+		if err := r.Update(ctx, endpoints); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
+	// refetch to avoid the issue "the object has been modified, please apply
+	// your changes to the latest version and try again" which would re-trigger the reconciliation
+	if err := r.Get(ctx, req.NamespacedName, endpoints); err != nil {
+		log.Error(err, "refetching resource after update")
+		return ctrl.Result{}, err
+	}
 	endpoints.Status.SynchronizationTimestamp = metav1.Now()
 	endpoints.Status.SynchronizationHash = hash
 	if err := r.Status().Update(ctx, endpoints); err != nil {
@@ -178,69 +188,99 @@ func (r *ApiEndpointsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, endpoints *krakendv1.ApiEndpoints) error {
-	// TODO: use label selector instead of app name
-	svc := &corev1.Service{}
-	err := r.Get(ctx, types.NamespacedName{
-		Name:      endpoints.Spec.AppName,
-		Namespace: endpoints.Namespace,
-	}, svc)
-
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	}
-
-	if errors.IsNotFound(err) {
-		log.Debugf("service for app %s not found, skipping ingress netpol", endpoints.Spec.AppName)
-		return nil
-	}
-
-	ownerRef := []metav1.OwnerReference{
-		{
-			APIVersion: endpoints.APIVersion,
-			Kind:       endpoints.Kind,
-			Name:       endpoints.Name,
-			UID:        endpoints.UID,
-		},
-	}
-
-	krakendName := endpoints.Spec.Krakend
-	if krakendName == "" {
-		krakendName = endpoints.Namespace
-	}
-	npName := fmt.Sprintf("%s-%s-%s", "allow", krakendName, endpoints.Spec.AppName)
-
-	np := &v1.NetworkPolicy{}
-	err = r.Get(ctx, types.NamespacedName{
-		Name:      npName,
-		Namespace: endpoints.Namespace,
-	}, np)
-
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	}
-
-	if errors.IsNotFound(err) {
-		np = netpol.AppAllowKrakendIngressNetpol(npName, endpoints.Namespace, map[string]string{
-			AppLabelName: endpoints.Spec.AppName,
-		})
-		np.SetOwnerReferences(ownerRef)
-
-		err := r.Create(ctx, np)
-		if err != nil {
-			return fmt.Errorf("create netpol: %v", err)
+	apps := r.appsInNamespace(endpoints)
+	log.Debugf("ensuring ingress netpols for apps: %v", apps)
+	for _, app := range apps {
+		ownerRef := []metav1.OwnerReference{
+			{
+				APIVersion: endpoints.APIVersion,
+				Kind:       endpoints.Kind,
+				Name:       endpoints.Name,
+				UID:        endpoints.UID,
+			},
 		}
-		return nil
-	}
 
-	//TODO: diff and update if needed
-	err = r.Update(ctx, np)
-	if err != nil {
-		return fmt.Errorf("update netpol: %v", err)
+		krakendName := endpoints.Spec.Krakend
+		if krakendName == "" {
+			krakendName = endpoints.Namespace
+		}
+		npName := fmt.Sprintf("%s-%s-%s", "allow", krakendName, app)
+
+		np := &v1.NetworkPolicy{}
+		err := r.Get(ctx, types.NamespacedName{
+			Name:      npName,
+			Namespace: endpoints.Namespace,
+		}, np)
+
+		if client.IgnoreNotFound(err) != nil {
+			return err
+		}
+
+		if errors.IsNotFound(err) {
+			np = netpol.AppAllowKrakendIngressNetpol(npName, endpoints.Namespace, map[string]string{
+				AppLabelName: app,
+			})
+			np.SetOwnerReferences(ownerRef)
+
+			err := r.Create(ctx, np)
+			if err != nil {
+				return fmt.Errorf("create netpol: %v", err)
+			}
+			log.Debugf("created netpol %s", npName)
+			continue
+		}
+
+		err = r.Update(ctx, np)
+		if err != nil {
+			return fmt.Errorf("update netpol: %v", err)
+		}
+		log.Debugf("updated netpol %s", npName)
+		continue
 	}
 	return nil
 }
 
+func (r *ApiEndpointsReconciler) appsInNamespace(endpoints *krakendv1.ApiEndpoints) []string {
+	// used to remove duplicates
+	seen := make(map[string]bool)
+	apps := make([]string, 0)
+	for _, e := range endpoints.Spec.Endpoints {
+		u, err := url.Parse(e.BackendHost)
+		if err != nil {
+			log.Warnf("failed to parse backend host %s in ApiEndpoints %s, skipping: %v", e.BackendHost, endpoints.Name, err)
+			continue
+		}
+		// only support http for service discovery
+		if u.Scheme == "http" && u.Hostname() != "" {
+			parts := strings.Split(u.Hostname(), ".")
+			app := ""
+
+			//e.g. http://app1 or http://app1.ns1 or http://app1.ns1.svc.cluster.local
+			switch num := len(parts); {
+			case num == 1:
+				app = parts[0]
+			case num == 2:
+				if parts[1] == endpoints.Namespace {
+					app = parts[0]
+				}
+			case num > 3:
+				rest := strings.Join(parts[2:], ".")
+				if parts[1] == endpoints.Namespace && rest == fmt.Sprintf("svc.%s", r.ClusterDomain) {
+					app = parts[0]
+				}
+			}
+			// only add app if not already seen
+			if _, ok := seen[app]; !ok && app != "" {
+				seen[app] = true
+				apps = append(apps, app)
+			}
+		}
+	}
+	return apps
+}
+
 func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend) error {
+	log.Debugf("updating ConfigMap for Krakend '%s'", k.Name)
 
 	cm := &corev1.ConfigMap{}
 	cmName := fmt.Sprintf("%s-%s-%s", k.Name, "krakend", "partials")
@@ -252,7 +292,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 	}
 
-	key := "endpoints.tmpl"
+	key := KrakendConfigMapKey
 	ep := cm.Data[key]
 	if ep == "" {
 		return fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)

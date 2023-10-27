@@ -7,6 +7,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const ManagedByLabel = "krakend-operator"
+const KrakendNameLabel = "krakend"
 const DefaultCIDR = "0.0.0.0/0"
 
 // TODO: get IP blocks for our clusters, and make it configurable for tenants
@@ -15,7 +17,9 @@ func KrakendNetpol(name string, namespace string, labelSelector map[string]strin
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels:    map[string]string{},
+			Labels: map[string]string{
+				"app.kubernetes.io/managed-by": ManagedByLabel,
+			},
 		},
 		Spec: v1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
@@ -74,7 +78,9 @@ func AppAllowKrakendIngressNetpol(name, namespace string, labelSelector map[stri
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels:    map[string]string{},
+			Labels: map[string]string{
+				"app.kubernetes.io/managed-by": ManagedByLabel,
+			},
 		},
 		Spec: v1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
@@ -87,8 +93,16 @@ func AppAllowKrakendIngressNetpol(name, namespace string, labelSelector map[stri
 				{
 					From: []v1.NetworkPolicyPeer{
 						{
-							PodSelector:       &metav1.LabelSelector{},
-							NamespaceSelector: &metav1.LabelSelector{},
+							PodSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app.kubernetes.io/name": KrakendNameLabel,
+								},
+							},
+							NamespaceSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"kubernetes.io/metadata.name": namespace,
+								},
+							},
 						},
 					},
 				},
