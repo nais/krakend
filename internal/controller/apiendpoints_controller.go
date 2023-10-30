@@ -138,6 +138,12 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
+	// refetch to avoid the issue "the object has been modified, please apply
+	// your changes to the latest version and try again" which would re-trigger the reconciliation
+	if err := r.Get(ctx, req.NamespacedName, endpoints); err != nil {
+		log.Error(err, "refetching resource after update")
+		return ctrl.Result{}, err
+	}
 	needsUpdate := controllerutil.AddFinalizer(endpoints, KrakendFinalizer)
 	if endpoints.GetOwnerReferences() == nil {
 		ownerRef := []metav1.OwnerReference{
@@ -154,12 +160,6 @@ func (r *ApiEndpointsReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	if needsUpdate {
-		// refetch to avoid the issue "the object has been modified, please apply
-		// your changes to the latest version and try again" which would re-trigger the reconciliation
-		if err := r.Get(ctx, req.NamespacedName, endpoints); err != nil {
-			log.Error(err, "refetching resource after update")
-			return ctrl.Result{}, err
-		}
 		if err := r.Update(ctx, endpoints); err != nil {
 			return ctrl.Result{}, err
 		}
