@@ -40,6 +40,10 @@ spec:
               alg: RS256
               jwkUrl: "{{ .Values.krakend.maskinporten.jwkUrl }}"
               issuer: "{{ .Values.krakend.maskinporten.issuer }}"
+            - name: azuread
+              alg: RS256
+              jwkUrl: "{{ .Values.krakend.azuread.jwkUrl }}"
+              issuer: "{{ .Values.krakend.azuread.issuer }}"
           {{- if .Values.krakend.webproxy }}
           deployment:
             extraEnvVars:
