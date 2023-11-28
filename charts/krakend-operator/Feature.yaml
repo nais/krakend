@@ -44,3 +44,13 @@ values:
     description: The issuer to use for Maskinporten
     config:
       type: string
+  krakend.azuread.jwkUrl:
+    displayName: Krakend Azure AD JWK URL
+    description: The JWK URL to use for Azure AD
+    config:
+      type: string
+  krakend.azuread.issuer:
+    displayName: Krakend Azure AD issuer
+    description: The issuer to use for Azure AD
+    config:
+      type: string
