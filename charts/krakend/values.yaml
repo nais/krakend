@@ -7,7 +7,7 @@ krakend:
   image:
     registry: docker.io
     repository: devopsfaith/krakend
-    tag: 2.4.6
+    tag: 2.5.0
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
