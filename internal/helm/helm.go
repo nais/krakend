@@ -42,7 +42,7 @@ func (c *Chart) ToUnstructured(releaseName string, values chartutil.Values) ([]*
 	resources := make([]*unstructured.Unstructured, 0)
 	for key, resource := range result {
 		log.Debugf("rendering resource: %s", key)
-		if !strings.HasSuffix(key, ".yaml") || resource == "\n" {
+		if !strings.HasSuffix(key, ".yaml") || resource == "\n" || resource == "" {
 			log.Debugf("resource '%s' is not yaml or empty", key)
 			continue
 		}

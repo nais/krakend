@@ -67,6 +67,9 @@ jobs:
           key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
 
   build_push:
+    needs:
+      - lint
+      - build
     outputs:
       version: ${{ steps.build-push-sign.outputs.version }}
     permissions:
