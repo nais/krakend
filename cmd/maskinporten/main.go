@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -20,6 +21,14 @@ import (
 )
 
 func main() {
+
+	var secretName, namespace string
+
+	flag.StringVar(&secretName, "secret-name", "debugclient-maskinporten", "name of secret")
+	flag.StringVar(&namespace, "namespace", "plattformsikkerhet", "namespace of secret")
+
+	flag.Parse()
+
 	kubeConfig := setupKubeConfig()
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
@@ -27,7 +36,7 @@ func main() {
 	}
 	ctx := context.Background()
 
-	endpoint, token := createAssertion(client, ctx, "debugclient-maskinporten", "plattformsikkerhet")
+	endpoint, token := createAssertion(client, ctx, secretName, namespace)
 
 	resp, err := http.DefaultClient.PostForm(endpoint, map[string][]string{
 		"grant_type": {"urn:ietf:params:oauth:grant-type:jwt-bearer"},
