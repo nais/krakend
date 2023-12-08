@@ -10,7 +10,6 @@ krakend:
           - "/__health"
       "telemetry/opencensus":
         sample_rate: 100
-        reporting_period:
         exporters:
           prometheus:
             port: 9091
