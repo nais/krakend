@@ -3,7 +3,7 @@ kind: ApiEndpoints
 metadata:
   name: debugapp-krakend
 spec:
-  krakendInstance: gateway
+  krakendInstance: yolo
   appName: debugapp-krakend
   auth:
     name: maskinporten
