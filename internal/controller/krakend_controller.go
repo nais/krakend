@@ -29,6 +29,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -146,7 +147,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			if err != nil && !errors.IsNotFound(err) {
 				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", resource.GetName(), err)
 			}
-			if err == nil {
+			if err == nil && strings.HasSuffix(resource.GetName(), "-partials") {
 				log.Infof("found configmap %s, skipping createOrUpdate", resource.GetName())
 				continue
 			}
