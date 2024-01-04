@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/arttor/helmify v0.4.5
-	github.com/brianvoe/gofakeit/v6 v6.23.2
+	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/golangci/golangci-lint v1.55.0
 	github.com/lestrrat-go/jwx/v2 v2.0.15
 	github.com/mitchellh/hashstructure/v2 v2.0.2
