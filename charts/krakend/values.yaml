@@ -29,7 +29,7 @@ krakend:
   image:
     registry: docker.io
     repository: devopsfaith/krakend
-    tag: 2.5.0
+    tag: 2.5
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -44,6 +44,4 @@ krakend:
   ingress:
     enabled: true
     className: "nais-ingress-external"
-    annotations: { }
-
-
+    annotations: {}
