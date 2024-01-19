@@ -42,11 +42,13 @@ type AuthValidator struct {
 }
 
 type QosRatelimitRouter struct {
-	MaxRate        int    `json:"max_rate"`
-	ClientMaxRate  int    `json:"client_max_rate"`
-	Strategy       string `json:"strategy"`
-	Capacity       int    `json:"capacity"`
-	ClientCapacity int    `json:"client_capacity"`
+	MaxRate        int    `json:"max_rate,omitempty"`
+	ClientMaxRate  int    `json:"client_max_rate,omitempty"`
+	Every          string `json:"every,omitempty"`
+	Key            string `json:"key,omitempty"`
+	Strategy       string `json:"strategy,omitempty"`
+	Capacity       int    `json:"capacity,omitempty"`
+	ClientCapacity int    `json:"client_capacity,omitempty"`
 }
 
 const DefaultOutputEncoding = "no-op"
@@ -117,6 +119,8 @@ func parseRateLimit(r *v1.RateLimit) *QosRatelimitRouter {
 	return &QosRatelimitRouter{
 		MaxRate:        r.MaxRate,
 		ClientMaxRate:  r.ClientMaxRate,
+		Every:          r.Every,
+		Key:            r.Key,
 		Strategy:       r.Strategy,
 		Capacity:       r.Capacity,
 		ClientCapacity: r.ClientCapacity,
