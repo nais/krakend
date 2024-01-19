@@ -13,7 +13,7 @@ const krakendChart = "../../charts/krakend"
 func TestChart_ToUnstructured(t *testing.T) {
 	c, err := LoadChart(krakendChart)
 	assert.NoError(t, err)
-	rs, err := c.ToUnstructured("my-release", chartutil.Values{
+	rs, err := c.ToUnstructured("my-release", "releaseNamespace", chartutil.Values{
 		"krakend": map[string]interface{}{
 			"replicaCount": 3,
 		},

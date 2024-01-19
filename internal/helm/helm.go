@@ -32,8 +32,8 @@ func LoadChart(chartFile string) (*Chart, error) {
 	}, nil
 }
 
-func (c *Chart) ToUnstructured(releaseName string, values chartutil.Values) ([]*unstructured.Unstructured, error) {
-	result, err := c.render(releaseName, values)
+func (c *Chart) ToUnstructured(releaseName string, releaseNamespace string, values chartutil.Values) ([]*unstructured.Unstructured, error) {
+	result, err := c.render(releaseName, releaseNamespace, values)
 	if err != nil {
 		return nil, fmt.Errorf("rendering chart: %w", err)
 	}
@@ -42,7 +42,7 @@ func (c *Chart) ToUnstructured(releaseName string, values chartutil.Values) ([]*
 	resources := make([]*unstructured.Unstructured, 0)
 	for key, resource := range result {
 		log.Debugf("rendering resource: %s", key)
-		if !strings.HasSuffix(key, ".yaml") || resource == "\n" {
+		if !strings.HasSuffix(key, ".yaml") || resource == "\n" || resource == "" {
 			log.Debugf("resource '%s' is not yaml or empty", key)
 			continue
 		}
@@ -61,10 +61,10 @@ func (c *Chart) ToUnstructured(releaseName string, values chartutil.Values) ([]*
 	return resources, err
 }
 
-func (c *Chart) render(releaseName string, values chartutil.Values) (map[string]string, error) {
+func (c *Chart) render(releaseName string, releaseNamespace string, values chartutil.Values) (map[string]string, error) {
 	vals, err := chartutil.ToRenderValues(c.chart, values, chartutil.ReleaseOptions{
 		Name:      releaseName,
-		Namespace: "notrelevant",
+		Namespace: releaseNamespace,
 	}, nil)
 	if err != nil {
 		return nil, err

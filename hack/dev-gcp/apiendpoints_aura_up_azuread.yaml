@@ -1,0 +1,19 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: fss-up-azuread
+spec:
+  appName: fss-up
+  auth:
+    name: azuread
+    cache: true
+    debug: true
+    audience:
+      - "5f28c10f-ecd5-45ef-96b8-db4311802e89"
+  endpoints:
+    - path: /fss/up/azuread
+      method: GET
+      forwardHeaders:
+        - Authorization
+      backendHost: https://aura-gw.dev-fss-pub.nais.io
+      backendPath: /up/azuread

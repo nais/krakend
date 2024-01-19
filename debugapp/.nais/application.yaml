@@ -27,4 +27,12 @@ spec:
     requests:
       cpu: 50m
       memory: 32Mi
+  env:
+    - name: ISSUER
+      value: https://maskinporten.no/
+    - name: JWKS_URL
+      value: https://maskinporten.no/jwk
+    - name: SCOPE
+      value: nav:aura:krakend.debugapp
+
 

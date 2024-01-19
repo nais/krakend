@@ -23,15 +23,19 @@ type Endpoint struct {
 // RateLimit defines the rate limit configuration
 type RateLimit struct {
 	// MaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
-	MaxRate int `json:"maxRate" fake:"5"`
+	MaxRate int `json:"maxRate,omitempty" fake:"5"`
 	// ClientMaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
-	ClientMaxRate int `json:"clientMaxRate" fake:"{number:10,100}"`
+	ClientMaxRate int `json:"clientMaxRate,omitempty" fake:"{number:10,100}"`
+	// Every is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	Every string `json:"every,omitempty" fake:"10s"`
+	// Key is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
+	Key string `json:"key,omitempty" fake:"X-TOKEN"`
 	// Strategy is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
-	Strategy string `json:"strategy" fake:"ip"`
+	Strategy string `json:"strategy,omitempty" fake:"ip"`
 	// Capacity is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
-	Capacity int `json:"capacity" fake:"1000"`
+	Capacity int `json:"capacity,omitempty" fake:"1000"`
 	// ClientCapacity is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration
-	ClientCapacity int `json:"clientCapacity" fake:"{number:10,100}"`
+	ClientCapacity int `json:"clientCapacity,omitempty" fake:"{number:10,100}"`
 }
 
 // Auth defines the JWT authentication config

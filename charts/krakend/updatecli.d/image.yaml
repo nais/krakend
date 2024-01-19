@@ -4,7 +4,7 @@ sources:
     kind: dockerimage
     spec:
       image: "devopsfaith/krakend"
-      tagfilter: "2.4.*"
+      tagfilter: "2.5.*"
       versionfilter:
         kind: semver
 conditions:

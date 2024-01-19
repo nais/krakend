@@ -157,18 +157,18 @@ spec:
                   clientMaxRate:
                     description: 'ClientMaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
                     type: integer
+                  every:
+                    description: 'Every is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
+                    type: string
+                  key:
+                    description: 'Key is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
+                    type: string
                   maxRate:
                     description: 'MaxRate is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
                     type: integer
                   strategy:
                     description: 'Strategy is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
                     type: string
-                required:
-                - capacity
-                - clientCapacity
-                - clientMaxRate
-                - maxRate
-                - strategy
                 type: object
             type: object
           status:
