@@ -29,6 +29,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -84,13 +85,14 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	releaseName := k.Name
+	releaseNamespace := k.Namespace
 
 	values, err := prepareValues(k)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("preparing values: %w", err)
 	}
 
-	resources, err := r.KrakendChart.ToUnstructured(releaseName, chartutil.Values{
+	resources, err := r.KrakendChart.ToUnstructured(releaseName, releaseNamespace, chartutil.Values{
 		"krakend": values,
 	})
 
@@ -146,7 +148,9 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			if err != nil && !errors.IsNotFound(err) {
 				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", resource.GetName(), err)
 			}
-			if err == nil {
+			// skip updating partials configmap if it already exists
+			// to avoid deleting existing apiendpoints
+			if err == nil && strings.HasSuffix(resource.GetName(), "-partials") {
 				log.Infof("found configmap %s, skipping createOrUpdate", resource.GetName())
 				continue
 			}

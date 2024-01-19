@@ -1,6 +1,6 @@
 dependencies:
 - name: krakend
   repository: https://helm.equinixmetal.com
-  version: v0.1.23
-digest: sha256:43dfe753c06483eb8972a85277a8e55ff4ca344bb37efb7e5fe84c2f8dd2343c
-generated: "2023-10-24T13:28:54.059760228Z"
+  version: v0.1.25
+digest: sha256:70d1f7e6039a4cea4acc96b847c29eda9bf7e3a0961f095488e0df2cab51f42b
+generated: "2023-12-04T00:13:31.139578034Z"

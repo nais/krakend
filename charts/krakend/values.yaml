@@ -3,11 +3,33 @@ krakend:
     env:
       - name: USAGE_DISABLE
         value: "1"
+    extraConfig:
+      router:
+        "@comment": "The health endpoint checks do not show in the logs"
+        logger_skip_paths:
+          - "/__health"
+      "telemetry/opencensus":
+        sample_rate: 100
+        exporters:
+          prometheus:
+            port: 9091
+            namespace: "krakend"
+            tag_host: false
+            tag_path: true
+            tag_method: true
+            tag_status_code: false
+  serviceMonitor:
+    enabled: true
+  service:
+    metrics:
+      enabled: true
+      port: 9091
+      targetPort: 9091
   replicaCount: 2
   image:
     registry: docker.io
     repository: devopsfaith/krakend
-    tag: 2.4.6
+    tag: 2.5.0
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -22,4 +44,6 @@ krakend:
   ingress:
     enabled: true
     className: "nais-ingress-external"
-    annotations: {}
+    annotations: { }
+
+

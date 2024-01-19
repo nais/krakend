@@ -24,7 +24,7 @@ func TestRenderChart(t *testing.T) {
 	c, err := helm.LoadChart("testdata/krakend")
 	assert.NoError(t, err)
 
-	resources, err := c.ToUnstructured(k.Name, chartutil.Values{
+	resources, err := c.ToUnstructured(k.Name, k.Namespace, chartutil.Values{
 		"krakend": values,
 	})
 	assert.NoError(t, err)
