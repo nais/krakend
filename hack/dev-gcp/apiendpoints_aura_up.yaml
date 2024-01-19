@@ -10,6 +10,13 @@ spec:
     debug: true
     scope:
       - "nav:plattformsikkerhet:krakend.demo"
+  rateLimit:
+    maxRate: 10
+    clientMaxRate: 0
+    strategy: ip
+    capacity: 0
+    clientCapacity: 0
+    every: 20s
   endpoints:
     - path: /fss/up
       method: GET
