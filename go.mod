@@ -6,7 +6,7 @@ require (
 	github.com/arttor/helmify v0.4.10
 	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/golangci/golangci-lint v1.55.2
-	github.com/lestrrat-go/jwx/v2 v2.0.15
+	github.com/lestrrat-go/jwx/v2 v2.0.19
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.0
