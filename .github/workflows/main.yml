@@ -87,7 +87,7 @@ jobs:
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
           push: true
       - uses: nais/platform-build-push-sign@main
-        id: build-push-sign
+        id: build-push-sign-exporter
         with:
           name: krakend-api-exporter
           dockerfile: Dockerfile.exporter
