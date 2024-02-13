@@ -3,10 +3,12 @@ module github.com/nais/krakend
 go 1.21
 
 require (
+	cloud.google.com/go/iam v0.13.0
 	cloud.google.com/go/storage v1.28.1
 	github.com/arttor/helmify v0.4.10
 	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/golangci/golangci-lint v1.55.2
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lestrrat-go/jwx/v2 v2.0.19
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/onsi/ginkgo/v2 v2.15.0
@@ -30,7 +32,6 @@ require (
 	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.13.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/4meepo/tagalign v1.3.3 // indirect
 	github.com/Abirdcfly/dupword v0.0.13 // indirect

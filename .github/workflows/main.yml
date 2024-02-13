@@ -86,6 +86,14 @@ jobs:
           google_service_account: ${{ env.SERVICE_ACCOUNT }}
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
           push: true
+      - uses: nais/platform-build-push-sign@main
+        id: build-push-sign
+        with:
+          name: krakend-api-exporter
+          dockerfile: Dockerfile.exporter
+          google_service_account: ${{ env.SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
+          push: true
       - uses: azure/setup-helm@v3
         name: "Setup Helm"
         with:

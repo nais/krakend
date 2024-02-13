@@ -1,0 +1,23 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: {{ .Release.Name }}-api-exporter
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  image: {{ .Values.apiexporter.image.repository }}:{{ .Values.apiexporter.image.tag }}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  restartPolicy: OnFailure
+  schedule: '0 */1 * * *'
+  successfulJobsHistoryLimit: 1
+  env:
+    - name: PROJECT_ID
+      value: {{ .Values.apiexporter.env.projectID }}
+    - name: LOCATION
+      value: {{ .Values.apiexporter.env.location }}
+    - name: BUCKET
+      value: {{ .Values.apiexporter.env.bucket }}
+
