@@ -5,7 +5,7 @@ metadata:
 spec:
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
-  image: {{ .Values.apiexporter.image.repository }}:{{ .Chart.Version }}
+  image: {{ .Values.apiexporter.image.repository }}:{{ .Values.apiexporter.image.tag }}
   resources:
     requests:
       cpu: 50m
