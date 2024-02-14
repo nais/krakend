@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	v1 "github.com/nais/krakend/api/v1"
 	log "github.com/sirupsen/logrus"
@@ -65,6 +66,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	out, err := toApiDocumentation(krakends, endpoints)
+
+	fmt.Printf("%s", out)
 
 	exporter, err := NewExporter(ctx, cfg.ProjectID, cfg.Location, cfg.Bucket)
 	if err != nil {
