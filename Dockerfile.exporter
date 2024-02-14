@@ -12,7 +12,7 @@ COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY cmd/exporter/ cmd/
+COPY cmd/exporter/main.go cmd/main.go
 COPY api/ api/
 
 # Build
