@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kelseyhightower/envconfig"
 	v1 "github.com/nais/krakend/api/v1"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,19 +18,8 @@ import (
 	"syscall"
 )
 
-type Config struct {
-	ProjectID string
-	Location  string
-	Bucket    string
-}
-
 func main() {
 	flag.Parse()
-	var cfg Config
-	err := envconfig.Process("", &cfg)
-	if err != nil {
-		log.Fatalf("failed to process envconfig: %v", err)
-	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
@@ -39,7 +27,7 @@ func main() {
 	setupLog(envOrDefault("LOG_LEVEL", "debug"))
 
 	var kubeConfig *rest.Config
-
+	var err error
 	if envConfig := os.Getenv("KUBECONFIG"); envConfig != "" {
 		kubeConfig, err = clientcmd.BuildConfigFromFlags("", envConfig)
 		if err != nil {
@@ -71,7 +59,7 @@ func main() {
 
 	fmt.Printf("%s", out)
 
-	exporter, err := NewExporter(ctx, cfg.ProjectID, cfg.Location, cfg.Bucket)
+	exporter, err := NewExporter(ctx, "nais-dev-cdea", "europe-north1", "nais-apigw-docs")
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

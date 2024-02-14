@@ -10,15 +10,6 @@ krakend:
     jwkUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/discovery/v2.0/keys
     issuer: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0
 
-apiexporter:
-  image:
-    repository: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-api-exporter
-    tag: latest
-  env:
-    projectID: "nais-dev"
-    location: "europe-north1"
-    bucket: "nais-apigw-docs"
-
 controllerManager:
   kubeRbacProxy:
     args:
