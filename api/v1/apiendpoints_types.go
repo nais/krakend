@@ -18,6 +18,9 @@ type Endpoint struct {
 	ForwardHeaders []string `json:"forwardHeaders,omitempty" fake:"{word}" fakesize:"1"`
 	// QueryParams is an exact list of query parameter names that are allowed to reach the backend. By default, KrakenD won’t pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
 	QueryParams []string `json:"queryParams,omitempty" fake:"{word}" fakesize:"1"`
+	// Timeout is the timeout for the whole duration of the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
+	// Valid duration units are: ns (nanosec.), us or µs (microsec.), ms (millisec.), s (sec.), m (minutes), h (hours).
+	TimeOut string `json:"timeout,omitempty" fake:"10s"`
 }
 
 // RateLimit defines the rate limit configuration

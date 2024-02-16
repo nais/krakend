@@ -102,6 +102,12 @@ spec:
                       items:
                         type: string
                       type: array
+                    timeout:
+                      description: 'Timeout is the timeout for the whole duration
+                        of the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
+                        Valid duration units are: ns (nanosec.), us or µs (microsec.),
+                        ms (millisec.), s (sec.), m (minutes), h (hours).'
+                      type: string
                   type: object
                 type: array
               krakend:
@@ -142,6 +148,12 @@ spec:
                       items:
                         type: string
                       type: array
+                    timeout:
+                      description: 'Timeout is the timeout for the whole duration
+                        of the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
+                        Valid duration units are: ns (nanosec.), us or µs (microsec.),
+                        ms (millisec.), s (sec.), m (minutes), h (hours).'
+                      type: string
                   type: object
                 type: array
               rateLimit:

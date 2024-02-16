@@ -17,6 +17,7 @@ type Endpoint struct {
 	InputHeaders      []string     `json:"input_headers,omitempty"`
 	ExtraConfig       *ExtraConfig `json:"extra_config,omitempty"`
 	Backend           []*Backend   `json:"backend"`
+	Timeout           string       `json:"timeout,omitempty"`
 }
 
 type Backend struct {
@@ -105,6 +106,7 @@ func parseEndpoint(e v1.Endpoint) *Endpoint {
 		Backend:           backend,
 		InputQueryStrings: e.QueryParams,
 		InputHeaders:      e.ForwardHeaders,
+		Timeout:           e.TimeOut,
 	}
 
 	extraCfg := &ExtraConfig{}
