@@ -23,6 +23,7 @@ spec:
   endpoints:
     - path: /app1/somepath
       method: GET
+      timeout: 2s
       forwardHeaders:
         - Authorization
       queryParams:
