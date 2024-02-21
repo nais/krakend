@@ -21,6 +21,7 @@ spec:
   endpoints:
     - path: /echo
       method: GET
+      timeout: 2s
       backendHost: http://echo:1027
       backendPath: /
       forwardHeaders:

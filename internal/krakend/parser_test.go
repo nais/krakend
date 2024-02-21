@@ -28,6 +28,7 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	p := partials[0]
 	assert.Equal(t, "/echo", p.Endpoint)
 	assert.Equal(t, "GET", p.Method)
+	assert.Equal(t, "2s", p.Timeout)
 	assert.Equal(t, "/", p.Backend[0].UrlPattern)
 	assert.Equal(t, "GET", p.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p.Backend[0].Host[0])
