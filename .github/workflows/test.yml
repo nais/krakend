@@ -2,8 +2,6 @@ name: testpullrequest
 
 on:
   pull_request:
-    branches:
-      - main
 
 jobs:
   lint:
