@@ -16,7 +16,7 @@ jobs:
           go-version: "1.21"
           cache: false
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: latest
           args: --timeout=5m
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.1.1
       - name: Restore cached binaries
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/bin
           key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
@@ -45,7 +45,7 @@ jobs:
       - name: Build binary
         run: make build
       - name: Cache installed binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/bin
           key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}

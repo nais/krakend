@@ -27,7 +27,7 @@ jobs:
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config charts/krakend/updatecli.d
 
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-helm@v4
         name: "Setup Helm"
         with:
           version: "3.12.0"
