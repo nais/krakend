@@ -128,7 +128,7 @@ spec:
     debug: true
     audience:
       - "audience1"
-    scope:
+    scopes:
       - "scope1"
       
   rateLimit:

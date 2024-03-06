@@ -60,7 +60,7 @@ spec:
                     description: Name is the name of the auth provider defined in
                       the Krakend resource, e.g. maskinporten
                     type: string
-                  scope:
+                  scopes:
                     description: Scope is the list of scopes to validate the JWT against
                     items:
                       type: string

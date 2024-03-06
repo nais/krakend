@@ -9,8 +9,10 @@ spec:
     name: maskinporten
     cache: true
     debug: true
-    scope:
+    scopes:
       - "org1:team1:krakend.app"
+    audience:
+      - "audience1"
   rateLimit:
     maxRate: 10
     clientMaxRate: 0

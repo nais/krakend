@@ -52,7 +52,7 @@ type Auth struct {
 	// Audience is the list of audiences to validate the JWT against
 	Audience []string `json:"audience,omitempty" fake:"{uuid}" fakesize:"1"`
 	// Scope is the list of scopes to validate the JWT against
-	Scope []string `json:"scope,omitempty" fake:"{word}" fakesize:"1"`
+	Scope []string `json:"scopes,omitempty" fake:"{word}" fakesize:"1"`
 }
 
 // ApiEndpointsSpec defines the desired state of ApiEndpoints

@@ -39,7 +39,7 @@ type AuthValidator struct {
 	JwkUrl         string   `json:"jwk_url"`
 	Issuer         string   `json:"issuer"`
 	Audience       []string `json:"audience,omitempty"`
-	Scope          []string `json:"scope,omitempty"`
+	Scope          []string `json:"scopes,omitempty"`
 }
 
 type QosRatelimitRouter struct {
