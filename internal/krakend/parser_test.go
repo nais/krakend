@@ -33,6 +33,7 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 	assert.Equal(t, "GET", p.Backend[0].Method)
 	assert.Equal(t, "http://echo:1027", p.Backend[0].Host[0])
 	assert.Equal(t, "org1:team1:krakend.app", p.ExtraConfig.AuthValidator.Scope[0])
+	assert.Equal(t, "scope", p.ExtraConfig.AuthValidator.ScopesKey)
 	assert.Equal(t, "https://test.maskinporten.no/jwk", p.ExtraConfig.AuthValidator.JwkUrl)
 	assert.Equal(t, "https://test.maskinporten.no/", p.ExtraConfig.AuthValidator.Issuer)
 	assert.Equal(t, "RS256", p.ExtraConfig.AuthValidator.Alg)

@@ -40,6 +40,7 @@ type AuthValidator struct {
 	Issuer         string   `json:"issuer"`
 	Audience       []string `json:"audience,omitempty"`
 	Scope          []string `json:"scopes,omitempty"`
+	ScopesKey      string   `json:"scopes_key,omitempty"`
 }
 
 type QosRatelimitRouter struct {
@@ -53,6 +54,7 @@ type QosRatelimitRouter struct {
 }
 
 const DefaultOutputEncoding = "no-op"
+const DefaultScopesKey = "scope"
 
 func ToKrakendEndpoints(k *v1.Krakend, list []v1.ApiEndpoints) ([]*Endpoint, error) {
 	endpoints := make([]*Endpoint, 0)
@@ -140,6 +142,7 @@ func findAuthProvider(k *v1.Krakend, auth *v1.Auth) (*AuthValidator, error) {
 				Issuer:         p.Issuer,
 				Audience:       auth.Audience,
 				Scope:          auth.Scope,
+				ScopesKey:      DefaultScopesKey,
 			}, nil
 		}
 	}
