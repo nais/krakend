@@ -1,11 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: apiendpoints.krakend.nais.io
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
-  labels:
-  {{- include "krakend-operator-crds.labels" . | nindent 4 }}
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: apiendpoints.krakend.nais.io
 spec:
   group: krakend.nais.io
   names:
@@ -21,14 +19,19 @@ spec:
         description: ApiEndpoints is the Schema for the apiendpoints API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -44,21 +47,22 @@ spec:
                   the endpoints specified in Endpoints
                 properties:
                   audience:
-                    description: Audience is the list of audiences to validate the JWT
-                      against
+                    description: Audience is the list of audiences to validate the
+                      JWT against
                     items:
                       type: string
                     type: array
                   cache:
-                    description: Cache is whether to cache the JWKs from the auth provider
-                    type: boolean
-                  debug:
-                    description: Debug is whether to enable debug logging for the auth
+                    description: Cache is whether to cache the JWKs from the auth
                       provider
                     type: boolean
+                  debug:
+                    description: Debug is whether to enable debug logging for the
+                      auth provider
+                    type: boolean
                   name:
-                    description: Name is the name of the auth provider defined in the
-                      Krakend resource, e.g. maskinporten
+                    description: Name is the name of the auth provider defined in
+                      the Krakend resource, e.g. maskinporten
                     type: string
                   scopes:
                     description: Scope is the list of scopes to validate the JWT against
@@ -78,34 +82,34 @@ spec:
                         and must start with the protocol, i.e. http:// or https://
                       type: string
                     backendPath:
-                      description: BackendPath is the path of the backend service and
-                        follows the conventions of url_pattern in https://www.krakend.io/docs/backends/#backendupstream-configuration
+                      description: BackendPath is the path of the backend service
+                        and follows the conventions of url_pattern in https://www.krakend.io/docs/backends/#backendupstream-configuration
                       type: string
                     forwardHeaders:
-                      description: ForwardHeaders is a list of header names to be forwarded
-                        to the backend service, see https://www.krakend.io/docs/endpoints/#input_headers
+                      description: ForwardHeaders is a list of header names to be
+                        forwarded to the backend service, see https://www.krakend.io/docs/endpoints/#input_headers
                       items:
                         type: string
                       type: array
                     method:
-                      description: Method is the HTTP method of the endpoint, see https://www.krakend.io/docs/endpoints/#method
+                      description: Method is the HTTP method of the endpoint, see
+                        https://www.krakend.io/docs/endpoints/#method
                       type: string
                     path:
-                      description: Path is exact path of an endpoint in a KrakenD instance
-                        and must be unique, see https://www.krakend.io/docs/endpoints/#endpoint
+                      description: Path is exact path of an endpoint in a KrakenD
+                        instance and must be unique, see https://www.krakend.io/docs/endpoints/#endpoint
                       type: string
                     queryParams:
-                      description: QueryParams is an exact list of query parameter names
-                        that are allowed to reach the backend. By default, KrakenD won’t
-                        pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
+                      description: QueryParams is an exact list of query parameter
+                        names that are allowed to reach the backend. By default, KrakenD
+                        won’t pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
                       items:
                         type: string
                       type: array
                     timeout:
-                      description: 'Timeout is the timeout for the whole duration of
-                        the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
-                        Valid duration units are: ns (nanosec.), us or µs (microsec.),
-                        ms (millisec.), s (sec.), m (minutes), h (hours).'
+                      description: |-
+                        Timeout is the timeout for the whole duration of the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
+                        Valid duration units are: ns (nanosec.), us or µs (microsec.), ms (millisec.), s (sec.), m (minutes), h (hours).
                       type: string
                   type: object
                 type: array
@@ -123,40 +127,40 @@ spec:
                         and must start with the protocol, i.e. http:// or https://
                       type: string
                     backendPath:
-                      description: BackendPath is the path of the backend service and
-                        follows the conventions of url_pattern in https://www.krakend.io/docs/backends/#backendupstream-configuration
+                      description: BackendPath is the path of the backend service
+                        and follows the conventions of url_pattern in https://www.krakend.io/docs/backends/#backendupstream-configuration
                       type: string
                     forwardHeaders:
-                      description: ForwardHeaders is a list of header names to be forwarded
-                        to the backend service, see https://www.krakend.io/docs/endpoints/#input_headers
+                      description: ForwardHeaders is a list of header names to be
+                        forwarded to the backend service, see https://www.krakend.io/docs/endpoints/#input_headers
                       items:
                         type: string
                       type: array
                     method:
-                      description: Method is the HTTP method of the endpoint, see https://www.krakend.io/docs/endpoints/#method
+                      description: Method is the HTTP method of the endpoint, see
+                        https://www.krakend.io/docs/endpoints/#method
                       type: string
                     path:
-                      description: Path is exact path of an endpoint in a KrakenD instance
-                        and must be unique, see https://www.krakend.io/docs/endpoints/#endpoint
+                      description: Path is exact path of an endpoint in a KrakenD
+                        instance and must be unique, see https://www.krakend.io/docs/endpoints/#endpoint
                       type: string
                     queryParams:
-                      description: QueryParams is an exact list of query parameter names
-                        that are allowed to reach the backend. By default, KrakenD won’t
-                        pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
+                      description: QueryParams is an exact list of query parameter
+                        names that are allowed to reach the backend. By default, KrakenD
+                        won’t pass any query string to the backend, see https://www.krakend.io/docs/endpoints/#input_query_strings
                       items:
                         type: string
                       type: array
                     timeout:
-                      description: 'Timeout is the timeout for the whole duration of
-                        the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
-                        Valid duration units are: ns (nanosec.), us or µs (microsec.),
-                        ms (millisec.), s (sec.), m (minutes), h (hours).'
+                      description: |-
+                        Timeout is the timeout for the whole duration of the request/response pipe, see https://www.krakend.io/docs/endpoints/#timeout
+                        Valid duration units are: ns (nanosec.), us or µs (microsec.), ms (millisec.), s (sec.), m (minutes), h (hours).
                       type: string
                   type: object
                 type: array
               rateLimit:
-                description: RateLimit is the common rate limit configuration used for
-                  the endpoints specified in Endpoints and OpenEndpoints
+                description: RateLimit is the common rate limit configuration used
+                  for the endpoints specified in Endpoints and OpenEndpoints
                 properties:
                   capacity:
                     description: 'Capacity is documented here: https://www.krakend.io/docs/endpoints/rate-limit/#configuration'
@@ -195,9 +199,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
