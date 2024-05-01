@@ -1,6 +1,7 @@
 module github.com/nais/krakend
 
 go 1.22
+toolchain go1.22.2
 
 require (
 	github.com/arttor/helmify v0.4.11
@@ -13,7 +14,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
-	helm.sh/helm/v3 v3.14.3
+	helm.sh/helm/v3 v3.14.4
 	k8s.io/api v0.29.3
 	k8s.io/apiextensions-apiserver v0.29.3
 	k8s.io/apimachinery v0.29.3
