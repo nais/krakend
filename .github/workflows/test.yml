@@ -2,6 +2,9 @@ name: testpullrequest
 
 on:
   pull_request:
+  push:
+    branches:
+      - *
 
 jobs:
   lint:

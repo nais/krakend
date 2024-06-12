@@ -40,10 +40,11 @@ jobs:
         uses: peter-evans/create-pull-request@v6.0.2
         with:
           commit-message: "feat: upgrade helm charts"
-          title: "deps: upgrade KrakenD helm chart and image versions"
+          title: "chore(deps): upgrade KrakenD helm chart and image versions"
           body: |
             Automatic upgrade of KrakenD helm chart and image tag versions using https://github.com/updatecli/updatecli.
 
             Check release log at https://github.com/equinixmetal-helm/krakend/releases for more details.
           branch: upgrade-krakend-helm-chart
           base: main
+          labels: dependencies
