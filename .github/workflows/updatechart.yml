@@ -48,3 +48,4 @@ jobs:
           branch: upgrade-krakend-helm-chart
           base: main
           labels: dependencies
+          delete-branch: true
