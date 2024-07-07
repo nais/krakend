@@ -1,0 +1,32 @@
+name: Publish Helm Chart
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+env:
+  HELM_EXPERIMENTAL_OCI: 1
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  push_to_registry:
+    name: Push Helm Chart GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - id: meta
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
+      - uses: appany/helm-oci-chart-releaser@v0.4.2
+        with:
+          name: krakend-operator-hypefamily
+          repository: ${{ github.repository }}
+          tag: ${{ steps.meta.outputs.tag }}
+          registry: ${{ env.REGISTRY }}
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+
