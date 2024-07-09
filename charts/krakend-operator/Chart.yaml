@@ -4,4 +4,4 @@ description: A Helm chart for krakend-operator responsible for installing and co
 sources:
   - https://github.com/nais/krakend/tree/main/charts
 type: application
-version: 0.1.1
+version: 0.1.2
