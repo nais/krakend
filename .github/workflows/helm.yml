@@ -23,7 +23,7 @@ jobs:
           echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
       - uses: appany/helm-oci-chart-releaser@v0.4.2
         with:
-          name: krakend-operator-hypefamily
+          name: krakend-operator
           repository: ${{ github.repository }}
           tag: ${{ steps.meta.outputs.tag }}
           registry: ${{ env.REGISTRY }}
