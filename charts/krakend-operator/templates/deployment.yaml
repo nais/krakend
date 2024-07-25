@@ -35,7 +35,8 @@ spec:
           value: {{ quote .Values.controllerManager.manager.env.debug }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default .Chart.Version }}
+        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
+          | default .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -90,5 +91,5 @@ spec:
           defaultMode: 420
           secretName: krakend-operator-webhook-server-cert
       - configMap:
-          name: {{ include "krakend-operator.fullname" . }}-config
+          name: config
         name: config

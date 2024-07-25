@@ -1,9 +1,11 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  name: krakends.krakend.nais.io
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: krakends.krakend.nais.io
+  labels:
+  {{- include "krakend-operator-crds.labels" . | nindent 4 }}
 spec:
   group: krakend.nais.io
   names:
@@ -69,9 +71,13 @@ spec:
                 description: Deployment defines configuration for the KrakenD deployment
                 properties:
                   deploymentType:
-                    description: DeploymentType is the type of deployment to use,
-                      either deployment or rollout
+                    description: DeploymentType is the type of deployment to use, either
+                      deployment or rollout
                     type: string
+                  extraConfig:
+                    description: ExtraConfig is an object, defining extra config variables
+                      to use for the deployment
+                    x-kubernetes-preserve-unknown-fields: true
                   extraEnvVars:
                     description: ExtraEnvVars is a list of extra environment variables
                       to add to the deployment
@@ -80,8 +86,7 @@ spec:
                         in a Container.
                       properties:
                         name:
-                          description: Name of the environment variable. Must be a
-                            C_IDENTIFIER.
+                          description: Name of the environment variable. Must be a C_IDENTIFIER.
                           type: string
                         value:
                           description: |-
@@ -125,12 +130,12 @@ spec:
                                 spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
                               properties:
                                 apiVersion:
-                                  description: Version of the schema the FieldPath
-                                    is written in terms of, defaults to "v1".
+                                  description: Version of the schema the FieldPath is
+                                    written in terms of, defaults to "v1".
                                   type: string
                                 fieldPath:
-                                  description: Path of the field to select in the
-                                    specified API version.
+                                  description: Path of the field to select in the specified
+                                    API version.
                                   type: string
                               required:
                               - fieldPath
@@ -149,8 +154,8 @@ spec:
                                   anyOf:
                                   - type: integer
                                   - type: string
-                                  description: Specifies the output format of the
-                                    exposed resources, defaults to "1"
+                                  description: Specifies the output format of the exposed
+                                    resources, defaults to "1"
                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                   x-kubernetes-int-or-string: true
                                 resource:
@@ -161,8 +166,7 @@ spec:
                               type: object
                               x-kubernetes-map-type: atomic
                             secretKeyRef:
-                              description: Selects a key of a secret in the pod's
-                                namespace
+                              description: Selects a key of a secret in the pod's namespace
                               properties:
                                 key:
                                   description: The key of the secret to select from.  Must
@@ -191,8 +195,7 @@ spec:
                     description: Image is the image configuration to use for the deployment
                     properties:
                       pullPolicy:
-                        description: PullPolicy is the pull policy to use for the
-                          image
+                        description: PullPolicy is the pull policy to use for the image
                         type: string
                       registry:
                         description: Registry is the registry to use for the image
@@ -205,8 +208,8 @@ spec:
                         type: string
                     type: object
                   replicaCount:
-                    description: ReplicaCount is the number of replicas to use for
-                      the deployment
+                    description: ReplicaCount is the number of replicas to use for the
+                      deployment
                     type: integer
                   resources:
                     description: Resources is the resource requirements for the deployment,
@@ -216,12 +219,12 @@ spec:
                         description: |-
                           Claims lists the names of resources, defined in spec.resourceClaims,
                           that are used by this container.
-
-
+  
+  
                           This is an alpha field and requires enabling the
                           DynamicResourceAllocation feature gate.
-
-
+  
+  
                           This field is immutable. It can only be set for containers.
                         items:
                           description: ResourceClaim references one entry in PodSpec.ResourceClaims.
@@ -276,8 +279,7 @@ spec:
                       ingress
                     type: object
                   className:
-                    description: Class is the ingress class to use for the Krakend
-                      instance
+                    description: Class is the ingress class to use for the Krakend instance
                     type: string
                   enabled:
                     description: Enabled is whether to enable ingress for the Krakend
@@ -310,8 +312,8 @@ spec:
                     type: array
                 type: object
               ingressHost:
-                description: IngressHost is a shortcut for creating a single host
-                  ingress with sane defaults, if Ingress is specified this is ignored
+                description: IngressHost is a shortcut for creating a single host ingress
+                  with sane defaults, if Ingress is specified this is ignored
                 type: string
             type: object
           status:
@@ -328,3 +330,9 @@ spec:
     storage: true
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
