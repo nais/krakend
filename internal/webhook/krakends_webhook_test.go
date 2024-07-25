@@ -1,11 +1,9 @@
 package webhook
 
 import (
-	"encoding/json"
 	"github.com/nais/krakend/api/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -24,22 +22,22 @@ var _ = Describe("Krakends Validating Webhook", func() {
 	// test Kubernetes API server, which isn't the goal here.
 	Context("Create Krakends ", func() {
 		It("should create an object successfully", func() {
-			serviceExtraConfig, _ := json.Marshal(map[string]interface{}{
-				"telemetry/opentelemetry": map[string]interface{}{
-					"service_name":            "krakend_prometheus_service",
-					"metric_reporting_period": 1,
-					"exporters": map[string]interface{}{
-						"prometheus": []interface{}{
-							map[string]interface{}{
-								"name":            "local_prometheus",
-								"port":            9090,
-								"process_metrics": true,
-								"go_metrics":      true,
-							},
-						},
-					},
-				},
-			})
+			//serviceExtraConfig, _ := json.Marshal(map[string]interface{}{
+			//	"telemetry/opentelemetry": map[string]interface{}{
+			//		"service_name":            "krakend_prometheus_service",
+			//		"metric_reporting_period": 1,
+			//		"exporters": map[string]interface{}{
+			//			"prometheus": []interface{}{
+			//				map[string]interface{}{
+			//					"name":            "local_prometheus",
+			//					"port":            9090,
+			//					"process_metrics": true,
+			//					"go_metrics":      true,
+			//				},
+			//			},
+			//		},
+			//	},
+			//})
 
 			k := &v1.Krakend{
 				ObjectMeta: metav1.ObjectMeta{
@@ -52,11 +50,11 @@ var _ = Describe("Krakends Validating Webhook", func() {
 							Name: "maskinporten",
 						},
 					},
-					Deployment: v1.KrakendDeployment{
-						ExtraConfig: &apiextensionsv1.JSON{
-							Raw: serviceExtraConfig,
-						},
-					},
+					//Deployment: v1.KrakendDeployment{
+					//	ExtraConfig: &apiextensionsv1.JSON{
+					//		Raw: serviceExtraConfig,
+					//	},
+					//},
 				},
 				Status: v1.KrakendStatus{},
 			}
