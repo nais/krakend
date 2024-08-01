@@ -8,16 +8,15 @@ krakend:
         "@comment": "The health endpoint checks do not show in the logs"
         logger_skip_paths:
           - "/__health"
-      "telemetry/opencensus":
-        sample_rate: 100
+      "telemetry/opentelemetry":
+        service_name: krakend_prometheus_service
+        metric_reporting_period: 1
         exporters:
           prometheus:
-            port: 9091
-            namespace: "krakend"
-            tag_host: false
-            tag_path: true
-            tag_method: true
-            tag_status_code: false
+            - name: local_prometheus
+              port: 9091
+              process_metrics: true
+              go_metrics: true
   serviceMonitor:
     enabled: true
   service:
@@ -29,7 +28,7 @@ krakend:
   image:
     registry: docker.io
     repository: devopsfaith/krakend
-    tag: 2.5.1
+    tag: 2.7.0
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
