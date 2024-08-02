@@ -91,5 +91,5 @@ spec:
           defaultMode: 420
           secretName: krakend-operator-webhook-server-cert
       - configMap:
-          name: config
+          name: {{ include "krakend-operator.fullname" . }}-config
         name: config
