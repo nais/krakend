@@ -47,3 +47,4 @@ webhooks:
     resources:
     - krakends
   sideEffects: None
+  timeoutSeconds: 30

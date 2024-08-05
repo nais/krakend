@@ -17,8 +17,6 @@ import (
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
-	log "github.com/sirupsen/logrus"
-
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,7 +28,7 @@ import (
 	krakendv1 "github.com/nais/krakend/api/v1"
 )
 
-//+kubebuilder:webhook:path=/validate-krakends,mutating=false,failurePolicy=fail,sideEffects=None,groups=krakend.nais.io,resources=krakends,verbs=create;update,versions=v1,name=krakends.krakend.nais.io,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/validate-krakends,mutating=false,timeoutSeconds=30,failurePolicy=fail,sideEffects=None,groups=krakend.nais.io,resources=krakends,verbs=create;update,versions=v1,name=krakends.krakend.nais.io,admissionReviewVersions=v1
 
 const ServiceExtraConfigSchemaUrl = "https://www.krakend.io/schema/v%s/service_extra_config.json"
 
@@ -41,7 +39,6 @@ type KrakendsValidator struct {
 }
 
 func (v *KrakendsValidator) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	log.Infof("registering webhook server at /validate-krakends")
 	v.decoder = admission.NewDecoder(mgr.GetScheme())
 	v.client = mgr.GetClient()
 	v.config = mgr.GetConfig()
@@ -188,5 +185,12 @@ func getVersion(ctx context.Context, cfg *rest.Config, k *krakendv1.Krakend) (*s
 		return nil, fmt.Errorf("version not found")
 	}
 
-	return &matches[0], nil
+	deletePolicy := v1.DeletePropagationBackground
+	if err = jobsClient.Delete(ctx, job.Name, v1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		return nil, fmt.Errorf("creating getversion job: %v", err)
+	}
+
+	return &matches[1], nil
 }

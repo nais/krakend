@@ -27,7 +27,6 @@ type ApiEndpointsValidator struct {
 }
 
 func (v *ApiEndpointsValidator) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	log.Infof("registering webhook server at /validate-apiendpoints")
 	v.decoder = admission.NewDecoder(mgr.GetScheme())
 	v.client = mgr.GetClient()
 	mgr.GetWebhookServer().Register("/validate-apiendpoints", &webhook.Admission{Handler: v})
