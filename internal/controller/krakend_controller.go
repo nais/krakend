@@ -113,7 +113,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
 
 		if resource.GetKind() == "Deployment" {
-			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
 			d := &v1.Deployment{}
 			err = runtime.DefaultUnstructuredConverter.FromUnstructured(resource.Object, d)
 			if err != nil {
@@ -138,8 +137,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 
 		if resource.GetKind() == "ConfigMap" {
-			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
-
 			var cm corev1.ConfigMap
 			err := r.Get(ctx, types.NamespacedName{
 				Name:      resource.GetName(),
@@ -181,17 +178,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func addAnnotations(resource *unstructured.Unstructured, annotations map[string]string) {
-	existing := resource.GetAnnotations()
-	if existing == nil {
-		existing = make(map[string]string)
-	}
-	for k, v := range annotations {
-		existing[k] = v
-	}
-	resource.SetAnnotations(existing)
 }
 
 func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
