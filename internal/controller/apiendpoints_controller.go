@@ -18,25 +18,31 @@ package controller
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
+	"time"
+
+	"gopkg.in/yaml.v3"
+
 	"github.com/mitchellh/hashstructure/v2"
-	krakendv1 "github.com/nais/krakend/api/v1"
-	"github.com/nais/krakend/internal/krakend"
-	"github.com/nais/krakend/internal/netpol"
 	log "github.com/sirupsen/logrus"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/networking/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"net/url"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"strings"
-	"time"
+
+	krakendv1 "github.com/nais/krakend/api/v1"
+	"github.com/nais/krakend/internal/krakend"
+	"github.com/nais/krakend/internal/netpol"
 )
 
 // ApiEndpointsReconciler reconciles a ApiEndpoints object
@@ -206,7 +212,7 @@ func (r *ApiEndpointsReconciler) ensureAppIngressNetpol(ctx context.Context, end
 		}
 		npName := fmt.Sprintf("%s-%s-%s", "allow", krakendName, app)
 
-		np := &v1.NetworkPolicy{}
+		np := &networkingv1.NetworkPolicy{}
 		err := r.Get(ctx, types.NamespacedName{
 			Name:      npName,
 			Namespace: endpoints.Namespace,
@@ -292,6 +298,11 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
 	}
 
+	isOwned := isConfigMapOwned(cm, k)
+	if !isOwned {
+		return fmt.Errorf("configmap '%s/%s' is not owned by Krakend '%s/%s'", cm.Namespace, cm.Name, k.Namespace, k.Name)
+	}
+
 	key := KrakendConfigMapKey
 	ep := cm.Data[key]
 	if ep == "" {
@@ -326,7 +337,63 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
 	}
 
+	err = r.Get(ctx, types.NamespacedName{
+		Name:      cmName,
+		Namespace: k.Namespace,
+	}, cm)
+	if err != nil {
+		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
+	}
+	cmBytes, err := yaml.Marshal(cm)
+	if err != nil {
+		return fmt.Errorf("marshaling ConfigMap '%s': %v", cmName, err)
+	}
+
+	cmHash := sha256.Sum256(cmBytes)
+
+	err = r.setCmHashToDeploymentAnnotations(ctx, k, cmHash)
+	if err != nil {
+		return fmt.Errorf("rollout restart Deployment: %v", err)
+	}
+
 	return nil
+}
+
+func (r ApiEndpointsReconciler) setCmHashToDeploymentAnnotations(ctx context.Context, k *krakendv1.Krakend, cmHash [32]byte) error {
+	d := &appsv1.Deployment{}
+	dName := fmt.Sprintf("%s-%s", k.Name, "krakend")
+	err := r.Get(ctx, types.NamespacedName{
+		Name:      dName,
+		Namespace: k.Namespace,
+	}, d)
+	if err != nil {
+		return fmt.Errorf("get Deployment '%s': %v", dName, err)
+	}
+
+	annotations := d.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	annotations["checksum/cm-partials"] = fmt.Sprintf("%x", cmHash)
+	d.SetAnnotations(annotations)
+
+	err = r.Update(ctx, d)
+	if err != nil {
+		return fmt.Errorf("update Deployment '%s': %v", dName, err)
+	}
+
+	return nil
+}
+
+func isConfigMapOwned(cm *corev1.ConfigMap, k *krakendv1.Krakend) bool {
+	refs := cm.GetOwnerReferences()
+	for _, ref := range refs {
+		if ref.APIVersion == k.APIVersion && ref.Kind == k.Kind && ref.Name == k.GetName() && ref.UID == k.GetUID() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func hashEndpoints(a krakendv1.ApiEndpointsSpec) (string, error) {
