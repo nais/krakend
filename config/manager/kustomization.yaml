@@ -6,5 +6,5 @@ kind: Kustomization
 
 images:
 - name: controller
-  newName: europe-north1-docker.pkg.dev/nais-io/nais/images/krakend-operator
+  newName: ghcr.io/hypefamily/krakend/krakend-operator
   newTag: latest
