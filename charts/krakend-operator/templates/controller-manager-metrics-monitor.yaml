@@ -19,4 +19,3 @@ spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-      {{- include "krakend-operator.selectorLabels" . | nindent 6 }}
