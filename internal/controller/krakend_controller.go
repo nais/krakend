@@ -225,6 +225,9 @@ func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
 	}
 
 	values["ingress"] = ingressValues
+	values["krakend"] = map[string]interface{}{
+		"extraConfig": values["extraConfig"],
+	}
 
 	return values, nil
 }
