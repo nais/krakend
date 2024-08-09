@@ -8,16 +8,6 @@ krakend:
         "@comment": "The health endpoint checks do not show in the logs"
         logger_skip_paths:
           - "/__health"
-      "telemetry/opencensus":
-        sample_rate: 100
-        exporters:
-          prometheus:
-            port: 9091
-            namespace: "krakend"
-            tag_host: false
-            tag_path: true
-            tag_method: true
-            tag_status_code: false
   serviceMonitor:
     enabled: true
   service:
