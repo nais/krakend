@@ -2,6 +2,7 @@ package v1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -42,6 +43,8 @@ type KrakendDeployment struct {
 	Image Image `json:"image,omitempty"`
 	// ExtraEnvVars is a list of extra environment variables to add to the deployment
 	ExtraEnvVars []corev1.EnvVar `json:"extraEnvVars,omitempty"`
+	// ExtraConfig is an object, defining extra config variables to use for the deployment
+	ExtraConfig *apiextensionsv1.JSON `json:"extraConfig,omitempty"`
 }
 
 // Ingress defines the ingress configuration

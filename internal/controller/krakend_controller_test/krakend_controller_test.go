@@ -2,11 +2,13 @@ package krakend_controller_test
 
 import (
 	"context"
+	"encoding/json"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -32,6 +34,23 @@ func krakendResource(ns, name string, spec krakendv1.KrakendSpec) *krakendv1.Kra
 }
 
 func fullKrakendSpec() krakendv1.KrakendSpec {
+	serviceExtraConfig, _ := json.Marshal(map[string]interface{}{
+		"telemetry/opentelemetry": map[string]interface{}{
+			"service_name":            "krakend_prometheus_service",
+			"metric_reporting_period": 1,
+			"exporters": map[string]interface{}{
+				"prometheus": []interface{}{
+					map[string]interface{}{
+						"name":            "local_prometheus",
+						"port":            9090,
+						"process_metrics": true,
+						"go_metrics":      true,
+					},
+				},
+			},
+		},
+	})
+
 	return krakendv1.KrakendSpec{
 		IngressHost:   "krakend.nais.io",
 		AuthProviders: []krakendv1.AuthProvider{},
@@ -54,6 +73,9 @@ func fullKrakendSpec() krakendv1.KrakendSpec {
 					Name:  "MY_ENV_VAR",
 					Value: "MY_ENV_VAR_VALUE",
 				},
+			},
+			ExtraConfig: &apiextensionsv1.JSON{
+				Raw: serviceExtraConfig,
 			},
 		},
 	}

@@ -28,3 +28,4 @@ Dockerfile.cross
 ignore/
 maskinporten
 /charts/testchart/
+.DS_Store

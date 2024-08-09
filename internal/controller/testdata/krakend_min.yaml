@@ -18,5 +18,16 @@ spec:
     replicaCount: 2
     image:
       tag: 2.4.3
+    extraConfig:
+      "telemetry/opentelemetry":
+        service_name: krakend_prometheus_service
+        metric_reporting_period: 1
+        exporters:
+          prometheus:
+            - name: local_prometheus
+              port: 9090
+              process_metrics: true
+              go_metricsL: true
+
 
 

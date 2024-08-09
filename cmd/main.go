@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/nais/krakend/internal/webhook"
 	"os"
+	"path/filepath"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -21,9 +21,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	webhookserver "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/controller"
+	"github.com/nais/krakend/internal/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -54,6 +56,7 @@ func main() {
 	var debug bool
 	var interval time.Duration
 	var krakendChartPath string
+	var webhookCertDir string
 	var netpolEnabled bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -63,7 +66,8 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&debug, "debug", os.Getenv("DEBUG") == "true", "Enable debug logging")
 	flag.DurationVar(&interval, "sync-interval", 1*time.Minute, "Synchronization interval for reconciliation")
-	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "charts/krakend-chart"), "Path to krakend helm chart")
+	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "charts/krakend"), "Path to krakend helm chart")
+	flag.StringVar(&webhookCertDir, "webhook-cert-dir", envOrDefault("WEBHOOK_CERT_DIR", filepath.Join(os.TempDir(), "k8s-webhook-server", "serving-certs")), "Path to webhook cert dir")
 	flag.BoolVar(&netpolEnabled, "netpol-enabled", os.Getenv("NETPOL_ENABLED") == "true", "Enable network policies")
 
 	opts := zap.Options{
@@ -84,6 +88,11 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "dbcb84f2.nais.io",
+		WebhookServer: webhookserver.NewServer(
+			webhookserver.Options{
+				CertDir: webhookCertDir,
+			},
+		),
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
@@ -130,6 +139,11 @@ func main() {
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&webhook.ApiEndpointsValidator{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "ApiEndpoints")
+			os.Exit(1)
+		}
+
+		if err = (&webhook.KrakendsValidator{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Krakends")
 			os.Exit(1)
 		}
 	}

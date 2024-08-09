@@ -73,6 +73,10 @@ spec:
                     description: DeploymentType is the type of deployment to use,
                       either deployment or rollout
                     type: string
+                  extraConfig:
+                    description: ExtraConfig is an object, defining extra config variables
+                      to use for the deployment
+                    x-kubernetes-preserve-unknown-fields: true
                   extraEnvVars:
                     description: ExtraEnvVars is a list of extra environment variables
                       to add to the deployment
