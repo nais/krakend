@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -116,10 +117,20 @@ func getVersion(ctx context.Context, cfg *rest.Config, k *krakendv1.Krakend) (*s
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    "example",
+							Name:    "krakend-detect-version",
 							Image:   fmt.Sprintf("%s:%s", k.Spec.Deployment.Image.Repository, k.Spec.Deployment.Image.Tag),
 							Command: []string{"krakend"},
 							Args:    []string{"version"},
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("10m"),
+									corev1.ResourceMemory: resource.MustParse("10Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("10m"),
+									corev1.ResourceMemory: resource.MustParse("10Mi"),
+								},
+							},
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
