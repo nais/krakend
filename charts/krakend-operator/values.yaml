@@ -39,7 +39,7 @@ controllerManager:
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
       netpolEnabled: "true"
     image:
-      repository: ghcr.io/hypefamily/krakend/krakend-operator
+      repository: ghcr.io/hypefamily/krakend/krakend-operator-image
       tag: latest
     resources:
       requests:
