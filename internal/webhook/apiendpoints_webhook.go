@@ -3,11 +3,12 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	krakendv1 "github.com/nais/krakend/api/v1"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -39,6 +40,9 @@ func (v *ApiEndpointsValidator) Handle(ctx context.Context, req admission.Reques
 	err := v.decoder.Decode(req, a)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
+	}
+	if a.GetDeletionTimestamp() != nil {
+		return admission.Allowed("")
 	}
 	if err := v.validate(ctx, a); err != nil {
 		return admission.Denied(err.Error())
