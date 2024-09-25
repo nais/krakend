@@ -2,12 +2,13 @@ package webhook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
 	krakendv1 "github.com/nais/krakend/api/v1"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -65,8 +66,8 @@ func (v *ApiEndpointsValidator) validate(ctx context.Context, a *krakendv1.ApiEn
 	if client.IgnoreNotFound(err) != nil {
 		return fmt.Errorf("getting krakendinstance: %w", err)
 	}
-	if errors.IsNotFound(err) {
-		return fmt.Errorf(MsgKrakendDoesNotExist)
+	if apierrors.IsNotFound(err) {
+		return errors.New(MsgKrakendDoesNotExist)
 	}
 	log.Infof("found krakendinstance %s", k.Name)
 
@@ -115,7 +116,7 @@ func validateEndpointsList(el *krakendv1.ApiEndpointsList, e *krakendv1.ApiEndpo
 
 	err := uniquePaths(el)
 	if err != nil {
-		return fmt.Errorf(MsgPathDuplicate)
+		return errors.New(MsgPathDuplicate)
 	}
 	return nil
 }
