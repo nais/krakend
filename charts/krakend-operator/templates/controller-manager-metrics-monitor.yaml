@@ -1,4 +1,4 @@
-{{-if .Values.customCrds.monitoring }}
+{{- if .Values.customCrds.monitoring }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -21,4 +21,4 @@ spec:
     matchLabels:
       control-plane: controller-manager
       {{- include "krakend-operator.selectorLabels" . | nindent 6 }}
-{{-end}}
+{{- end}}
