@@ -1,0 +1,29 @@
+apiVersion: v1
+entries:
+  krakend-operator:
+  - apiVersion: v2
+    created: "2024-10-02T13:06:26.516745383Z"
+    description: A Helm chart for krakend-operator responsible for installing and
+      configuring krakend instances into a namespace
+    digest: 3f251f34b98603b3b9ce01b02220e706ac64a31b941100bbb558c144aaa988db
+    name: krakend-operator
+    sources:
+    - https://github.com/nais/krakend/tree/main/charts
+    type: application
+    urls:
+    - https://github.com/nais/krakend/releases/download/krakend-operator-0.1.1/krakend-operator-0.1.1.tgz
+    version: 0.1.1
+  krakend-operator-crds:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-10-02T13:06:26.641182986Z"
+    description: A Helm chart for Krakend Operator CRDs
+    digest: b59e345425ca40ee321ef216bc732915581473146efef7e5087989fec02ee054
+    name: krakend-operator-crds
+    sources:
+    - https://github.com/nais/krakend/tree/main/charts/krakend-operator-crds
+    type: application
+    urls:
+    - https://github.com/nais/krakend/releases/download/krakend-operator-crds-0.1.0/krakend-operator-crds-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-10-02T13:06:26.641191262Z"
