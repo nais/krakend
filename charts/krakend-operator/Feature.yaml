@@ -11,6 +11,12 @@ values:
     displayName: API server IP
     computed:
       template: '"{{ .Env.apiserver_endpoint }}"'
+  customCrds.replicator.enabled:
+    displayName: Replicator enabled
+    config:
+      type: bool
+    computed:
+      template: 'true'
   controllerManager.manager.env.debug:
     description: Enable debug logging
     displayName: Debug
