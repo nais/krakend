@@ -1,18 +1,23 @@
 apiserverIP:
-krakend:
-  webproxy: false
-  ingressDomain: external.dev.dev-nais.cloud.nais.io
-  ingressClassName: nais-ingress-external
-  maskinporten:
-    jwkUrl: "https://test.maskinporten.no/jwk"
-    issuer: "https://test.maskinporten.no/"
-  azuread:
-    jwkUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/discovery/v2.0/keys
-    issuer: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0
+
+replicator:
+  krakend:
+    webproxy: false
+    ingressDomain: external.dev.dev-nais.cloud.nais.io
+    ingressClassName: nais-ingress-external
+    # only relevant for use with github.com/nais/replicator in NAV
+    maskinporten:
+      jwkUrl: "https://test.maskinporten.no/jwk"
+      issuer: "https://test.maskinporten.no/"
+    # only relevant for use with github.com/nais/replicator in NAV
+    azuread:
+      jwkUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/discovery/v2.0/keys
+      issuer: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0
 
 customCrds:
-  replicator:
-    enabled: false
+  monitoring: true
+  certmanager: true
+  replicator: false
 
 controllerManager:
   kubeRbacProxy:

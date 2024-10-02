@@ -11,7 +11,7 @@ values:
     displayName: API server IP
     computed:
       template: '"{{ .Env.apiserver_endpoint }}"'
-  customCrds.replicator.enabled:
+  customCrds.replicator:
     displayName: Replicator enabled
     config:
       type: bool
@@ -26,36 +26,36 @@ values:
     displayName: Network policy enabled
     computed:
       template: '{{ ne .Kind "onprem" }}'
-  krakend.webproxy:
+  replicator.krakend.webproxy:
     displayName: Use webproxy for krakend
     computed:
       template: '{{ eq .Kind "onprem" }}'
-  krakend.ingressDomain:
+  replicator.krakend.ingressDomain:
     displayName: Krakend ingress domain
     description: The domain to use for the ingress
     config:
       type: string
-  krakend.ingressClassName:
+  replicator.krakend.ingressClassName:
     displayName: Krakend ingress class name
     description: The class to use for the ingress
     config:
       type: string
-  krakend.maskinporten.jwkUrl:
+  replicator.krakend.maskinporten.jwkUrl:
     displayName: Krakend Maskinporten JWK URL
     description: The JWK URL to use for Maskinporten
     config:
       type: string
-  krakend.maskinporten.issuer:
+  replicator.krakend.maskinporten.issuer:
     displayName: Krakend Maskinporten issuer
     description: The issuer to use for Maskinporten
     config:
       type: string
-  krakend.azuread.jwkUrl:
+  replicator.krakend.azuread.jwkUrl:
     displayName: Krakend Azure AD JWK URL
     description: The JWK URL to use for Azure AD
     config:
       type: string
-  krakend.azuread.issuer:
+  replicator.krakend.azuread.issuer:
     displayName: Krakend Azure AD issuer
     description: The issuer to use for Azure AD
     config:

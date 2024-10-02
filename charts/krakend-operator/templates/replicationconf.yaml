@@ -1,4 +1,4 @@
-{{- if .Values.customCrds.replicator.enabled}}
+{{- if .Values.customCrds.replicator }}
 ---
 apiVersion: nais.io/v1
 kind: ReplicationConfig
@@ -6,11 +6,6 @@ metadata:
   name: {{ include "krakend-operator.fullname" . }}
   labels:
     {{- include "krakend-operator.labels" . | nindent 4 }}
-  #annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # replicationconfig is considered part of the release.
-    #"helm.sh/hook": post-install,post-upgrade
-    #"helm.sh/hook-weight": "-5"
 spec:
   namespaceSelector:
     matchExpressions:
@@ -29,23 +24,23 @@ spec:
         spec:
           ingress:
             enabled: true
-            className: "{{ .Values.krakend.ingressClassName }}"
+            className: "{{ .Values.replicator.krakend.ingressClassName }}"
             annotations: {}
             hosts:
-              - host: "[[ .Values.team ]]-gw.{{ .Values.krakend.ingressDomain }}"
+              - host: "[[ .Values.team ]]-gw.{{ .Values.replicator.krakend.ingressDomain }}"
                 paths:
                   - path: /
                     pathType: ImplementationSpecific
           authProviders:
             - name: maskinporten
               alg: RS256
-              jwkUrl: "{{ .Values.krakend.maskinporten.jwkUrl }}"
-              issuer: "{{ .Values.krakend.maskinporten.issuer }}"
+              jwkUrl: "{{ .Values.replicator.krakend.maskinporten.jwkUrl }}"
+              issuer: "{{ .Values.replicator.krakend.maskinporten.issuer }}"
             - name: azuread
               alg: RS256
-              jwkUrl: "{{ .Values.krakend.azuread.jwkUrl }}"
-              issuer: "{{ .Values.krakend.azuread.issuer }}"
-          {{- if .Values.krakend.webproxy }}
+              jwkUrl: "{{ .Values.replicator.krakend.azuread.jwkUrl }}"
+              issuer: "{{ .Values.replicator.krakend.azuread.issuer }}"
+          {{- if .Values.replicator.krakend.webproxy }}
           deployment:
             extraEnvVars:
               - name: HTTP_PROXY
