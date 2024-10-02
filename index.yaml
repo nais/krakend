@@ -15,6 +15,17 @@ entries:
     version: 0.1.1
   krakend-operator-crds:
   - apiVersion: v2
+    created: "2024-10-02T13:46:02.02095253Z"
+    description: A Helm chart for Krakend Operator CRDs
+    digest: ed4f9c8982badd392c75ec7bc358ff38e955c2ab2bc50c5dfd5241c871276167
+    name: krakend-operator-crds
+    sources:
+    - https://github.com/nais/krakend/tree/main/charts/krakend-operator-crds
+    type: application
+    urls:
+    - https://github.com/nais/krakend/releases/download/krakend-operator-crds-0.1.1/krakend-operator-crds-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2024-10-02T13:06:26.641182986Z"
     description: A Helm chart for Krakend Operator CRDs
@@ -26,4 +37,4 @@ entries:
     urls:
     - https://github.com/nais/krakend/releases/download/krakend-operator-crds-0.1.0/krakend-operator-crds-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-02T13:06:26.641191262Z"
+generated: "2024-10-02T13:46:02.020961397Z"
