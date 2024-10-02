@@ -45,7 +45,7 @@ help: ## Display this help.
 ##@ Development
 .PHONY: helm
 helm:
-	helm package charts/krakend -d charts/krakend-operator
+	helm package installer/krakend -d charts/krakend-operator
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.

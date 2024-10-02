@@ -22,10 +22,10 @@ jobs:
         uses: updatecli/updatecli-action@v2
 
       - name: Run Updatecli in Dry Run mode
-        run: updatecli diff --config charts/krakend/updatecli.d
+        run: updatecli diff --config installer/krakend/updatecli.d
 
       - name: Run Updatecli in Apply mode
-        run: updatecli apply --config charts/krakend/updatecli.d
+        run: updatecli apply --config installer/krakend/updatecli.d
 
       - uses: azure/setup-helm@v4
         name: "Setup Helm"
@@ -34,7 +34,7 @@ jobs:
 
       - name: Package and copy chart
         run: |-
-          helm package charts/krakend -d charts/krakend-operator
+          helm package installer/krakend -d charts/krakend-operator
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6.0.2
