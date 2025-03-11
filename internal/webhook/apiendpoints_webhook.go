@@ -18,7 +18,7 @@ import (
 
 const (
 	MsgKrakendDoesNotExist = "the referenced Krakend does not exist"
-	MsgPathDuplicate       = "duplicate paths in apiendpoints resource"
+	MsgPathDuplicate       = "duplicate path and method combination in apiendpoints resource"
 )
 
 //+kubebuilder:webhook:path=/validate-apiendpoints,mutating=false,failurePolicy=fail,sideEffects=None,groups=krakend.nais.io,resources=apiendpoints,verbs=create;update,versions=v1,name=apiendpoints.krakend.nais.io,admissionReviewVersions=v1
@@ -122,26 +122,31 @@ func validateEndpointsList(el *krakendv1.ApiEndpointsList, e *krakendv1.ApiEndpo
 }
 
 func uniquePaths(list *krakendv1.ApiEndpointsList) error {
-	paths := make(map[string]string)
+	// Use a composite key of path+method to check for duplicates
+	pathMethods := make(map[string]string)
 	for _, e := range list.Items {
 		if e.GetDeletionTimestamp() == nil {
 			if len(e.Spec.Endpoints) > 0 {
 				for _, p := range e.Spec.Endpoints {
-					if _, ok := paths[p.Path]; ok {
-						log.Warnf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
+					// Create a composite key with path and method
+					key := p.Path + ":" + p.Method
+					if _, ok := pathMethods[key]; ok {
+						log.Warnf("duplicate path %s with method %s in endpoints %s and %s", p.Path, p.Method, e.Name, pathMethods[key])
+						return fmt.Errorf("duplicate path %s with method %s in endpoints %s and %s", p.Path, p.Method, e.Name, pathMethods[key])
 					} else {
-						paths[p.Path] = e.Name
+						pathMethods[key] = e.Name
 					}
 				}
 			}
 			if len(e.Spec.OpenEndpoints) > 0 {
 				for _, p := range e.Spec.OpenEndpoints {
-					if _, ok := paths[p.Path]; ok {
-						log.Warnf("duplicate path %s in openEndpoints %s and %s", p.Path, e.Name, paths[p.Path])
-						return fmt.Errorf("duplicate path %s in endpoints %s and %s", p.Path, e.Name, paths[p.Path])
+					// Create a composite key with path and method
+					key := p.Path + ":" + p.Method
+					if _, ok := pathMethods[key]; ok {
+						log.Warnf("duplicate path %s with method %s in openEndpoints %s and %s", p.Path, p.Method, e.Name, pathMethods[key])
+						return fmt.Errorf("duplicate path %s with method %s in endpoints %s and %s", p.Path, p.Method, e.Name, pathMethods[key])
 					} else {
-						paths[p.Path] = e.Name
+						pathMethods[key] = e.Name
 					}
 				}
 			}
