@@ -1,15 +1,17 @@
 package webhook
 
 import (
-	"github.com/nais/krakend/api/v1"
+	"os"
+	"testing"
+
+	v1 "github.com/nais/krakend/api/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"os"
-	"testing"
+
 )
 
 var _ = Describe("ApiEndpoints Validating Webhook", func() {
@@ -134,6 +136,81 @@ func TestUniquePaths(t *testing.T) {
 	err = parseYaml("testdata/apiendpoints_dpaths_same_app.yaml", endpointsList)
 	up = uniquePaths(endpointsList)
 	assert.NoError(t, err)
+	assert.Error(t, up)
+
+	// Test that endpoints with the same path but different methods are allowed
+	endpointsList = &v1.ApiEndpointsList{
+		Items: []v1.ApiEndpoints{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-endpoints",
+				},
+				Spec: v1.ApiEndpointsSpec{
+					Endpoints: []v1.Endpoint{
+						{
+							Path:        "/api/resource",
+							Method:      "GET",
+							BackendHost: "http://backend",
+							BackendPath: "/resource",
+						},
+						{
+							Path:        "/api/resource",
+							Method:      "POST",
+							BackendHost: "http://backend",
+							BackendPath: "/resource",
+						},
+						{
+							Path:        "/api/resource",
+							Method:      "PUT",
+							BackendHost: "http://backend",
+							BackendPath: "/resource",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	up = uniquePaths(endpointsList)
+	assert.NoError(t, up)
+
+	// Test that endpoints with the same path and same method are still rejected
+	endpointsList = &v1.ApiEndpointsList{
+		Items: []v1.ApiEndpoints{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-endpoints-1",
+				},
+				Spec: v1.ApiEndpointsSpec{
+					Endpoints: []v1.Endpoint{
+						{
+							Path:        "/api/resource",
+							Method:      "GET",
+							BackendHost: "http://backend1",
+							BackendPath: "/resource",
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-endpoints-2",
+				},
+				Spec: v1.ApiEndpointsSpec{
+					Endpoints: []v1.Endpoint{
+						{
+							Path:        "/api/resource",
+							Method:      "GET",
+							BackendHost: "http://backend2",
+							BackendPath: "/resource",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	up = uniquePaths(endpointsList)
 	assert.Error(t, up)
 }
 
