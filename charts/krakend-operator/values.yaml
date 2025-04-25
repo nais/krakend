@@ -1,15 +1,15 @@
 controllerManager:
   kubeRbacProxy:
     args:
-    - --secure-listen-address=0.0.0.0:8443
-    - --upstream=http://127.0.0.1:8080/
-    - --logtostderr=true
-    - --v=0
+      - --secure-listen-address=0.0.0.0:8443
+      - --upstream=http://127.0.0.1:8080/
+      - --logtostderr=true
+      - --v=0
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - ALL
+          - ALL
     image:
       repository: gcr.io/kubebuilder/kube-rbac-proxy
       tag: v0.14.1
@@ -22,14 +22,14 @@ controllerManager:
         memory: 64Mi
   manager:
     args:
-    - --health-probe-bind-address=:8081
-    - --metrics-bind-address=127.0.0.1:8080
-    - --leader-elect
+      - --health-probe-bind-address=:8081
+      - --metrics-bind-address=127.0.0.1:8080
+      - --leader-elect
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - ALL
+          - ALL
       readOnlyRootFilesystem: true
       runAsGroup: 65532
       runAsNonRoot: true
@@ -39,8 +39,8 @@ controllerManager:
       krakendChartPath: /var/config/krakendinstaller-1.0.0.tgz
       netpolEnabled: "true"
     image:
-      repository: ghcr.io/hypefamily/krakend/krakend-operator-image
-      tag: latest
+      repository: ghcr.io/hypefamily/krakend-image
+      tag: 0.2.6
     resources:
       requests:
         cpu: 100m
@@ -51,14 +51,14 @@ controllerManager:
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: https
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: https
   type: ClusterIP
 webhookService:
   ports:
-  - port: 443
-    protocol: TCP
-    targetPort: 9443
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
   type: ClusterIP
