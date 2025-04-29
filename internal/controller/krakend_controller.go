@@ -128,6 +128,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				d.Spec.Template.Spec.Containers[0].Env = existing
 			}
 			d.Spec.Template.Annotations["kubectl.kubernetes.io/default-container"] = d.Name
+			d.Spec.Template.Annotations["logs.nais.io/flow-loki"] = "true"
 
 			m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(d)
 			if err != nil {
