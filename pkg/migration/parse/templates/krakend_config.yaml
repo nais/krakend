@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    reloader.stakater.com/match: "true"
+  name: change-me
+  namespace: change-me
+data:
+  krakend.json: |
+    {
+      "$schema": "https://www.krakend.io/schema/v2.11/krakend.json",
+      "version": 3,
+      "extra_config": {
+        "router": {
+          "@comment": "The health endpoint checks do not show in the logs",
+          "logger_skip_paths": [
+            "/__health"
+          ]
+        },
+        "telemetry/opentelemetry": {
+          "service_name": "krakend_prometheus_service",
+          "metric_reporting_period": 1,
+          "exporters": {
+            "prometheus": [
+              {
+                "name": "krakend_app",
+                "port": 9090,
+                "process_metrics": true,
+                "go_metrics": true
+              }
+            ]
+          },
+          "layers": {
+            "global": {
+              "disable_metrics": false,
+              "disable_traces": false,
+              "disable_propagation": false
+            },
+            "proxy": {
+              "disable_metrics": false,
+              "disable_traces": false
+            },
+            "backend": {
+              "metrics": {
+                "disable_stage": false,
+                "round_trip": true,
+                "read_payload": true,
+                "detailed_connection": true,
+              },
+              "traces": {
+                "disable_stage": false,
+                "round_trip": true,
+                "read_payload": true,
+                "detailed_connection": true
+              }
+            }
+          },
+          "skip_paths": [
+            "/foo/{bar}"
+          ]
+        }
+      },
+      "endpoints": {{ include "endpoints.json" }}
+    }
