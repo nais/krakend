@@ -27,7 +27,7 @@ func ConvertKrakends(ctx context.Context) (string, error) {
 
 	objs := make([]runtime.Object, 0)
 	for _, k := range krakends.Items {
-		o, err := parse.Convert(&k, apiEndpoints.Items...)
+		o, err := parse.Convert(&k, apiEndpoints.Items)
 		if err != nil {
 			return "", fmt.Errorf("converting krakend %s: %v", k.Name, err)
 		}

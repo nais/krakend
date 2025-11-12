@@ -45,7 +45,7 @@ data:
                 "disable_stage": false,
                 "round_trip": true,
                 "read_payload": true,
-                "detailed_connection": true,
+                "detailed_connection": true
               },
               "traces": {
                 "disable_stage": false,

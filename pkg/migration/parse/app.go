@@ -3,7 +3,6 @@ package parse
 import (
 	"embed"
 	"fmt"
-	"k8s.io/apimachinery/pkg/runtime"
 	"net/url"
 	"strings"
 
@@ -11,19 +10,20 @@ import (
 	nais_io_v1 "github.com/nais/liberator/pkg/apis/nais.io/v1"
 	nais_io_v1alpha1 "github.com/nais/liberator/pkg/apis/nais.io/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
 	AppTemplateFile = "templates/app.yaml"
-	DefaultImage    = "krakend:2.11.1"
+	DefaultImage    = "krakend:2.12.0"
 )
 
 //go:embed templates/*.yaml
 var templatesDir embed.FS
 
-func Convert(k *krakendv1.Krakend, endpoints ...krakendv1.ApiEndpoints) ([]runtime.Object, error) {
+func Convert(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) ([]runtime.Object, error) {
 	objs := make([]runtime.Object, 0)
-	app := ToApp(k, endpoints...)
+	app := ToApp(k, endpoints)
 	config, err := ToKrakendConfig(k)
 	if err != nil {
 		return nil, fmt.Errorf("creating krakend config configmap: %v", err)
@@ -47,17 +47,25 @@ func Convert(k *krakendv1.Krakend, endpoints ...krakendv1.ApiEndpoints) ([]runti
 	return objs, nil
 }
 
-func ToApp(k *krakendv1.Krakend, endpoints ...krakendv1.ApiEndpoints) *nais_io_v1alpha1.Application {
+func ToApp(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) *nais_io_v1alpha1.Application {
 	app := &nais_io_v1alpha1.Application{}
 	err := ParseYaml(templatesDir, AppTemplateFile, app)
 	if err != nil {
 		log.Fatalf("parsing application template: %v", err)
 	}
 
-	app.Name = k.Name
+	app.Name = resourceName(k)
 	app.Namespace = k.Namespace
 	app.Spec.Image = DefaultImage
-	app.Spec.Ingresses = getIngresses(k)
+
+	ingresses := getIngresses(k)
+	for _, ingress := range ingresses {
+		if strings.Contains(string(ingress), "fss") {
+			app.Spec.WebProxy = true
+		}
+	}
+
+	app.Spec.Ingresses = ingresses
 	if k.Spec.Deployment.ReplicaCount > 0 {
 		app.Spec.Replicas = &nais_io_v1.Replicas{
 			Min: &k.Spec.Deployment.ReplicaCount,
@@ -65,11 +73,11 @@ func ToApp(k *krakendv1.Krakend, endpoints ...krakendv1.ApiEndpoints) *nais_io_v
 	}
 	app.Spec.FilesFrom = []nais_io_v1.FilesFrom{
 		{
-			ConfigMap: fmt.Sprintf("%s-%s-%s", k.Name, "krakend", "config"),
+			ConfigMap: resourceName(k, "config"),
 			MountPath: "/etc/krakend",
 		},
 		{
-			ConfigMap: fmt.Sprintf("%s-%s-%s", k.Name, "krakend", "partials"),
+			ConfigMap: resourceName(k, "partials"),
 			MountPath: "/etc/krakend/partials",
 		},
 	}
