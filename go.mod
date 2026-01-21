@@ -3,7 +3,7 @@ module github.com/nais/krakend
 go 1.24.6
 
 require (
-	github.com/arttor/helmify v0.4.11
+	github.com/arttor/helmify v0.4.13
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/golangci/golangci-lint v1.57.2
 	github.com/mitchellh/hashstructure/v2 v2.0.2
