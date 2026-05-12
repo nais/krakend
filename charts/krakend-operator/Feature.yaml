@@ -4,7 +4,6 @@ dependencies:
     - krakend-operator-crds
 environmentKinds:
   - tenant
-  - legacy
   - onprem
 values:
   apiserverIP:
