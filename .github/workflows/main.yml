@@ -105,38 +105,26 @@ jobs:
           helm push krakend-operator-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
           helm push krakend-operator-crds-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
 
-  deploy-controller:
-    name: Deploy controller
+  rollout-controller:
     needs:
       - build_push
     runs-on: fasit-deploy
     permissions:
       id-token: write
     steps:
-      - uses: nais/fasit-deploy@58a70a338b16dc646373c91724fc7e7522d085a4 # ratchet:nais/fasit-deploy@v4.0.1
+      - uses: nais/fasit-deploy@v2
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator
           version: ${{ needs.build_push.outputs.version }}
-          targets: |
-            [
-              { "target": { "kind": "tenant", "tenant": "nav" } },
-              { "target": { "kind": "onprem", "tenant": "nav" } }
-            ]
 
-  deploy-crds:
-    name: Deploy CRDs
+  rollout-crds:
     needs:
       - build_push
     runs-on: fasit-deploy
     permissions:
       id-token: write
     steps:
-      - uses: nais/fasit-deploy@58a70a338b16dc646373c91724fc7e7522d085a4 # ratchet:nais/fasit-deploy@v4.0.1
+      - uses: nais/fasit-deploy@v2
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator-crds
           version: ${{ needs.build_push.outputs.version }}
-          targets: |
-            [
-              { "target": { "kind": "tenant", "tenant": "nav" } },
-              { "target": { "kind": "onprem", "tenant": "nav" } }
-            ]
