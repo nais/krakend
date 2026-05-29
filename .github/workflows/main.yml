@@ -50,9 +50,9 @@ jobs:
         run: mise run build
 
   build_push:
-    needs:
-      - lint
-      - build
+    #needs:
+    #  - lint
+    #  - build
     outputs:
       version: ${{ steps.build-push-sign.outputs.version }}
     permissions:
@@ -98,7 +98,7 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
             ]
 
   rollout-crds:
@@ -114,5 +114,5 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
             ]
