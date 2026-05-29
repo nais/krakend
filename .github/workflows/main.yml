@@ -3,7 +3,7 @@ name: Container Image
 on:
   push:
     branches:
-      - bump_krakend
+      - main
     paths-ignore:
       - "debugapp/**"
       - ".github/workflows/debugapp.yml"
@@ -50,9 +50,6 @@ jobs:
         run: mise run build
 
   build_push:
-    #needs:
-    #  - lint
-    #  - build
     outputs:
       version: ${{ steps.build-push-sign.outputs.version }}
     permissions:
@@ -87,6 +84,8 @@ jobs:
 
   rollout-controller:
     needs:
+      - lint
+      - build
       - build_push
     runs-on: fasit-deploy
     permissions:
@@ -98,11 +97,16 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
+              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+              { "target": { "kind": "tenant", "tenant": "nav", "environment": "dev" } },
+              { "target": { "kind": "onprem", "tenant": "nav", "environment": "dev-fss" } }
             ]
 
   rollout-crds:
     needs:
+      - lint
+      - build
       - build_push
     runs-on: fasit-deploy
     permissions:
@@ -114,5 +118,8 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
+              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+              { "target": { "kind": "tenant", "tenant": "nav", "environment": "dev" } },
+              { "target": { "kind": "onprem", "tenant": "nav", "environment": "dev-fss" } }
             ]
