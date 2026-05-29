@@ -3,7 +3,7 @@ name: Container Image
 on:
   push:
     branches:
-      - main
+      - bump_krakend
     paths-ignore:
       - "debugapp/**"
       - ".github/workflows/debugapp.yml"
