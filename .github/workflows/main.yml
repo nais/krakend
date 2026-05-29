@@ -99,8 +99,8 @@ jobs:
             [
               { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
               { "target": { "kind": "tenant", "tenant": "dev-nais" } },
-              { "target": { "kind": "tenant", "tenant": "nav", "environment": "dev" } },
-              { "target": { "kind": "onprem", "tenant": "nav", "environment": "dev-fss" } }
+              { "target": { "kind": "tenant", "tenant": "nav" } },
+              { "target": { "kind": "onprem", "tenant": "nav" } }
             ]
 
   rollout-crds:
@@ -120,6 +120,6 @@ jobs:
             [
               { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
               { "target": { "kind": "tenant", "tenant": "dev-nais" } },
-              { "target": { "kind": "tenant", "tenant": "nav", "environment": "dev" } },
-              { "target": { "kind": "onprem", "tenant": "nav", "environment": "dev-fss" } }
+              { "target": { "kind": "tenant", "tenant": "nav" } },
+              { "target": { "kind": "onprem", "tenant": "nav" } }
             ]
