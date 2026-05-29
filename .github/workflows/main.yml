@@ -98,7 +98,6 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
               { "target": { "kind": "tenant", "tenant": "dev-nais" } },
             ]
 
@@ -115,6 +114,5 @@ jobs:
           version: ${{ needs.build_push.outputs.version }}
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
               { "target": { "kind": "tenant", "tenant": "dev-nais" } },
             ]
