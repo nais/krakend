@@ -146,17 +146,17 @@ func TestValidateEndpointsList(t *testing.T) {
 	err = parseYaml("testdata/apiendpoints.yaml", apiendpointsList)
 	assert.NoError(t, err)
 
-	//Validate update of apiendpoint in same apiendpoints resource
+	// Validate update of apiendpoint in same apiendpoints resource
 	err = validateEndpointsList(apiendpointsList, apiendpoint)
 	assert.NoError(t, err)
 
-	//Validate update/create of apiendpoint with duplicate path in a different apiendpoints resource
+	// Validate update/create of apiendpoint with duplicate path in a different apiendpoints resource
 	err = parseYaml("testdata/apiendpoints_in_other_resource.yaml", apiendpointsList)
 	assert.NoError(t, err)
 	err = validateEndpointsList(apiendpointsList, apiendpoint)
 	assert.Error(t, err)
 
-	//Validate update/create of apiendpoint with unique paths in different apiendpoints resources
+	// Validate update/create of apiendpoint with unique paths in different apiendpoints resources
 	apiendpoint.Spec.Endpoints[0].Path = "/unique"
 	err = validateEndpointsList(apiendpointsList, apiendpoint)
 	assert.NoError(t, err)
@@ -164,7 +164,7 @@ func TestValidateEndpointsList(t *testing.T) {
 }
 
 func parseYaml(file string, v any) error {
-	reader, err := os.Open(file)
+	reader, err := os.Open(file) //nolint:gosec // test file path
 	if err != nil {
 		return err
 	}

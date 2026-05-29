@@ -1,0 +1,13 @@
+version: "2"
+
+linters:
+  enable:
+    - gosec
+    - staticcheck
+    - govet
+    - ineffassign
+    - unused
+    - bodyclose
+    - noctx
+    - errcheck
+    - gocritic

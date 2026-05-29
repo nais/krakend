@@ -110,7 +110,7 @@ func main() {
 	if err = (&controller.KrakendReconciler{
 		Client:        mgr.GetClient(),
 		Scheme:        mgr.GetScheme(),
-		Recorder:      mgr.GetEventRecorderFor("krakend-operator"),
+		Recorder:      mgr.GetEventRecorderFor("krakend-operator"), //nolint:staticcheck // TODO: migrate to GetEventRecorder
 		SyncInterval:  interval,
 		KrakendChart:  krakendChart,
 		NetpolEnabled: netpolEnabled,

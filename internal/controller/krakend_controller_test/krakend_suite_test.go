@@ -3,6 +3,11 @@ package krakend_controller_test
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"runtime"
+	"testing"
+	"time"
+
 	"github.com/nais/krakend/internal/controller"
 	"github.com/nais/krakend/internal/helm"
 	. "github.com/onsi/ginkgo/v2"
@@ -11,15 +16,11 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
-	"path/filepath"
-	"runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	"testing"
-	"time"
 
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -90,7 +91,7 @@ var _ = BeforeSuite(func() {
 	err = (&controller.KrakendReconciler{
 		Client:        k8sManager.GetClient(),
 		Scheme:        k8sManager.GetScheme(),
-		Recorder:      k8sManager.GetEventRecorderFor("krakend-operator"),
+		Recorder:      k8sManager.GetEventRecorderFor("krakend-operator"), //nolint:staticcheck // TODO: migrate to GetEventRecorder
 		SyncInterval:  time.Millisecond * 100,
 		KrakendChart:  chart,
 		NetpolEnabled: true,

@@ -55,7 +55,7 @@ func TestParseKrakendEndpointsSpec(t *testing.T) {
 }
 
 func parseYaml(file string, v any) error {
-	reader, err := os.Open(file)
+	reader, err := os.Open(file) //nolint:gosec // test file path
 	if err != nil {
 		return err
 	}

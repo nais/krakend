@@ -25,7 +25,7 @@ const (
 
 type ApiEndpointsValidator struct {
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 func (v *ApiEndpointsValidator) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -105,7 +105,7 @@ func validateEndpointsList(el *krakendv1.ApiEndpointsList, e *krakendv1.ApiEndpo
 		// Delete the apiEndpoints that is about to be updated from existing list
 		if endpoint.Name == e.Name {
 			el.Items = append(el.Items[:i], el.Items[i+1:]...)
-			//add new apiEndpoints to list
+			// add new apiEndpoints to list
 			el.Items = append(el.Items, *e)
 			endpointUpdated = true
 		}

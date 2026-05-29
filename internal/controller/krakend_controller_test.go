@@ -2,6 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/helm"
 	"github.com/stretchr/testify/assert"
@@ -10,8 +13,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
-	"os"
-	"testing"
 )
 
 func TestRenderChart(t *testing.T) {
@@ -47,7 +48,7 @@ func unmarshallKrakend(yamlFile string) (*krakendv1.Krakend, error) {
 	}
 	_ = apiextv1beta1.AddToScheme(sch)
 	decode := serializer.NewCodecFactory(sch).UniversalDeserializer().Decode
-	stream, _ := os.ReadFile(yamlFile)
+	stream, _ := os.ReadFile(yamlFile) //nolint:gosec // test file path
 	obj, gvk, err := decode(stream, nil, nil)
 	if err != nil {
 		return nil, err
