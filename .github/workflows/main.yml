@@ -28,46 +28,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.2
-      - name: Set up Go environment
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.24"
-          cache: false
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: latest
-          args: --timeout=5m
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # ratchet:jdx/mise-action@v4
+      - name: Lint
+        run: mise run lint
 
   build:
     name: Build and Test code
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.2
-      - name: Restore cached binaries
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ github.workspace }}/bin
-          key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
-      - name: Set up Go environment
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.24"
-      - name: Install make
-        run: sudo apt-get update && sudo apt-get install make
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # ratchet:jdx/mise-action@v4
       - name: Vet code
-        run: make vet
+        run: mise run vet
       - name: Test code
-        run: make test
+        run: mise run test
       - name: Build binary
-        run: make build
-      - name: Cache installed binaries
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/bin
-          key: ${{ runner.os }}-bin-${{ hashFiles('Makefile', 'go.mod') }}
+        run: mise run build
 
   build_push:
     needs:
@@ -81,18 +61,18 @@ jobs:
     name: Build and push to GAR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.2
-      - uses: nais/platform-build-push-sign@main
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+      - uses: nais/platform-build-push-sign@df590279b21bc5978519685752f9eaddd546043c # ratchet:nais/platform-build-push-sign@main
         id: build-push-sign
         with:
           name: ${{ env.NAME }}
           google_service_account: ${{ env.SERVICE_ACCOUNT }}
           workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
           push: true
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # ratchet:azure/setup-helm@v4
         name: "Setup Helm"
         with:
-          version: "3.12.0"
+          version: "3.21.0"
       - name: Build Chart
         run: |-
           sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/krakend-operator/Chart.yaml
@@ -112,10 +92,15 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: nais/fasit-deploy@v2
+      - uses: nais/fasit-deploy@58a70a338b16dc646373c91724fc7e7522d085a4 # ratchet:nais/fasit-deploy@v4.0.1
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator
           version: ${{ needs.build_push.outputs.version }}
+          targets: |
+            [
+              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+            ]
 
   rollout-crds:
     needs:
@@ -124,7 +109,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: nais/fasit-deploy@v2
+      - uses: nais/fasit-deploy@58a70a338b16dc646373c91724fc7e7522d085a4 # ratchet:nais/fasit-deploy@v4.0.1
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator-crds
           version: ${{ needs.build_push.outputs.version }}
+          targets: |
+            [
+              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
+            ]
