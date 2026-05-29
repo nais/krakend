@@ -20,13 +20,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/nais/krakend/api/v1"
 	"net"
 	"path/filepath"
 	"runtime"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"testing"
 	"time"
+
+	"github.com/nais/krakend/api/v1"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -128,14 +129,13 @@ var _ = BeforeSuite(func() {
 	dialer := &net.Dialer{Timeout: time.Second}
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
 	Eventually(func() error {
-		conn, err := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
+		conn, err := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true}) //nolint:gosec // test TLS connection
 		if err != nil {
 			return err
 		}
-		conn.Close()
+		conn.Close() //nolint:errcheck,gosec // best-effort close in test
 		return nil
 	}).Should(Succeed())
-
 })
 
 var _ = AfterSuite(func() {

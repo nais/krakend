@@ -255,7 +255,7 @@ func (r *ApiEndpointsReconciler) appsInNamespace(endpoints *krakendv1.ApiEndpoin
 			parts := strings.Split(u.Hostname(), ".")
 			app := ""
 
-			//e.g. http://app1 or http://app1.ns1 or http://app1.ns1.svc.cluster.local
+			// e.g. http://app1 or http://app1.ns1 or http://app1.ns1.svc.cluster.local
 			switch num := len(parts); {
 			case num == 1:
 				app = parts[0]
@@ -319,7 +319,7 @@ func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *
 		return err
 	}
 
-	//TODO handle race conditions when updating configmap
+	// TODO handle race conditions when updating configmap
 	cm.Data[key] = string(partials)
 	err = r.Update(ctx, cm)
 	if err != nil {

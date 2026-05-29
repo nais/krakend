@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"os"
+	"path/filepath"
+
 	"github.com/brianvoe/gofakeit/v6"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"path/filepath"
 )
 
 func main() {
@@ -35,5 +36,5 @@ func fakeAndSave(file string, v any) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(file, b, 0644)
+	return os.WriteFile(file, b, 0600)
 }

@@ -19,31 +19,6 @@ rules:
   - krakend.nais.io
   resources:
   - apiendpoints
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - krakend.nais.io
-  resources:
-  - apiendpoints/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - krakend.nais.io
-  resources:
-  - apiendpoints/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - krakend.nais.io
-  resources:
   - krakends
   verbs:
   - create
@@ -56,12 +31,14 @@ rules:
 - apiGroups:
   - krakend.nais.io
   resources:
+  - apiendpoints/finalizers
   - krakends/finalizers
   verbs:
   - update
 - apiGroups:
   - krakend.nais.io
   resources:
+  - apiendpoints/status
   - krakends/status
   verbs:
   - get
