@@ -15,7 +15,7 @@ import (
 
 const (
 	AppTemplateFile = "templates/app.yaml"
-	DefaultImage    = "krakend:2.12.0"
+	DefaultImage    = "krakend:2.13.10"
 )
 
 //go:embed templates/*.yaml
@@ -23,7 +23,6 @@ var templatesDir embed.FS
 
 func Convert(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) ([]runtime.Object, error) {
 	objs := make([]runtime.Object, 0)
-	app := ToApp(k, endpoints)
 	config, err := ToKrakendConfig(k)
 	if err != nil {
 		return nil, fmt.Errorf("creating krakend config configmap: %v", err)
@@ -43,6 +42,7 @@ func Convert(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) ([]runtim
 		return nil, fmt.Errorf("creating partials config configmap: %v", err)
 	}
 
+	app := ToApp(k, filtered)
 	objs = append(objs, app, config, partials)
 	return objs, nil
 }
