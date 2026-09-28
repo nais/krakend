@@ -9,8 +9,6 @@ import (
 
 const ManagedByLabel = "krakend-operator"
 const KrakendNameLabel = "krakend"
-const DefaultCIDR = "0.0.0.0/0"
-
 // TODO: get IP blocks for our clusters, and make it configurable for tenants
 func KrakendNetpol(name string, namespace string, labelSelector map[string]string) *v1.NetworkPolicy {
 	np := &v1.NetworkPolicy{
@@ -44,18 +42,6 @@ func KrakendNetpol(name string, namespace string, labelSelector map[string]strin
 						{
 							Protocol: &[]corev1.Protocol{corev1.ProtocolTCP}[0],
 							Port:     &intstr.IntOrString{IntVal: 443},
-						},
-					},
-					To: []v1.NetworkPolicyPeer{
-						{
-							IPBlock: &v1.IPBlock{
-								CIDR: DefaultCIDR,
-								Except: []string{
-									"10.6.0.0/15",
-									"172.16.0.0/12",
-									"192.168.0.0/16",
-								},
-							},
 						},
 					},
 				},
