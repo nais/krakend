@@ -97,7 +97,3 @@ type ApiEndpointsList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ApiEndpoints `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&ApiEndpoints{}, &ApiEndpointsList{})
-}

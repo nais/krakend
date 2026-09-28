@@ -111,10 +111,6 @@ type KrakendList struct {
 	Items           []Krakend `json:"items"`
 }
 
-func init() {
-	SchemeBuilder.Register(&Krakend{}, &KrakendList{})
-}
-
 func (k *Krakend) NamespacedName() types.NamespacedName {
 	return types.NamespacedName{
 		Namespace: k.Namespace,
