@@ -43,5 +43,5 @@ krakend:
         - ALL
   ingress:
     enabled: true
-    className: "nais-ingress-external"
+    className: "external-haproxy"
     annotations: {}

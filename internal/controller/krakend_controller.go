@@ -20,6 +20,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	hashstructure "github.com/mitchellh/hashstructure/v2"
 	krakendv1 "github.com/nais/krakend/api/v1"
 	"github.com/nais/krakend/internal/helm"
@@ -29,7 +31,8 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	"strings"
+
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +42,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 // KrakendReconciler reconciles a Krakend object
@@ -52,7 +54,7 @@ type KrakendReconciler struct {
 	NetpolEnabled bool
 }
 
-const DefaultKrakendIngressClass = "nais-ingress-external"
+const DefaultKrakendIngressClass = "external-haproxy"
 
 //TODO: add more finegrained permissions
 
@@ -213,7 +215,7 @@ func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
 				Paths: []krakendv1.Path{
 					{
 						Path:     "/",
-						PathType: "ImplementationSpecific",
+						PathType: "Prefix",
 					},
 				},
 			},

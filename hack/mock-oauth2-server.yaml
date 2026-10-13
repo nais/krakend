@@ -56,11 +56,8 @@ metadata:
   name: mock-oauth2-server
   labels:
     app: mock-oauth2-server
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nais-ingress
+  ingressClassName: internal-haproxy
   rules:
     - host: mock-oauth2-server.dev.dev-nais.cloud.nais.io
       http:
@@ -71,7 +68,7 @@ spec:
                 name: mock-oauth2-server
                 port:
                   number: 8080
-            pathType: ImplementationSpecific
+            pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
