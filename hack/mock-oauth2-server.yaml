@@ -56,9 +56,6 @@ metadata:
   name: mock-oauth2-server
   labels:
     app: mock-oauth2-server
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: internal-haproxy
   rules:
