@@ -53,9 +53,9 @@ spec:
   annotations: {}
   hosts:
     - host: my-namespace.nais.io
-    paths:
+      paths:
       - path: /
-      pathType: ImplementationSpecific
+        pathType: Prefix
   authProviders:
   - name: some-jwt-auth-provider
     alg: RS256

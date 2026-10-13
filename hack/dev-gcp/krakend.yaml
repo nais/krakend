@@ -6,13 +6,13 @@ spec:
   name: gateway
   ingress:
     enabled: true
-    className: "nais-ingress"
+    className: "internal-haproxy"
     annotations: {}
     hosts:
       - host: gateway.intern.dev.nav.no
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
   ingressHost:
   authProviders:
     - name: mock-oauth2-server

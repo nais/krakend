@@ -6,13 +6,13 @@ spec:
   name: team1
   ingress:
     enabled: true
-    className: "nais-ingress"
+    className: "internal-haproxy"
     annotations: {}
     hosts:
       - host: team1.nais.io
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
   authProviders:
     - name: maskinporten
       alg: RS256

@@ -30,7 +30,7 @@ spec:
               - host: "[[ .Values.team ]]-gw.{{ .Values.replicator.krakend.ingressDomain }}"
                 paths:
                   - path: /
-                    pathType: ImplementationSpecific
+                    pathType: Prefix
           authProviders:
             - name: maskinporten
               alg: RS256
