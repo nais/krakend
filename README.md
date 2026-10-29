@@ -130,7 +130,7 @@ kubectl apply -f <your-apiendpoints-resource.yaml>
 
 #### Generated KrakenD config
 
-The operator runs KrakenD CE 3.x (image `krakend`). For each `Krakend` resource it writes the full
+The operator runs KrakenD CE 3.x, from our GAR mirror of the official image (`krakend/Dockerfile`, signed and with SBOM). For each `Krakend` resource it writes the full
 `krakend.json` (`version: 4`) to the ConfigMap `<name>-krakend-v3`, built from the `Krakend` resource and all
 `ApiEndpoints` in the namespace. Prometheus metrics (OpenTelemetry) are exposed on port 9091.
 

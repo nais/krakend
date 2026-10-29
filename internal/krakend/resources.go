@@ -17,12 +17,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ImageTag is bumped by updatecli (hack/updatecli.d/krakend-image.yaml), keep it on its own line.
+// ImageTag must match the tag in krakend/Dockerfile. Bumped by updatecli (hack/updatecli.d/krakend-image.yaml), keep it on its own line.
 const ImageTag = "3.0.2"
 
 const (
-	// ImageRepository is the official Docker Hub image, without registry prefix to match the kyverno allowlist
-	ImageRepository = "krakend"
+	// ImageRepository is our mirror of the official image, see krakend/Dockerfile
+	ImageRepository = "europe-north1-docker.pkg.dev/nais-io/nais/images/krakend"
 	// MinMajorVersion is the lowest KrakenD major version supported by the generated config (version 4)
 	MinMajorVersion = 3
 

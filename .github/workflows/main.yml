@@ -84,11 +84,51 @@ jobs:
           helm push krakend-operator-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
           helm push krakend-operator-crds-${{ steps.build-push-sign.outputs.version }}.tgz ${{ env.IMAGE_REPOSITORY }}
 
+  build_push_krakend:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: Build and push krakend image to GAR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+        with:
+          fetch-depth: 0
+      # job-level path filters are not supported, and skipping the job would skip the rollouts that need it
+      - name: Check for krakend/ changes
+        id: changes
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [[ "${{ github.event_name }}" != "push" ]] || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$BEFORE" "$GITHUB_SHA" -- krakend/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Read krakend version
+        if: steps.changes.outputs.changed == 'true'
+        id: version
+        run: echo "tag=$(sed -n 's/^FROM krakend:\([^@]*\)@.*/\1/p' krakend/Dockerfile)" >> "$GITHUB_OUTPUT"
+      - uses: nais/platform-build-push-sign@df590279b21bc5978519685752f9eaddd546043c # ratchet:nais/platform-build-push-sign@main
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          name: krakend
+          context: krakend
+          dockerfile: krakend/Dockerfile
+          extra_tags: ${{ steps.version.outputs.tag }}
+          multi-platform: true
+          google_service_account: ${{ env.SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
+          push: true
+
   rollout-controller:
     needs:
       - lint
       - build
       - build_push
+      - build_push_krakend
     runs-on: fasit-deploy
     permissions:
       id-token: write

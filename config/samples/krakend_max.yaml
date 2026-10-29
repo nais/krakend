@@ -21,7 +21,6 @@ spec:
   deployment:
     replicaCount: 2
     image:
-      repository: krakend
       tag: "3.0.2"
       pullPolicy: IfNotPresent
     resources:

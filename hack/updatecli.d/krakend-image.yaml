@@ -8,11 +8,28 @@ sources:
       versionfilter:
         kind: semver
         pattern: "3.x"
+  digest:
+    name: "krakend image digest"
+    kind: dockerdigest
+    dependson:
+      - latestRelease
+    spec:
+      image: "krakend"
+      tag: '{{ source "latestRelease" }}'
 targets:
   imageTag:
     name: Bump krakend image tag
     kind: file
+    sourceid: latestRelease
     spec:
       file: "internal/krakend/resources.go"
       matchpattern: '(?m)^const ImageTag = "[^"]*"$'
       replacepattern: 'const ImageTag = "{{ source "latestRelease" }}"'
+  dockerfile:
+    name: Bump krakend Dockerfile
+    kind: file
+    sourceid: digest
+    spec:
+      file: "krakend/Dockerfile"
+      matchpattern: '(?m)^FROM krakend:.*$'
+      replacepattern: 'FROM krakend:{{ source "digest" }}'
