@@ -21,8 +21,7 @@ spec:
   deployment:
     replicaCount: 2
     image:
-      registry: docker.io
-      repository: library/krakend
+      repository: krakend
       tag: "3.0.2"
       pullPolicy: IfNotPresent
     resources:

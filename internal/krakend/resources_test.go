@@ -35,7 +35,7 @@ func TestResources(t *testing.T) {
 				"app.kubernetes.io/name":     "krakend",
 				"app.kubernetes.io/instance": "team1",
 			}, r.Spec.Selector.MatchLabels, "selector is immutable on existing deployments")
-			assert.Equal(t, "docker.io/library/krakend:"+ImageTag, r.Spec.Template.Spec.Containers[0].Image)
+			assert.Equal(t, "krakend:"+ImageTag, r.Spec.Template.Spec.Containers[0].Image)
 			assert.Equal(t, "team1-krakend-v3", r.Spec.Template.Spec.Volumes[1].ConfigMap.Name)
 		case *networkingv1.Ingress:
 			assert.Equal(t, "team1.nais.io", r.Spec.Rules[0].Host)

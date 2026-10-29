@@ -73,7 +73,8 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// reconciliation is triggered when status subresource is updated, so we need this check to avoid infinite loop
 	if k.Status.SynchronizationHash == hash && !r.needsSync(k.Status.SynchronizationTimestamp.Time) {
 		log.Debugf("skipping reconciliation of %q, hash %q is unchanged and changed within syncInterval window", k.Name, hash)
-		return ctrl.Result{}, nil
+		// requeue when the window ends, otherwise nothing reconciles it until the next change
+		return ctrl.Result{RequeueAfter: time.Until(k.Status.SynchronizationTimestamp.Add(r.SyncInterval)) + time.Second}, nil
 	} else {
 		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", k.Status.SynchronizationHash != hash, r.needsSync(k.Status.SynchronizationTimestamp.Time))
 	}

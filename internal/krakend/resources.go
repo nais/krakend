@@ -21,8 +21,8 @@ import (
 const ImageTag = "3.0.2"
 
 const (
-	ImageRegistry   = "docker.io"
-	ImageRepository = "library/krakend"
+	// ImageRepository is the official Docker Hub image, without registry prefix to match the kyverno allowlist
+	ImageRepository = "krakend"
 	// MinMajorVersion is the lowest KrakenD major version supported by the generated config (version 4)
 	MinMajorVersion = 3
 
@@ -93,22 +93,23 @@ func Resources(k *v1.Krakend) ([]client.Object, []string, error) {
 // image returns the image to use. Overrides are only used for KrakenD 3.x or newer.
 func image(k *v1.Krakend) (string, []string) {
 	img := k.Spec.Deployment.Image
+	def := ImageRepository + ":" + ImageTag
 	if img.Registry == "" && img.Repository == "" && img.Tag == "" {
-		return fmt.Sprintf("%s/%s:%s", ImageRegistry, ImageRepository, ImageTag), nil
+		return def, nil
 	}
 	if !SupportedImageTag(img.Tag) {
-		return fmt.Sprintf("%s/%s:%s", ImageRegistry, ImageRepository, ImageTag), []string{
+		return def, []string{
 			fmt.Sprintf("ignoring spec.deployment.image (tag %q): only KrakenD %d.x or newer is supported, using operator default", img.Tag, MinMajorVersion),
 		}
 	}
-	registry, repository := img.Registry, img.Repository
-	if registry == "" {
-		registry = ImageRegistry
-	}
+	repository := img.Repository
 	if repository == "" {
 		repository = ImageRepository
 	}
-	return fmt.Sprintf("%s/%s:%s", registry, repository, img.Tag), nil
+	if img.Registry != "" {
+		repository = img.Registry + "/" + repository
+	}
+	return repository + ":" + img.Tag, nil
 }
 
 // SupportedImageTag returns true if tag is a version with major >= MinMajorVersion, e.g. 3, 3.0 or 3.0.2
