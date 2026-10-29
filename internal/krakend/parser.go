@@ -1,14 +1,10 @@
 package krakend
 
 import (
-	"encoding/json"
 	"fmt"
 	v1 "github.com/nais/krakend/api/v1"
 )
 
-type Partials struct {
-	Endpoints []*Endpoint `json:"endpoints,omitempty"`
-}
 type Endpoint struct {
 	Endpoint          string       `json:"endpoint"`
 	Method            string       `json:"method"`
@@ -147,15 +143,4 @@ func findAuthProvider(k *v1.Krakend, auth *v1.Auth) (*AuthValidator, error) {
 		}
 	}
 	return nil, fmt.Errorf("auth provider with name '%s' not found", auth.Name)
-}
-
-func ParsePartials(content []byte) (*Partials, error) {
-	partials := &Partials{}
-	endpoints := make([]*Endpoint, 0)
-	err := json.Unmarshal(content, &endpoints)
-	if err != nil {
-		return nil, err
-	}
-	partials.Endpoints = endpoints
-	return partials, nil
 }

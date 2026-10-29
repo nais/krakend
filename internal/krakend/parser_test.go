@@ -66,13 +66,3 @@ func parseYaml(file string, v any) error {
 	}
 	return nil
 }
-
-func TestParsePartials(t *testing.T) {
-	content, err := os.ReadFile("testdata/config.json")
-	assert.NoError(t, err)
-
-	partials, err := ParsePartials(content)
-	assert.NoError(t, err)
-
-	assert.Equal(t, 2, len(partials.Endpoints))
-}

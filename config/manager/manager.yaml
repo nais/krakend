@@ -75,8 +75,6 @@ spec:
         image: controller:latest
         name: manager
         env:
-          - name: KRAKEND_CHART_PATH
-            value: "/var/config/krakendinstaller-1.0.0.tgz"
           - name: NETPOL_ENABLED
             value: "true"
           - name: DEBUG
@@ -108,12 +106,5 @@ spec:
           requests:
             cpu: 100m
             memory: 256Mi
-        volumeMounts:
-          - mountPath: /var/config
-            name: config
-      volumes:
-        - name: config
-          configMap:
-            name: config
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

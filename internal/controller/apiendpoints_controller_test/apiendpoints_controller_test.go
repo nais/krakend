@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	krakendv1 "github.com/nais/krakend/api/v1"
-	"github.com/nais/krakend/internal/controller"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -32,12 +31,10 @@ var _ = Describe("ApiEndpoints Controller", func() {
 
 	BeforeEach(func() {
 		Expect(k8sClient.Create(ctx, apiEndpointsDeps.krakend)).Should(Succeed())
-		Expect(k8sClient.Create(ctx, apiEndpointsDeps.cm)).Should(Succeed())
 	})
 
 	AfterEach(func() {
 		Expect(k8sClient.Delete(ctx, apiEndpointsDeps.krakend)).Should(Succeed())
-		Expect(k8sClient.Delete(ctx, apiEndpointsDeps.cm)).Should(Succeed())
 	})
 
 	// TODO: add more tests
@@ -76,13 +73,19 @@ var _ = Describe("ApiEndpoints Controller", func() {
 				}, n)).Should(Succeed())
 			}
 
+			cm := &v1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Namespace: actual.Namespace,
+				Name:      "ns1-krakend-v3",
+			}, cm)).Should(Succeed())
+			Expect(cm.Data["krakend.json"]).To(ContainSubstring(`"endpoint": "/path0"`))
+
 		})
 	})
 })
 
 type apiEndpointsControllerDependencies struct {
 	krakend *krakendv1.Krakend
-	cm      *v1.ConfigMap
 }
 
 func prepareApiEndpointsController() *apiEndpointsControllerDependencies {
@@ -103,19 +106,8 @@ func prepareApiEndpointsController() *apiEndpointsControllerDependencies {
 			},
 		},
 	}
-	cm := &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ns1-krakend-partials",
-			Namespace: "ns1",
-		},
-		Data: map[string]string{
-			controller.KrakendConfigMapKey: "[]",
-		},
-	}
-
 	return &apiEndpointsControllerDependencies{
 		krakend: krakend,
-		cm:      cm,
 	}
 }
 

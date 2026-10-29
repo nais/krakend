@@ -64,7 +64,7 @@ spec:
   deployment:
   replicaCount: 2
   image:
-    tag: 2.4.3
+    tag: 3.0.2
   resources:
     limits:
     cpu: 100m
@@ -127,6 +127,14 @@ Apply the resource:
 ```sh
 kubectl apply -f <your-apiendpoints-resource.yaml>
 ```
+
+#### Generated KrakenD config
+
+The operator runs KrakenD CE 3.x (`docker.io/library/krakend`). For each `Krakend` resource it writes the full
+`krakend.json` (`version: 4`) to the ConfigMap `<name>-krakend-v3`, built from the `Krakend` resource and all
+`ApiEndpoints` in the namespace. Prometheus metrics (OpenTelemetry) are exposed on port 9091.
+
+`spec.deployment.image` is only used if the tag is 3.x or newer, otherwise the operator default image is used.
 
 ## Development
 

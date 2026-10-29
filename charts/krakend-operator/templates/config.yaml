@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "krakend-operator.fullname" . }}-config
-  labels:
-  {{- include "krakend-operator.labels" . | nindent 4 }}
-binaryData:
-  krakendinstaller-1.0.0.tgz: {{ range $path, $_ :=  .Files.Glob  "**.tgz" }}{{ $.Files.Get $path | b64enc }}{{ end }}

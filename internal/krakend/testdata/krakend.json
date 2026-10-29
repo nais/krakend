@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.0/krakend.json",
+  "version": 4,
+  "timeout": "3s",
+  "cache_ttl": "3s",
+  "extra_config": {
+    "router": {
+      "logger_skip_paths": [
+        "/__health"
+      ]
+    },
+    "telemetry/opentelemetry": {
+      "exporters": {
+        "prometheus": [
+          {
+            "go_metrics": true,
+            "name": "krakend_app",
+            "port": 9091,
+            "process_metrics": true
+          }
+        ]
+      },
+      "layers": {
+        "backend": {
+          "metrics": {
+            "detailed_connection": true,
+            "disable_stage": false,
+            "read_payload": true,
+            "round_trip": true
+          },
+          "traces": {
+            "detailed_connection": true,
+            "disable_stage": false,
+            "read_payload": true,
+            "round_trip": true
+          }
+        },
+        "global": {
+          "disable_metrics": false,
+          "disable_propagation": false,
+          "disable_traces": false
+        },
+        "proxy": {
+          "disable_metrics": false,
+          "disable_traces": false
+        }
+      },
+      "metric_reporting_period": 1,
+      "service_name": "krakend_prometheus_service"
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/other",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "input_query_strings": [
+        "foo",
+        "bar"
+      ],
+      "input_headers": [
+        "X-Forwarded-For"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "operation_debug": true,
+          "alg": "RS256",
+          "cache": true,
+          "jwk_url": "https://test.maskinporten.no/jwk",
+          "issuer": "https://test.maskinporten.no/",
+          "audience": [
+            "audience1"
+          ],
+          "scopes": [
+            "org1:team1:krakend.app"
+          ],
+          "scopes_key": "scope"
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 10,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "method": "GET",
+          "host": [
+            "http://echo:1027"
+          ],
+          "url_pattern": "/",
+          "encoding": "no-op"
+        }
+      ],
+      "timeout": "2s"
+    },
+    {
+      "endpoint": "/echo",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "input_query_strings": [
+        "foo",
+        "bar"
+      ],
+      "input_headers": [
+        "X-Forwarded-For"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "operation_debug": true,
+          "alg": "RS256",
+          "cache": true,
+          "jwk_url": "https://test.maskinporten.no/jwk",
+          "issuer": "https://test.maskinporten.no/",
+          "audience": [
+            "audience1"
+          ],
+          "scopes": [
+            "org1:team1:krakend.app"
+          ],
+          "scopes_key": "scope"
+        },
+        "qos/ratelimit/router": {
+          "max_rate": 10,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "method": "GET",
+          "host": [
+            "http://echo:1027"
+          ],
+          "url_pattern": "/",
+          "encoding": "no-op"
+        }
+      ],
+      "timeout": "2s"
+    },
+    {
+      "endpoint": "/doc",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 10,
+          "strategy": "ip"
+        }
+      },
+      "backend": [
+        {
+          "method": "GET",
+          "host": [
+            "http://echo:1027"
+          ],
+          "url_pattern": "/doc",
+          "encoding": "no-op"
+        }
+      ]
+    }
+  ]
+}

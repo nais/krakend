@@ -18,14 +18,11 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/hashstructure/v2"
 	krakendv1 "github.com/nais/krakend/api/v1"
-	"github.com/nais/krakend/internal/krakend"
 	"github.com/nais/krakend/internal/netpol"
 	log "github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,9 +46,8 @@ type ApiEndpointsReconciler struct {
 }
 
 const (
-	AppLabelName        = "app"
-	KrakendFinalizer    = "finalizer.krakend.nais.io"
-	KrakendConfigMapKey = "endpoints.tmpl"
+	AppLabelName     = "app"
+	KrakendFinalizer = "finalizer.krakend.nais.io"
 )
 
 //+kubebuilder:rbac:groups=krakend.nais.io,resources=apiendpoints,verbs=get;list;watch;create;update;patch;delete
@@ -281,52 +277,7 @@ func (r *ApiEndpointsReconciler) appsInNamespace(endpoints *krakendv1.ApiEndpoin
 
 func (r *ApiEndpointsReconciler) updateKrakendConfigMap(ctx context.Context, k *krakendv1.Krakend) error {
 	log.Debugf("updating ConfigMap for Krakend '%s'", k.Name)
-
-	cm := &corev1.ConfigMap{}
-	cmName := fmt.Sprintf("%s-%s-%s", k.Name, "krakend", "partials")
-	err := r.Get(ctx, types.NamespacedName{
-		Name:      cmName,
-		Namespace: k.Namespace,
-	}, cm)
-	if err != nil {
-		return fmt.Errorf("get ConfigMap '%s': %v", cmName, err)
-	}
-
-	key := KrakendConfigMapKey
-	ep := cm.Data[key]
-	if ep == "" {
-		return fmt.Errorf("%s not found in ConfigMap with name %s", key, cmName)
-	}
-
-	list := &krakendv1.ApiEndpointsList{}
-	if err = r.List(ctx, list, client.InNamespace(k.Namespace)); err != nil {
-		return fmt.Errorf("list all ApiEndpoints: %v", err)
-	}
-
-	filtered := make([]krakendv1.ApiEndpoints, 0)
-	for _, e := range list.Items {
-		if e.GetDeletionTimestamp() == nil {
-			filtered = append(filtered, e)
-		}
-	}
-
-	allEndpoints, err := krakend.ToKrakendEndpoints(k, filtered)
-	if err != nil {
-		return fmt.Errorf("convert ApiEndpoints to Krakend endpoints: %v", err)
-	}
-	partials, err := json.Marshal(allEndpoints)
-	if err != nil {
-		return err
-	}
-
-	// TODO handle race conditions when updating configmap
-	cm.Data[key] = string(partials)
-	err = r.Update(ctx, cm)
-	if err != nil {
-		return fmt.Errorf("update ConfigMap '%s': %v", cmName, err)
-	}
-
-	return nil
+	return ensureKrakendConfig(ctx, r.Client, r.Scheme, k)
 }
 
 func hashEndpoints(a krakendv1.ApiEndpointsSpec) (string, error) {

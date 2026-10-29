@@ -32,13 +32,14 @@ type AuthProvider struct {
 
 // KrakendDeployment defines the configuration for the KrakenD deployment
 type KrakendDeployment struct {
-	// DeploymentType is the type of deployment to use, either deployment or rollout
+	// DeploymentType is deprecated and ignored, only deployment is supported
 	DeploymentType string `json:"deploymentType,omitempty"`
 	// ReplicaCount is the number of replicas to use for the deployment
 	ReplicaCount int `json:"replicaCount,omitempty"`
 	// Resources is the resource requirements for the deployment, as in corev1.ResourceRequirements
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
-	// Image is the image configuration to use for the deployment
+	// Image is the image configuration to use for the deployment.
+	// Registry, repository and tag are only used if tag is KrakenD 3.x or newer, otherwise the operator default is used.
 	Image Image `json:"image,omitempty"`
 	// ExtraEnvVars is a list of extra environment variables to add to the deployment
 	ExtraEnvVars []corev1.EnvVar `json:"extraEnvVars,omitempty"`

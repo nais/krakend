@@ -1,4 +1,4 @@
-name: Update Krakend Chart
+name: Update Krakend Image
 
 on:
   workflow_dispatch:
@@ -22,30 +22,21 @@ jobs:
         uses: updatecli/updatecli-action@e71be7554f3f940bc439cf720b3e4e379823c562 # ratchet:updatecli/updatecli-action@v3.2.0
 
       - name: Run Updatecli in Dry Run mode
-        run: updatecli diff --config installer/krakend/updatecli.d
+        run: updatecli diff --config hack/updatecli.d
 
       - name: Run Updatecli in Apply mode
-        run: updatecli apply --config installer/krakend/updatecli.d
-
-      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # ratchet:azure/setup-helm@v4
-        name: "Setup Helm"
-        with:
-          version: "3.21.0"
-
-      - name: Package and copy chart
-        run: |-
-          helm package installer/krakend -d charts/krakend-operator
+        run: updatecli apply --config hack/updatecli.d
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # ratchet:peter-evans/create-pull-request@v8
         with:
-          commit-message: "feat: upgrade helm charts"
-          title: "chore(deps): upgrade KrakenD helm chart and image versions"
+          commit-message: "chore(deps): upgrade krakend image"
+          title: "chore(deps): upgrade KrakenD image"
           body: |
-            Automatic upgrade of KrakenD helm chart and image tag versions using https://github.com/updatecli/updatecli.
+            Automatic upgrade of the KrakenD image tag using https://github.com/updatecli/updatecli.
 
-            Check release log at https://github.com/equinixmetal-helm/krakend/releases for more details.
-          branch: upgrade-krakend-helm-chart
+            Check release notes at https://github.com/krakend/krakend-ce/releases.
+          branch: upgrade-krakend-image
           base: main
           labels: dependencies
           delete-branch: true

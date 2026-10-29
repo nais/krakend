@@ -18,18 +18,13 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	hashstructure "github.com/mitchellh/hashstructure/v2"
 	krakendv1 "github.com/nais/krakend/api/v1"
-	"github.com/nais/krakend/internal/helm"
+	"github.com/nais/krakend/internal/krakend"
 	"github.com/nais/krakend/internal/netpol"
 	log "github.com/sirupsen/logrus"
-	"helm.sh/helm/v3/pkg/chartutil"
-	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 
 	"time"
@@ -50,11 +45,8 @@ type KrakendReconciler struct {
 	Scheme        *runtime.Scheme
 	Recorder      record.EventRecorder
 	SyncInterval  time.Duration
-	KrakendChart  *helm.Chart
 	NetpolEnabled bool
 }
-
-const DefaultKrakendIngressClass = "external-haproxy"
 
 //TODO: add more finegrained permissions
 
@@ -86,20 +78,19 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.Debugf("reconciling: hash changed: %v, outside syncInterval window: %v", k.Status.SynchronizationHash != hash, r.needsSync(k.Status.SynchronizationTimestamp.Time))
 	}
 
-	releaseName := k.Name
-	releaseNamespace := k.Namespace
-
-	values, err := prepareValues(k)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("preparing values: %w", err)
+	// write config before the deployment, so new pods have a config to mount
+	if err := ensureKrakendConfig(ctx, r.Client, r.Scheme, k); err != nil {
+		r.Recorder.Eventf(k, "Warning", "KrakendConfig", "Unable to create krakend config: %v", err)
+		return ctrl.Result{}, fmt.Errorf("ensuring krakend config: %w", err)
 	}
 
-	resources, err := r.KrakendChart.ToUnstructured(releaseName, releaseNamespace, chartutil.Values{
-		"krakend": values,
-	})
-
+	objects, warnings, err := krakend.Resources(k)
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("rendering helm chart: %w", err)
+		r.Recorder.Eventf(k, "Warning", "InvalidSpec", "%v", err)
+		return ctrl.Result{}, fmt.Errorf("building resources: %w", err)
+	}
+	for _, w := range warnings {
+		r.Recorder.Event(k, "Warning", "InvalidSpec", w)
 	}
 
 	ownerRef := []metav1.OwnerReference{
@@ -111,58 +102,15 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		},
 	}
 
-	for _, resource := range resources {
-		log.Debugf("creating resource of kind: %s with name: %s", resource.GetKind(), resource.GetName())
-
-		if resource.GetKind() == "Deployment" {
-			addAnnotations(resource, map[string]string{"reloader.stakater.com/search": "true"})
-			d := &v1.Deployment{}
-			err = runtime.DefaultUnstructuredConverter.FromUnstructured(resource.Object, d)
-			if err != nil {
-				return ctrl.Result{}, fmt.Errorf("converting unstructured to deployment: %w", err)
-			}
-
-			d.Spec.Template.Name = d.Name
-			if len(d.Spec.Template.Spec.Containers) == 1 {
-				d.Spec.Template.Spec.Containers[0].Name = d.Name
-				existing := d.Spec.Template.Spec.Containers[0].Env
-				existing = append(existing, k.Spec.Deployment.ExtraEnvVars...)
-				d.Spec.Template.Spec.Containers[0].Env = existing
-			}
-			d.Spec.Template.Labels["logs.nais.io/flow-loki"] = "true"
-			d.Spec.Template.Annotations["kubectl.kubernetes.io/default-container"] = d.Name
-
-			m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(d)
-			if err != nil {
-				return ctrl.Result{}, fmt.Errorf("converting deployment to unstructured: %w", err)
-			}
-			resource.Object = m
+	for _, obj := range objects {
+		m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("converting %T to unstructured: %w", obj, err)
 		}
-
-		if resource.GetKind() == "ConfigMap" {
-			addAnnotations(resource, map[string]string{"reloader.stakater.com/match": "true"})
-
-			var cm corev1.ConfigMap
-			err := r.Get(ctx, types.NamespacedName{
-				Name:      resource.GetName(),
-				Namespace: ns,
-			}, &cm)
-
-			if err != nil && !errors.IsNotFound(err) {
-				return ctrl.Result{}, fmt.Errorf("get ConfigMap '%s': %v", resource.GetName(), err)
-			}
-			// skip updating partials configmap if it already exists
-			// to avoid deleting existing apiendpoints
-			if err == nil && strings.HasSuffix(resource.GetName(), "-partials") {
-				log.Infof("found configmap %s, skipping createOrUpdate", resource.GetName())
-				continue
-			}
-		}
-
+		resource := &unstructured.Unstructured{Object: m}
 		resource.SetNamespace(ns)
 		resource.SetOwnerReferences(ownerRef)
-		err := r.createOrUpdate(ctx, resource)
-		if err != nil {
+		if err := r.createOrUpdate(ctx, resource); err != nil {
 			r.Recorder.Eventf(k, "Warning", "CreateResource", "Unable to create resource %v/%v for namespace %q: %v", resource.GetKind(), resource.GetName(), ns, err)
 			continue
 		}
@@ -170,7 +118,7 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	if r.NetpolEnabled {
-		if err := r.ensureKrakendNetpol(ctx, k, releaseName); err != nil {
+		if err := r.ensureKrakendNetpol(ctx, k, k.Name); err != nil {
 			return ctrl.Result{}, fmt.Errorf("ensuring krakend egress netpol: %w", err)
 		}
 	}
@@ -183,52 +131,6 @@ func (r *KrakendReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func addAnnotations(resource *unstructured.Unstructured, annotations map[string]string) {
-	existing := resource.GetAnnotations()
-	if existing == nil {
-		existing = make(map[string]string)
-	}
-	for k, v := range annotations {
-		existing[k] = v
-	}
-	resource.SetAnnotations(existing)
-}
-
-func prepareValues(k *krakendv1.Krakend) (map[string]any, error) {
-	values, err := toMap(k.Spec.Deployment)
-	if err != nil {
-		return nil, fmt.Errorf("marshalling krakend deployment: %w", err)
-	}
-
-	ingress := k.Spec.Ingress
-	ingressHost := k.Spec.IngressHost
-	if len(ingress.Hosts) == 0 && ingressHost == "" {
-		return nil, fmt.Errorf("either ingressHost or ingress.hosts must be specified")
-	}
-
-	if len(ingress.Hosts) == 0 && ingressHost != "" {
-		ingress.Hosts = []krakendv1.Host{
-			{
-				Host: ingressHost,
-				Paths: []krakendv1.Path{
-					{
-						Path:     "/",
-						PathType: "Prefix",
-					},
-				},
-			},
-		}
-	}
-	ingressValues, err := toMap(ingress)
-	if err != nil {
-		return nil, fmt.Errorf("preparing ingress values: %w", err)
-	}
-
-	values["ingress"] = ingressValues
-
-	return values, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -282,19 +184,6 @@ func (r *KrakendReconciler) ensureKrakendNetpol(ctx context.Context, k *krakendv
 		return fmt.Errorf("update netpol: %v", err)
 	}
 	return nil
-}
-
-func toMap(v any) (map[string]any, error) {
-	j, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	m := make(map[string]any)
-	err = json.Unmarshal(j, &m)
-	if err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 // TODO: diff and update - see nais/replicator for inspiration

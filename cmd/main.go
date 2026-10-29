@@ -8,8 +8,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/nais/krakend/internal/helm"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -40,20 +38,12 @@ func init() {
 	setupLogrus()
 }
 
-func envOrDefault(key, defaultValue string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return defaultValue
-}
-
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
 	var debug bool
 	var interval time.Duration
-	var krakendChartPath string
 	var netpolEnabled bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -63,7 +53,6 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&debug, "debug", os.Getenv("DEBUG") == "true", "Enable debug logging")
 	flag.DurationVar(&interval, "sync-interval", 1*time.Minute, "Synchronization interval for reconciliation")
-	flag.StringVar(&krakendChartPath, "krakend-chart-path", envOrDefault("KRAKEND_CHART_PATH", "charts/krakend-chart"), "Path to krakend helm chart")
 	flag.BoolVar(&netpolEnabled, "netpol-enabled", os.Getenv("NETPOL_ENABLED") == "true", "Enable network policies")
 
 	opts := zap.Options{
@@ -101,18 +90,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	krakendChart, err := helm.LoadChart(krakendChartPath)
-	if err != nil {
-		setupLog.Error(err, "unable to load krakend chart")
-		os.Exit(1)
-	}
-
 	if err = (&controller.KrakendReconciler{
 		Client:        mgr.GetClient(),
 		Scheme:        mgr.GetScheme(),
 		Recorder:      mgr.GetEventRecorderFor("krakend-operator"), //nolint:staticcheck // TODO: migrate to GetEventRecorder
 		SyncInterval:  interval,
-		KrakendChart:  krakendChart,
 		NetpolEnabled: netpolEnabled,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Krakend")

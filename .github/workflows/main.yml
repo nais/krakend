@@ -46,6 +46,8 @@ jobs:
         run: mise run vet
       - name: Test code
         run: mise run test
+      - name: Check krakend config
+        run: mise run krakend-check
       - name: Build binary
         run: mise run build
 
@@ -95,12 +97,10 @@ jobs:
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator
           version: ${{ needs.build_push.outputs.version }}
+          # TODO: KrakenD v3 upgrade, only dev-nais for now. Restore ci-nais, nav and onprem nav targets after verification.
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
-              { "target": { "kind": "tenant", "tenant": "nav" } },
-              { "target": { "kind": "onprem", "tenant": "nav" } }
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
             ]
 
   rollout-crds:
@@ -116,10 +116,8 @@ jobs:
         with:
           chart: ${{ env.IMAGE_REPOSITORY }}/krakend-operator-crds
           version: ${{ needs.build_push.outputs.version }}
+          # TODO: KrakenD v3 upgrade, only dev-nais for now. Restore ci-nais, nav and onprem nav targets after verification.
           targets: |
             [
-              { "target": { "kind": "tenant", "tenant": "ci-nais" }, "wait": true },
-              { "target": { "kind": "tenant", "tenant": "dev-nais" } },
-              { "target": { "kind": "tenant", "tenant": "nav" } },
-              { "target": { "kind": "onprem", "tenant": "nav" } }
+              { "target": { "kind": "tenant", "tenant": "dev-nais" } }
             ]

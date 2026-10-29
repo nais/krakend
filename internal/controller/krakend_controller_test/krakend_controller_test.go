@@ -99,6 +99,14 @@ var _ = Describe("Krakend Controller", func() {
 				}, d)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
+			Expect(d.Spec.Template.Spec.Volumes).To(ContainElement(HaveField("ConfigMap.Name", "team1-krakend-v3")))
+
+			cm := &corev1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Namespace: "default",
+				Name:      "team1-krakend-v3",
+			}, cm)).Should(Succeed())
+			Expect(cm.Data).To(HaveKey("krakend.json"))
 		})
 	})
 })

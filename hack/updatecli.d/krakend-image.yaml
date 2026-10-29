@@ -1,0 +1,18 @@
+sources:
+  latestRelease:
+    name: "krakend image"
+    kind: dockerimage
+    spec:
+      image: "krakend"
+      tagfilter: '^3\.\d+\.\d+$'
+      versionfilter:
+        kind: semver
+        pattern: "3.x"
+targets:
+  imageTag:
+    name: Bump krakend image tag
+    kind: file
+    spec:
+      file: "internal/krakend/resources.go"
+      matchpattern: '(?m)^const ImageTag = "[^"]*"$'
+      replacepattern: 'const ImageTag = "{{ source "latestRelease" }}"'

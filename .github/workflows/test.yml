@@ -32,5 +32,7 @@ jobs:
         run: mise run vet
       - name: Test code
         run: mise run test
+      - name: Check krakend config
+        run: mise run krakend-check
       - name: Build binary
         run: mise run build

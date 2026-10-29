@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/nais/krakend/internal/controller"
-	"github.com/nais/krakend/internal/helm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	log "github.com/sirupsen/logrus"
@@ -30,8 +29,6 @@ import (
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
-
-const krakendChartPath = "../../../installer/krakend"
 
 var cfg *rest.Config
 var k8sClient client.Client
@@ -86,14 +83,11 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	chart, err := helm.LoadChart(krakendChartPath)
-	Expect(err).ToNot(HaveOccurred())
 	err = (&controller.KrakendReconciler{
 		Client:        k8sManager.GetClient(),
 		Scheme:        k8sManager.GetScheme(),
 		Recorder:      k8sManager.GetEventRecorderFor("krakend-operator"), //nolint:staticcheck // TODO: migrate to GetEventRecorder
 		SyncInterval:  time.Millisecond * 100,
-		KrakendChart:  chart,
 		NetpolEnabled: true,
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())

@@ -69,8 +69,8 @@ spec:
                 description: Deployment defines configuration for the KrakenD deployment
                 properties:
                   deploymentType:
-                    description: DeploymentType is the type of deployment to use,
-                      either deployment or rollout
+                    description: DeploymentType is deprecated and ignored, only deployment
+                      is supported
                     type: string
                   extraEnvVars:
                     description: ExtraEnvVars is a list of extra environment variables
@@ -188,7 +188,9 @@ spec:
                       type: object
                     type: array
                   image:
-                    description: Image is the image configuration to use for the deployment
+                    description: |-
+                      Image is the image configuration to use for the deployment.
+                      Registry, repository and tag are only used if tag is KrakenD 3.x or newer, otherwise the operator default is used.
                     properties:
                       pullPolicy:
                         description: PullPolicy is the pull policy to use for the
