@@ -4,20 +4,18 @@ metadata:
   name: change-me
   namespace: change-me
 spec:
-  image: krakend:2.11.1
+  image: set-in-code
   port: 8080
   prometheus:
     enabled: true
     path: /metrics
-    port: 9090
+    port: set-in-code
   env:
     - name: USAGE_DISABLE
       value: "1"
-    - name: FC_ENABLE
-      value: "1"
-    - name: FC_PARTIALS
-      value: "/etc/krakend/partials"
   liveness:
     path: /__health
     initialDelay: 20
     periodSeconds: 10
+  readiness:
+    path: /__health

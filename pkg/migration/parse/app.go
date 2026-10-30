@@ -4,9 +4,11 @@ import (
 	"embed"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	krakendv1 "github.com/nais/krakend/api/v1"
+	"github.com/nais/krakend/internal/krakend"
 	nais_io_v1 "github.com/nais/liberator/pkg/apis/nais.io/v1"
 	nais_io_v1alpha1 "github.com/nais/liberator/pkg/apis/nais.io/v1alpha1"
 	log "github.com/sirupsen/logrus"
@@ -15,19 +17,16 @@ import (
 
 const (
 	AppTemplateFile = "templates/app.yaml"
-	DefaultImage    = "krakend:2.13.10"
 )
+
+// DefaultImage is the official image, same version as the operator. Teams are expected to wrap it in their own image.
+var DefaultImage = "krakend:" + krakend.ImageTag
 
 //go:embed templates/*.yaml
 var templatesDir embed.FS
 
 func Convert(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) ([]runtime.Object, error) {
 	objs := make([]runtime.Object, 0)
-	config, err := ToKrakendConfig(k)
-	if err != nil {
-		return nil, fmt.Errorf("creating krakend config configmap: %v", err)
-	}
-
 	filtered := make([]krakendv1.ApiEndpoints, 0)
 	for _, e := range endpoints {
 		for _, ref := range e.OwnerReferences {
@@ -37,13 +36,13 @@ func Convert(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) ([]runtim
 		}
 	}
 
-	partials, err := ToPartialsConfig(k, filtered)
+	config, err := ToKrakendConfig(k, filtered)
 	if err != nil {
-		return nil, fmt.Errorf("creating partials config configmap: %v", err)
+		return nil, fmt.Errorf("creating krakend config configmap: %v", err)
 	}
 
 	app := ToApp(k, filtered)
-	objs = append(objs, app, config, partials)
+	objs = append(objs, app, config)
 	return objs, nil
 }
 
@@ -57,6 +56,7 @@ func ToApp(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) *nais_io_v1
 	app.Name = resourceName(k)
 	app.Namespace = k.Namespace
 	app.Spec.Image = DefaultImage
+	app.Spec.Prometheus.Port = strconv.Itoa(krakend.MetricsPort)
 
 	ingresses := getIngresses(k)
 	for _, ingress := range ingresses {
@@ -71,14 +71,11 @@ func ToApp(k *krakendv1.Krakend, endpoints []krakendv1.ApiEndpoints) *nais_io_v1
 			Min: &k.Spec.Deployment.ReplicaCount,
 		}
 	}
+	// the image runs /etc/krakend/krakend.json by default
 	app.Spec.FilesFrom = []nais_io_v1.FilesFrom{
 		{
 			ConfigMap: resourceName(k, "config"),
 			MountPath: "/etc/krakend",
-		},
-		{
-			ConfigMap: resourceName(k, "partials"),
-			MountPath: "/etc/krakend/partials",
 		},
 	}
 
@@ -148,7 +145,7 @@ func getEgresses(endpoints ...krakendv1.ApiEndpoints) []*Egress {
 	seen := make(map[string]bool)
 	egresses := make([]*Egress, 0)
 	for _, ep := range endpoints {
-		for _, e := range ep.Spec.Endpoints {
+		for _, e := range append(append([]krakendv1.Endpoint{}, ep.Spec.Endpoints...), ep.Spec.OpenEndpoints...) {
 			u, err := url.Parse(e.BackendHost)
 			if err != nil {
 				log.Warnf("failed to parse backend host %s in ApiEndpoints %s, skipping: %v", e.BackendHost, ep.Name, err)
