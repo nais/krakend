@@ -18,7 +18,7 @@ import (
 )
 
 // ImageTag must match the tag in krakend/Dockerfile. Bumped by updatecli (hack/updatecli.d/krakend-image.yaml), keep it on its own line.
-const ImageTag = "3.0.2"
+const ImageTag = "3.0.3"
 
 const (
 	// ImageRepository is our mirror of the official image, see krakend/Dockerfile
